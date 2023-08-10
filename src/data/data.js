@@ -40,5 +40,29 @@ export const data = [
         previousYearAmount : 0,
         currentYearAmount : 1000,
         sikshaNidhiAmount : 0
+    },
+    {
+        firmName: "HIJ",
+        previousYearAmount : 2000,
+        currentYearAmount : 2500,
+        sikshaNidhiAmount : 500
+    },
+    {
+        firmName: "IJK",
+        previousYearAmount : 1000,
+        currentYearAmount : 1000,
+        sikshaNidhiAmount : 500
+    },
+    {
+        firmName: "JKL",
+        previousYearAmount : 2000,
+        currentYearAmount : 2500,
+        sikshaNidhiAmount : 500
+    },
+    {
+        firmName: "KLM",
+        previousYearAmount : 1000,
+        currentYearAmount : 1000,
+        sikshaNidhiAmount : 500
     }
 ]
