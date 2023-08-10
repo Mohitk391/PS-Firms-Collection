@@ -1,10 +1,58 @@
 import UmiyaMataji from "./assets/umiya-mataji.png";
 import './App.css';
 import {data} from "./data/data";
+import { useState } from "react";
+import debounce from "lodash.debounce";
+import Pagination from "./utilities/Pagination/Pagination";
+import { useEffect } from "react";
+const ITEMS_PER_PAGE = 10;
+
 
 function App() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [results, setResults] = useState(data);
+  const [currentPage, setCurrentPage] = useState(1);
+  // const [currentDetails, setCurrentDetails] = useState({});
+  
+  // const handleModalClose = () => {
+  //   setCurrentDetails({});
+  // };
+  
+  // useEffect(() => {
+  //   const modalElement = document.getElementById('updateDetails');
+  //   modalElement.addEventListener('hidden.bs.modal', handleModalClose);
+  //   return () => {
+  //     modalElement.removeEventListener('hidden.bs.modal', handleModalClose);
+  //   };
+  // }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [results]);
+
+  const handleChange = (event) => {
+    setSearchTerm(event.target.value);
+    debouncedSearch(event.target.value);
+  };
+
+  const debouncedSearch = debounce((searchTerm) => {
+    const filteredResults = data.filter((item) =>
+      item.firmName.toLowerCase().includes(searchTerm.toLowerCase().trim())
+    );
+    setResults(filteredResults);
+  }, 500);
+
+  const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentItems = results.slice(startIndex, endIndex);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
   return (
-    <div className="App">
+    <div className="App d-flex flex-column min-vh-100">
       <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
         <div className="container-fluid">
             <a className="navbar-brand" href="/">
@@ -12,15 +60,15 @@ function App() {
               Patidar Yuva Mandal
             </a>
             <form className="d-flex">
-                <input className="form-control me-2" type="text" placeholder="Search" />
-                <button className="btn btn-primary" type="button">Search</button>
+                <input className="form-control me-2" type="text" placeholder="Search" value={searchTerm} onChange={handleChange}/>
             </form>
-            <button className="btn btn-danger">Logout</button>
+            <button className="btn btn-outline-danger">Logout</button>
         </div>
       </nav>
-      <main className="container mt-3">
+      <main className="container mt-3 flex-fill">
           <h2>Collections</h2>
-          <table className="table table-bordered table-hover">
+          {results.length > 0 ? (
+            <table className="table table-bordered table-hover">
               <thead>
                 <tr>
                   <th className="col-6 border-3">Firm Name</th>
@@ -30,31 +78,42 @@ function App() {
                 </tr>
               </thead>
               <tbody>
-                <tr role="button" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                  <td className="border-3">ABC</td>
-                  <td className="border-3 text-center border-3">1500</td>
-                  <td className="text-center border-3">-</td>
-                  <td className="text-center border-3">-</td>
-                </tr>
-                {data.map(firm => {
+                {currentItems.map((firm) => {
                   return (
-                    <tr role="button">
+                    <tr role="button" data-bs-toggle="modal"
+                    data-bs-target="#addNew" >
                       <td className="border-3">{firm.firmName}</td>
-                      <td className="border-3 text-center border-3">{firm.previousYearAmount}</td>
-                      <td className="text-center border-3">{firm.currentYearAmount}</td>
-                      <td className="text-center border-3">{firm.sikshaNidhiAmount}</td>
+                      <td className="border-3 text-center border-3">
+                        {firm.previousYearAmount >0 ? firm.previousYearAmount : "-"}
+                      </td>
+                      <td className="text-center border-3">{firm.currentYearAmount >0 ? firm.currentYearAmount : "-"}</td>
+                      <td className="text-center border-3">{firm.sikshaNidhiAmount >0 ? firm.sikshaNidhiAmount : "-"}</td>
                     </tr>
                   );
                 })}
               </tbody>
-          </table>
-          <ul className="pagination justify-content-end">
-            <li className="page-item"><a className="page-link" href="/">Previous</a></li>
-            <li className="page-item"><a className="page-link" href="/">1</a></li>
-            <li className="page-item"><a className="page-link" href="/">2</a></li>
-            <li className="page-item active"><a className="page-link" href="/">3</a></li>
-            <li className="page-item"><a className="page-link disabled" href="/">Next</a></li>
-          </ul>
+            </table>
+          ) : (
+            <div className="d-flex flex-column align-items-center justify-content-center">
+              <p>No records found</p>
+              <button
+                type="button"
+                className="btn btn-outline-success"
+                data-bs-toggle="modal"
+                data-bs-target="#addNew"
+              >
+                Add New Firm
+              </button>
+            </div>
+          )}
+
+          {results.length > ITEMS_PER_PAGE && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          )}
       </main>
       <footer className="page-footer shadow-lg border-top">
         <div className="d-flex flex-wrap justify-content-between align-items-center mx-auto py-4">
@@ -77,18 +136,18 @@ function App() {
           </div>
         </div>
       </footer>
-      <div className="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div className="modal fade" id="updateDetails" tabindex="-1" aria-labelledby="updateDetailsLabel" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered modal-xl">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="exampleModalLabel">Firm Details</h5>
+              <h5 className="modal-title" id="updateDetailsLabel">Firm Details</h5>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body">
               <div className="mb-3 row">
                 <label for="firmName" className="col-sm-2 col-form-label">Firm Name</label>
                 <div className="col-sm-10">
-                  <input type="text" className="form-control" id="firmName" value="ABC" />
+                  <input type="text" className="form-control" id="firmName" />
                 </div>
               </div>
               <div className="mb-3 row">
@@ -113,6 +172,46 @@ function App() {
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
               <button type="button" className="btn btn-primary">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="modal fade" id="addNew" tabindex="-1" aria-labelledby="addNewLabel" aria-hidden="true">
+        <div className="modal-dialog modal-dialog-centered modal-xl">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="addNewLabel">Firm Details</h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div className="modal-body">
+              <div className="mb-3 row">
+                <label for="firmName" className="col-sm-2 col-form-label">Firm Name</label>
+                <div className="col-sm-10">
+                  <input type="text" className="form-control" id="firmName" placeholder="Firm Name"  value={searchTerm}/>
+                </div>
+              </div>
+              <div className="mb-3 row">
+                <label for="inputPassword" className="col-sm-2 col-form-label">Previous (2022)</label>
+                <div className="col-sm-10">
+                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" />
+                </div>
+              </div>
+              <div className="mb-3 row">
+                <label for="inputPassword" className="col-sm-2 col-form-label">Current (2023)</label>
+                <div className="col-sm-10">
+                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" />
+                </div>
+              </div>
+              <div className="mb-3 row">
+                <label for="inputPassword" className="col-sm-2 col-form-label">Siksha Nidhi</label>
+                <div className="col-sm-10">
+                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" />
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" className="btn btn-primary">Add Firm</button>
             </div>
           </div>
         </div>
