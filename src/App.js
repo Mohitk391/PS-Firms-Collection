@@ -5,6 +5,8 @@ import { useState } from "react";
 import debounce from "lodash.debounce";
 import Pagination from "./utilities/Pagination/Pagination";
 import { useEffect } from "react";
+import jsPDF from "jspdf";
+import autoTable from 'jspdf-autotable';
 
 const ITEMS_PER_PAGE = 10;
 let currentData = data;
@@ -72,6 +74,12 @@ function App() {
     setCurrentPage(newPage);
   };
 
+  const downloadTable = () => {
+    const doc = new jsPDF();
+    autoTable(doc, { html: '#collectionTable' });
+    doc.save('table.pdf')
+}
+
   return (
     <div className="App d-flex flex-column min-vh-100">
       <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
@@ -87,9 +95,13 @@ function App() {
         </div>
       </nav>
       <main className="container mt-3 flex-fill">
-          <h2>Collections</h2>
+          <div className="d-flex justify-content-between mb-1">
+            <h2>Collections</h2>
+            <div onClick={downloadTable} role="button"><i class="bi bi-file-earmark-arrow-down-fill"></i></div>
+          </div>
           {results.length > 0 ? (
-            <table className="table table-bordered table-hover">
+            <table className="table table-bordered table-hover" id="collectionTable">
+              <caption>Collections</caption>
               <thead>
                 <tr>
                   <th className="col-6 border-3">Firm Name</th>
