@@ -16,6 +16,14 @@ function App() {
   const [results, setResults] = useState(currentData);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({});
+
+  useEffect(() => {
+    const storedData = localStorage.getItem('data');
+    if (storedData) {
+      setResults(JSON.parse(storedData));
+    }
+  }, []);
+  
   
   const handleModalClose = () => {
     setCurrentDetails({});  
@@ -23,19 +31,26 @@ function App() {
   };
 
   const saveNewFirm = (firmDetails) => {
-    setResults([...currentData, firmDetails]);
+    const newData = [...currentData, firmDetails];
+    setResults(newData);
+    localStorage.setItem('data', JSON.stringify(newData));
     document.getElementById('newFirmClose').click();
     console.log(currentData);
   }
 
   const saveUpdatedFirm = (firmDetails) => {
-    setResults(currentData.map(firm => firm.id === firmDetails.id ? firmDetails : firm));
+    const newData = results.map(firm => firm.id === firmDetails.id ? firmDetails : firm);
+    setResults(newData);
+    localStorage.setItem('data', JSON.stringify(newData));
     document.getElementById('newFirmClose').click();
     console.log(currentData);
   }
 
   const deleteFirm = (firmDetails) => {
-    setResults(currentData.filter(firm=> firm.id !== firmDetails.id));
+    const newData = results.filter(firm=> firm.id !== firmDetails.id);
+    setResults(newData);
+    localStorage.setItem('data', JSON.stringify(newData));
+    document.getElementById('newFirmClose').click(); 
   }
   
   useEffect(() => {
@@ -76,6 +91,7 @@ function App() {
 
   const downloadTable = () => {
     const doc = new jsPDF();
+    doc.text("Collections 2023", 15, 12);
     autoTable(doc, { html: '#collectionTable' });
     doc.save('table.pdf')
 }
@@ -97,11 +113,10 @@ function App() {
       <main className="container mt-3 flex-fill">
           <div className="d-flex justify-content-between mb-1">
             <h2>Collections</h2>
-            <div onClick={downloadTable} role="button"><i class="bi bi-file-earmark-arrow-down-fill"></i></div>
+            <button onClick={downloadTable} className="btn btn-outline-dark" title="Download Records PDF"><i class="bi bi-file-earmark-arrow-down-fill"></i></button>
           </div>
           {results.length > 0 ? (
             <table className="table table-bordered table-hover" id="collectionTable">
-              <caption>Collections</caption>
               <thead>
                 <tr>
                   <th className="col-6 border-3">Firm Name</th>
