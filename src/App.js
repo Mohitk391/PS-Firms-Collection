@@ -92,8 +92,8 @@ function App() {
   const downloadTable = () => {
     const doc = new jsPDF();
     doc.text("Collections 2023", 15, 12);
-    autoTable(doc, { html: '#collectionTable' });
-    doc.save('table.pdf')
+    autoTable(doc, { html: '#fullDataTable' });
+    doc.save('collections.pdf')
 }
 
   return (
@@ -269,6 +269,35 @@ function App() {
           </div>
         </div>
       </div>
+      <table className="table table-bordered" id="fullDataTable" style={{display: 'none'}}>
+        <thead>
+          <tr>
+            <th className="col-6 border-3">Firm Name</th>
+            <th className="text-center border-3">Prev (2022)</th>
+            <th className="text-center border-3">Curr (2023)</th>
+            <th className="text-center border-3">Siksha Nidhi</th>
+            <th className="text-center border-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {results.map((firm) => {
+            return (
+              <tr role="button" key={firm.id}>
+                <td className="border-3">{firm.firmName}</td>
+                <td className="border-3 text-center border-3">
+                  {firm.previousYearAmount >0 ? firm.previousYearAmount : "-"}
+                </td>
+                <td className="text-center border-3">{firm.currentYearAmount >0 ? firm.currentYearAmount : "-"}</td>
+                <td className="text-center border-3">{firm.sikshaNidhiAmount >0 ? firm.sikshaNidhiAmount : "-"}</td>
+                <td className="text-center border-3 d-flex gap-3 justify-content-center">
+                <i class="bi bi-building-fill-gear"></i>
+                <i class="bi bi-trash3-fill"></i>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
