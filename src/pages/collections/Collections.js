@@ -6,7 +6,7 @@ import Pagination from "../../utilities/Pagination/Pagination";
 import { useEffect } from "react";
 import jsPDF from "jspdf";
 import autoTable from 'jspdf-autotable';
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const ITEMS_PER_PAGE = 10;
 let currentData = data;
@@ -101,10 +101,10 @@ const Collections = () => {
     <div className="App d-flex flex-column min-vh-100">
       <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
         <div className="container-fluid">
-            <Link className="navbar-brand d-flex align-items-center" to="/collections">
+            <a className="navbar-brand d-flex" href="/">
               <img src={UmiyaMataji} className="mx-1" alt="logo" width="40"/>
               Patidar Yuva Mandal
-            </Link>
+            </a>
             <form className="d-flex">
                 <input className="form-control me-2" type="text" placeholder="Search" value={searchTerm} onChange={handleChange}/>
             </form>
@@ -172,10 +172,10 @@ const Collections = () => {
       <footer className="page-footer shadow-lg border-top">
         <div className="d-flex flex-wrap justify-content-between align-items-center mx-auto py-4">
           <div className="d-flex flex-wrap align-items-center justify-content-start">
-            <Link to="/collections" className="d-flex align-items-center p-0 text-dark gap-0">
+            <a href="/#" className="d-flex align-items-center p-0 text-dark gap-0">
               <img alt="logo" className="mx-3" src={UmiyaMataji} width="50"/>
               <span className="h5 mb-0 font-weight-bold">Patidar Yuva Mandal</span>
-            </Link> 
+            </a> 
           </div>
           <div className="pe-3 d-flex gap-3">
             <button className="btn btn-dark rounded-5">
