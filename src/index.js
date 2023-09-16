@@ -10,12 +10,15 @@ import "bootstrap/dist/js/bootstrap.bundle.min";
 // Bootstrap Icons
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { BrowserRouter } from 'react-router-dom';
+import { UserProvider } from './contexts/UserContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <UserProvider>
+        <App />
+      </UserProvider>
     </BrowserRouter>
   </React.StrictMode>
 );
