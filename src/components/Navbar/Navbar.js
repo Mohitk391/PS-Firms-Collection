@@ -6,7 +6,7 @@ const Navbar = () => {
 
     return (<nav className="navbar navbar-expand-sm navbar-dark bg-dark">
     <div className="container-fluid">
-        <Link className="navbar-brand d-flex" to="/collections">
+        <Link className="navbar-brand d-flex" to="/">
           <img src={UmiyaMataji} className="mx-1" alt="logo" width="30"/>
           Patidar Yuva Mandal
         </Link>

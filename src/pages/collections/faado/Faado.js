@@ -1,12 +1,13 @@
-import UmiyaMataji from "../../assets/umiya-mataji.png";
-import {data} from "../../data/data";
+import UmiyaMataji from "../../../assets/umiya-mataji.png";
+import {data} from "../../../data/data";
 import { useState } from "react";
 import debounce from "lodash.debounce";
-import Pagination from "../../utilities/Pagination/Pagination";
+import Pagination from "../../../utilities/Pagination/Pagination";
 import { useEffect } from "react";
 import jsPDF from "jspdf";
 import autoTable from 'jspdf-autotable';
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import Navbar from "../../../components/Navbar/Navbar";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -15,7 +16,6 @@ const Faado = () => {
   const [results, setResults] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({});
-  const navigate = useNavigate();
 
   useEffect(() => {
     const storedData = localStorage.getItem('data');
@@ -96,31 +96,22 @@ const Faado = () => {
 
   return (
     <div className="App d-flex flex-column min-vh-100">
-      <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
-        <div className="container-fluid">
-            <Link className="navbar-brand d-flex" to="/collections">
-              <img src={UmiyaMataji} className="mx-1" alt="logo" width="30"/>
-              Patidar Yuva Mandal
-            </Link>
-            <form className="d-flex">
-                <input className="form-control me-2" type="text" placeholder="Search" value={searchTerm} onChange={handleChange}/>
-            </form>
-            <button className="btn btn-outline-danger" onClick={()=>{navigate("/")}}>Logout</button>
-        </div>
-      </nav>
+     <Navbar />
       <main className="container mt-3 flex-fill">
           <div className="d-flex justify-content-between mb-1">
-            <h2>Collections</h2>
+            <h2>Faado</h2>
+            <input className="py-0 px-3 border rounded-4 border-opacity-50" type="text" placeholder="Search" onChange={handleChange} />
             <button onClick={downloadTable} className="btn btn-outline-dark" title="Download Records PDF"><i class="bi bi-file-earmark-arrow-down-fill"></i></button>
           </div>
           {results.length > 0 ? (
             <table className="table table-bordered table-hover" id="collectionTable">
               <thead>
                 <tr>
-                  <th className="col-6 border-3">Firm Name</th>
+                  <th className="col-1 text-center border-3">Date</th>
+                  <th className="col-5 border-3">Firm Name</th>
+                  <th className="col-1 text-center border-3">Place</th>
                   <th className="text-center border-3">Prev (2022)</th>
                   <th className="text-center border-3">Curr (2023)</th>
-                  <th className="text-center border-3">Siksha Nidhi</th>
                   <th className="text-center border-3">Actions</th>
                 </tr>
               </thead>
@@ -128,13 +119,14 @@ const Faado = () => {
                 {currentItems.map((firm) => {
                   return (
                     <tr role="button" key={firm.id}>
+                      <td className="text-center border-3">{firm.date}</td>
                       <td className="border-3">{firm.firmName}</td>
+                      <td className="text-center border-3">Bhanpuri</td>
                       <td className="border-3 text-center border-3">
                         {firm.previousYearAmount >0 ? firm.previousYearAmount : "-"}
                       </td>
                       <td className="text-center border-3">{firm.currentYearAmount >0 ? firm.currentYearAmount : "-"}</td>
-                      <td className="text-center border-3">{firm.sikshaNidhiAmount >0 ? firm.sikshaNidhiAmount : "-"}</td>
-                      <td className="text-center border-3 d-flex gap-3 justify-content-center">
+                     <td className="text-center border-3 d-flex gap-3 justify-content-center">
                       <i class="bi bi-building-fill-gear" data-bs-toggle="modal" data-bs-target="#updateDetails" onClick={()=> setCurrentDetails(firm)} title="Update Firm Details"></i>
                       <i class="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm)}></i>
                       </td>
@@ -169,7 +161,7 @@ const Faado = () => {
       <footer className="page-footer shadow-lg border-top">
         <div className="d-flex flex-wrap justify-content-between align-items-center mx-auto py-4">
           <div className="d-flex flex-wrap align-items-center justify-content-start">
-            <Link href="/collections" className="d-flex align-items-center p-0 text-dark gap-0">
+            <Link href="/" className="d-flex align-items-center p-0 text-dark gap-0">
               <img alt="logo" className="mx-3" src={UmiyaMataji} width="40"/>
               <span className="h5 mb-0 font-weight-bold">Patidar Yuva Mandal</span>
             </Link> 
