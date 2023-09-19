@@ -118,16 +118,15 @@ const Faado = () => {
               <tbody>
                 {currentItems.map((firm) => {
                   return (
-                    <tr role="button" key={firm.id}>
+                    <tr  key={firm.id}>
                       <td className="text-center border-3">{firm.date}</td>
-                      <td className="border-3">{firm.firmName}</td>
-                      <td className="text-center border-3">Bhanpuri</td>
+                      <td role="button" className="fw-bold border-3" data-bs-toggle="modal" data-bs-target="#updateDetails" onClick={()=> setCurrentDetails(firm)}>{firm.firmName}</td>
+                      <td className="text-center border-3">{firm.place}</td>
                       <td className="border-3 text-center border-3">
                         {firm.previousYearAmount >0 ? firm.previousYearAmount : "-"}
                       </td>
                       <td className="text-center border-3">{firm.currentYearAmount >0 ? firm.currentYearAmount : "-"}</td>
                      <td className="text-center border-3 d-flex gap-3 justify-content-center">
-                      <i class="bi bi-building-fill-gear" data-bs-toggle="modal" data-bs-target="#updateDetails" onClick={()=> setCurrentDetails(firm)} title="Update Firm Details"></i>
                       <i class="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm)}></i>
                       </td>
                     </tr>
@@ -194,6 +193,12 @@ const Faado = () => {
                 </div>
               </div>
               <div className="mb-3 row">
+                <label for="place" className="col-sm-2 col-form-label">Place</label>
+                <div className="col-sm-10">
+                  <input type="text" className="form-control" id="place" value={currentDetails?.place} onChange={e=>setCurrentDetails({...currentDetails, place: e.target.value})}/>
+                </div>
+              </div>
+              <div className="mb-3 row">
                 <label for="previousYearAmount" className="col-sm-2 col-form-label">Previous (2022)</label>
                 <div className="col-sm-10">
                   <input type="number" min="0" placeholder="-" className="form-control" id="previousYearAmount" value={currentDetails?.previousYearAmount} onChange={e=>setCurrentDetails({...currentDetails, previousYearAmount: Number(e.target.value)})}/>
@@ -206,9 +211,21 @@ const Faado = () => {
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="sikshaNidhiAmount" className="col-sm-2 col-form-label">Siksha Nidhi</label>
+                <label for="payerName" className="col-sm-2 col-form-label">Haste (Payer)</label>
                 <div className="col-sm-10">
-                  <input type="number" min="0" placeholder="-" className="form-control" id="sikshaNidhiAmount" value={currentDetails?.sikshaNidhiAmount} onChange={e=>setCurrentDetails({...currentDetails, sikshaNidhiAmount: Number(e.target.value)})}/>
+                  <input type="text" placeholder="-" className="form-control" id="payerName" value={currentDetails?.payer} onChange={e=>setCurrentDetails({...currentDetails, payer: e.target.value})}/>
+                </div>
+              </div>
+              <div className="mb-3 row">
+                <label for="payerNumber" className="col-sm-2 col-form-label">Mobile Number</label>
+                <div className="col-sm-10">
+                  <input type="text" placeholder="-" className="form-control" id="payerNumber" value={currentDetails?.payerMobile} onChange={e=>setCurrentDetails({...currentDetails, payerMobile:  e.target.value})}/>
+                </div>
+              </div>
+              <div className="mb-3 row">
+                <label for="receiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
+                <div className="col-sm-10">
+                  <input type="text" placeholder="-" className="form-control" id="receiver" value={currentDetails?.receiver} onChange={e=>setCurrentDetails({...currentDetails, receiver: e.target.value})}/>
                 </div>
               </div>
             </div>
@@ -246,9 +263,21 @@ const Faado = () => {
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="inputPassword" className="col-sm-2 col-form-label">Siksha Nidhi</label>
+                <label for="payerName" className="col-sm-2 col-form-label">Haste (Payer)</label>
                 <div className="col-sm-10">
-                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" onChange={e=>setCurrentDetails({...currentDetails, sikshaNidhiAmount: Number(e.target.value)})}/>
+                  <input type="text" placeholder="-" className="form-control" id="payerName" value={currentDetails?.payer} onChange={e=>setCurrentDetails({...currentDetails, payer: e.target.value})}/>
+                </div>
+              </div>
+              <div className="mb-3 row">
+                <label for="payerNumber" className="col-sm-2 col-form-label">Mobile Number</label>
+                <div className="col-sm-10">
+                  <input type="text" placeholder="-" className="form-control" id="payerNumber" value={currentDetails?.payerMobile} onChange={e=>setCurrentDetails({...currentDetails, payerMobile:  e.target.value})}/>
+                </div>
+              </div>
+              <div className="mb-3 row">
+                <label for="receiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
+                <div className="col-sm-10">
+                  <input type="text" placeholder="-" className="form-control" id="receiver" value={currentDetails?.receiver} onChange={e=>setCurrentDetails({...currentDetails, receiver: e.target.value})}/>
                 </div>
               </div>
             </div>
