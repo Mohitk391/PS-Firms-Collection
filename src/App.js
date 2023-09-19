@@ -7,6 +7,7 @@ import Sikshanidhi from "./pages/collections/sikshanidhi/Sikshanidhi";
 import { useEffect } from "react";
 import Homepage from "./pages/homepage/Homepage";
 import { RequiresAuth } from "./utilities/Auth/RequiresAuth";
+import FaadoIndex from "./pages/collections/faado/FaadoIndex";
 
 function App() {
   useEffect(()=>{
@@ -23,7 +24,7 @@ function App() {
         } />
         <Route path="/faado" element={
           <RequiresAuth>
-            <Faado />
+            <FaadoIndex />
           </RequiresAuth>
         } />
         <Route path="/sikshanidhi" element={
