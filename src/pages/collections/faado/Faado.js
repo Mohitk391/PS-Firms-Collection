@@ -6,27 +6,35 @@ import Pagination from "../../../utilities/Pagination/Pagination";
 import { useEffect } from "react";
 import jsPDF from "jspdf";
 import autoTable from 'jspdf-autotable';
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 
 const ITEMS_PER_PAGE = 10;
 
 const Faado = () => {
+  const { dayId } = useParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [results, setResults] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({});
+  const [newDetails, setNewDetails] = useState({});
 
   useEffect(() => {
     const storedData = localStorage.getItem('data');
     if (storedData) {
-      setResults(JSON.parse(storedData));
+      if(dayId === "day-1"){
+        setResults(JSON.parse(storedData).filter(res => res.date === "14/09/2023"));
+      }
+      else{
+        setResults(JSON.parse(storedData));
+      }
     }
-  }, []);
+  }, [dayId]);
   
   
   const handleModalClose = () => {
     setCurrentDetails({});  
+    setNewDetails({});  
     setSearchTerm('');
   };
 
@@ -98,10 +106,15 @@ const Faado = () => {
     <div className="App d-flex flex-column min-vh-100">
      <Navbar />
       <main className="container mt-3 flex-fill">
-          <div className="d-flex justify-content-between mb-1">
-            <h2>Faado</h2>
+          <div className="d-flex justify-content-between mb-2">
+            <div className="header">
+              <span className="h2">Faado</span>
+              <span className=" px-3 fs-6">
+                <Link to="/faado">Faado</Link> / <Link to={`/faado/${dayId}`}>{dayId}</Link>
+              </span>
+            </div>
             <input className="py-0 px-3 border rounded-4 border-opacity-50" type="text" placeholder="Search" onChange={handleChange} />
-            <button onClick={downloadTable} className="btn btn-outline-dark" title="Download Records PDF"><i class="bi bi-file-earmark-arrow-down-fill"></i></button>
+           { results.length > 0 ? <button onClick={downloadTable} className="btn btn-outline-dark" title="Download Records PDF"><i class="bi bi-file-earmark-arrow-down-fill"></i></button> : <button className="invisible pe-none"></button>}
           </div>
           {results.length > 0 ? (
             <table className="table table-bordered table-hover" id="collectionTable">
@@ -142,7 +155,7 @@ const Faado = () => {
                 className="btn btn-outline-success"
                 data-bs-toggle="modal"
                 data-bs-target="#addNew"
-                onClick={()=>setCurrentDetails({...currentDetails, firmName: searchTerm})}
+                onClick={()=>setNewDetails({...newDetails, firmName: searchTerm})}
               >
                 Add New Firm
               </button>
@@ -247,43 +260,49 @@ const Faado = () => {
               <div className="mb-3 row">
                 <label for="firmName" className="col-sm-2 col-form-label">Firm Name</label>
                 <div className="col-sm-10">
-                  <input type="text" className="form-control" id="firmName" placeholder="Firm Name"  value={currentDetails?.firmName} onChange={e=>setCurrentDetails({...currentDetails, firmName: e.target.value})}/>
+                  <input type="text" className="form-control" id="firmName" placeholder="Firm Name"  value={newDetails?.firmName} onChange={e=>setNewDetails({...newDetails, firmName: e.target.value})}/>
+                </div>
+              </div>
+              <div className="mb-3 row">
+                <label for="place" className="col-sm-2 col-form-label">Place</label>
+                <div className="col-sm-10">
+                  <input type="text" className="form-control" id="place" value={newDetails?.place} onChange={e=>setNewDetails({...newDetails, place: e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">
                 <label for="inputPassword" className="col-sm-2 col-form-label">Previous (2022)</label>
                 <div className="col-sm-10">
-                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" onChange={e=>setCurrentDetails({...currentDetails, previousYearAmount: Number(e.target.value)})}/>
+                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" onChange={e=>setNewDetails({...newDetails, previousYearAmount: Number(e.target.value)})}/>
                 </div>
               </div>
               <div className="mb-3 row">
                 <label for="inputPassword" className="col-sm-2 col-form-label">Current (2023)</label>
                 <div className="col-sm-10">
-                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" onChange={e=>setCurrentDetails({...currentDetails, currentYearAmount: Number(e.target.value)})}/>
+                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" onChange={e=>setNewDetails({...newDetails, currentYearAmount: Number(e.target.value)})}/>
                 </div>
               </div>
               <div className="mb-3 row">
                 <label for="payerName" className="col-sm-2 col-form-label">Haste (Payer)</label>
                 <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="payerName" value={currentDetails?.payer} onChange={e=>setCurrentDetails({...currentDetails, payer: e.target.value})}/>
+                  <input type="text" placeholder="-" className="form-control" id="payerName" value={newDetails?.payer} onChange={e=>setNewDetails({...newDetails, payer: e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">
                 <label for="payerNumber" className="col-sm-2 col-form-label">Mobile Number</label>
                 <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="payerNumber" value={currentDetails?.payerMobile} onChange={e=>setCurrentDetails({...currentDetails, payerMobile:  e.target.value})}/>
+                  <input type="text" placeholder="-" className="form-control" id="payerNumber" value={newDetails?.payerMobile} onChange={e=>setNewDetails({...newDetails, payerMobile:  e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">
                 <label for="receiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
                 <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="receiver" value={currentDetails?.receiver} onChange={e=>setCurrentDetails({...currentDetails, receiver: e.target.value})}/>
+                  <input type="text" placeholder="-" className="form-control" id="receiver" value={newDetails?.receiver} onChange={e=>setNewDetails({...newDetails, receiver: e.target.value})}/>
                 </div>
               </div>
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary" onClick={()=>saveNewFirm(currentDetails)}>Add Firm</button>
+              <button type="button" className="btn btn-primary" onClick={()=>saveNewFirm(newDetails)}>Add Firm</button>
             </div>
           </div>
         </div>

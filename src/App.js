@@ -22,11 +22,12 @@ function App() {
             <Homepage />
           </RequiresAuth>
         } />
-        <Route path="/faado" element={
+        <Route path="faado" element={
           <RequiresAuth>
             <FaadoIndex />
           </RequiresAuth>
         } />
+        <Route path="faado/:dayId" element={<Faado />} />
         <Route path="/sikshanidhi" element={
           <RequiresAuth>
             <Sikshanidhi />
