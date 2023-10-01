@@ -10,7 +10,7 @@ const Homepage = () => {
         <Navbar />
         <main className="container mt-3 flex-fill">
            <button onClick={()=>navigate("/datar")}>Datar</button>
-           <button onClick={()=>navigate("/faado")}>Faado</button>
+           <button onClick={()=>navigate("/phaad")}>Phaad</button>
            <button onClick={()=>navigate("/sikshanidhi")}>Sikshanidhi</button>
         </main>
         <footer className="page-footer shadow-lg border-top">

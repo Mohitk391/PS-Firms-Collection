@@ -1,11 +1,11 @@
 const DataReducer = (dataState, action) => {
     switch(action.type){
-        case "FAADO_SET":
-            return dataState;
+        case "SET_PHAAD":
+            return {...dataState, phaad: action.value};
         case "SIKSHANIDHI_SET":
-            return dataState;
+            return {...dataState, sikshanidhi: action.value};
         case "DATAR_SET":
-            return dataState;
+            return {...dataState, datar: action.value};
         default:
             return dataState;
     }

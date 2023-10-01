@@ -2,12 +2,12 @@ import {data} from "./data/data";
 import Login from "./pages/authentication/Login";
 import { Route, Routes } from "react-router-dom";
 import Datar from "./pages/collections/datar/Datar";
-import Faado from "./pages/collections/faado/Faado";
+import Phaad from "./pages/collections/phaad/Phaad";
 import Sikshanidhi from "./pages/collections/sikshanidhi/Sikshanidhi";
 import { useEffect } from "react";
 import Homepage from "./pages/homepage/Homepage";
 import { RequiresAuth } from "./utilities/Auth/RequiresAuth";
-import FaadoIndex from "./pages/collections/faado/FaadoIndex";
+import PhaadIndex from "./pages/collections/phaad/PhaadIndex";
 
 function App() {
   useEffect(()=>{
@@ -22,12 +22,12 @@ function App() {
             <Homepage />
           </RequiresAuth>
         } />
-        <Route path="faado" element={
+        <Route path="phaad" element={
           <RequiresAuth>
-            <FaadoIndex />
+            <PhaadIndex />
           </RequiresAuth>
         } />
-        <Route path="faado/:dayId" element={<Faado />} />
+        <Route path="phaad/:dayId" element={<Phaad />} />
         <Route path="/sikshanidhi" element={
           <RequiresAuth>
             <Sikshanidhi />
