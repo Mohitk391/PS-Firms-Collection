@@ -5,13 +5,15 @@ import { db } from "../firebase-config";
 import { readPhaad } from "../utilities/Actions/PhaadActions";
 import { readSikshanidhi } from "../utilities/Actions/SikshanidhiActions";
 import { readDatar } from "../utilities/Actions/DatarActions";
+import { readAllFirms } from "../utilities/Actions/AllFirmsActions";
 
 const DataContext = createContext();
 
 const initialState = {
     phaad: [],
     sikshanidhi: [],
-    datar: []
+    datar: [],
+    allFirms: []
 }
 
 const DataProvider = ({children}) => {
@@ -21,15 +23,18 @@ const DataProvider = ({children}) => {
         const phaadQuery = query(collection(db, "phaad"));
         const sikshanidhiQuery = query(collection(db, "sikshanidhi"));
         const datarQuery = query(collection(db, "datar"));
+        const allFirmsQuery = query(collection(db, "allFirms"));
 
         const unsubscribePhaad = readPhaad(phaadQuery, dataState, dataDispatch);
         const unsubscribeSikshanidhi = readSikshanidhi(sikshanidhiQuery, dataState, dataDispatch);
         const unsubscribeDatar = readDatar(datarQuery, dataState, dataDispatch);
+        const unsubscribeAllFirms = readAllFirms(allFirmsQuery, dataState, dataDispatch);
 
         return ()=>{
             unsubscribePhaad();
             unsubscribeSikshanidhi();
             unsubscribeDatar();
+            unsubscribeAllFirms();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     },[])

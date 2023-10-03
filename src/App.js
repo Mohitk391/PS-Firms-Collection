@@ -3,6 +3,7 @@ import Login from "./pages/authentication/Login";
 import { Route, Routes } from "react-router-dom";
 import Datar from "./pages/collections/datar/Datar";
 import Phaad from "./pages/collections/phaad/Phaad";
+import AllFirms from "./pages/collections/allFirms/AllFirms";
 import Sikshanidhi from "./pages/collections/sikshanidhi/Sikshanidhi";
 import { useEffect } from "react";
 import Homepage from "./pages/homepage/Homepage";
@@ -20,6 +21,11 @@ function App() {
         <Route path="/" element={
           <RequiresAuth>
             <Homepage />
+          </RequiresAuth>
+        } />
+        <Route path="allFirms" element={
+          <RequiresAuth>
+            <AllFirms />
           </RequiresAuth>
         } />
         <Route path="phaad" element={

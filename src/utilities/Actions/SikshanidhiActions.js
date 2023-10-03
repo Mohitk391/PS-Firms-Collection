@@ -1,5 +1,5 @@
 import { db } from "../../firebase-config.js";
-import { collection, addDoc, onSnapshot, query, updateDoc, doc, deleteDoc, setDoc, Timestamp  } from "firebase/firestore";
+import { collection, onSnapshot, query } from "firebase/firestore";
 
 
 export function readSikshanidhi(q, state, dispatch){

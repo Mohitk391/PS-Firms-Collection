@@ -9,6 +9,7 @@ const Homepage = () => {
         <div className="App d-flex flex-column min-vh-100">
         <Navbar />
         <main className="container mt-3 flex-fill">
+           <button onClick={()=>navigate("/allFirms")}>All Firms</button>
            <button onClick={()=>navigate("/datar")}>Datar</button>
            <button onClick={()=>navigate("/phaad")}>Phaad</button>
            <button onClick={()=>navigate("/sikshanidhi")}>Sikshanidhi</button>

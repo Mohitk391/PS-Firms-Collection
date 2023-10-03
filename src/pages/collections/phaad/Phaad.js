@@ -1,5 +1,4 @@
 import UmiyaMataji from "../../../assets/umiya-mataji.png";
-import {data} from "../../../data/data";
 import { useState } from "react";
 import debounce from "lodash.debounce";
 import Pagination from "../../../utilities/Pagination/Pagination";
@@ -19,20 +18,7 @@ const Phaad = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({});
   const [newDetails, setNewDetails] = useState({});
-  const {dataState : {phaad}} = useData();
-
-  // useEffect(() => {
-  //   const storedData = localStorage.getItem('data');
-  //   if (storedData) {
-  //     if(dayId === "day-1"){
-  //       setResults(JSON.parse(storedData).filter(res => res.date === "14/09/2023"));
-  //     }
-  //     else{
-  //       setResults(JSON.parse(storedData));
-  //     }
-  //   }
-  // }, [dayId]);
-  
+  const {dataState : {phaad}} = useData();  
   
   const handleModalClose = () => {
     setCurrentDetails({});  
@@ -131,7 +117,7 @@ const Phaad = () => {
                 </tr>
               </thead>
               <tbody>
-                {phaad.map((firm) => {
+                {currentItems.map((firm) => {
                   return (
                     <tr  key={firm.id}>
                       <td className="text-center border-3">{firm.date}</td>
