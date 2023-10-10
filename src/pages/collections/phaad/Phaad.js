@@ -1,6 +1,5 @@
 import UmiyaMataji from "../../../assets/umiya-mataji.png";
 import { useState } from "react";
-import debounce from "lodash.debounce";
 import Pagination from "../../../utilities/Pagination/Pagination";
 import { useEffect } from "react";
 import jsPDF from "jspdf";
@@ -8,17 +7,34 @@ import autoTable from 'jspdf-autotable';
 import { Link, useParams } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import { useData } from "../../../contexts/DataContext";
+import { Timestamp, doc, setDoc, updateDoc } from "firebase/firestore";
+import { db } from "../../../firebase-config";
 
 const ITEMS_PER_PAGE = 10;
+const days = {
+  "day-1" : new Date("10/15/2023").toLocaleDateString("en-GB"),
+  "day-2" : new Date("10/16/2023").toLocaleDateString("en-GB"),
+  "day-3" : new Date("10/17/2023").toLocaleDateString("en-GB"),
+  "day-4" : new Date("10/18/2023").toLocaleDateString("en-GB"),
+  "day-5" : new Date("10/19/2023").toLocaleDateString("en-GB"),
+  "day-6" : new Date("10/20/2023").toLocaleDateString("en-GB"),
+  "day-7" : new Date("10/21/2023").toLocaleDateString("en-GB"),
+  "day-8" : new Date("10/22/2023").toLocaleDateString("en-GB"),
+  "day-9" : new Date("10/23/2023").toLocaleDateString("en-GB"),
+}
 
 const Phaad = () => {
   const { dayId } = useParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [results, setResults] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [currentDetails, setCurrentDetails] = useState({});
-  const [newDetails, setNewDetails] = useState({});
-  const {dataState : {phaad}} = useData();  
+  const [currentDetails, setCurrentDetails] = useState({name : "", place: "", previous: 0, current: 0, payer: "", mobile: "", reciever: ""});
+  const [newDetails, setNewDetails] = useState({name : "", place: "", previous: 0, current: 0, payer: "", mobile: "", reciever: ""});
+  const {dataState : {phaad, allFirms}} = useData();  
+
+  useEffect(()=>{
+    setResults((dayId==="all" ? phaad : phaad.filter(firm=>firm.date === days[dayId])).filter(item =>item.name.toLowerCase().includes(searchTerm.toLowerCase().trim())) );
+  },[dayId, phaad, searchTerm]);
   
   const handleModalClose = () => {
     setCurrentDetails({});  
@@ -26,24 +42,74 @@ const Phaad = () => {
     setSearchTerm('');
   };
 
-  const saveNewFirm = (firmDetails) => {
-    const newData = [...results, firmDetails];
-    setResults(newData);
-    localStorage.setItem('data', JSON.stringify(newData));
+  const saveNewFirm = async () => {
+    let firm = allFirms.find(firm => firm.id === newDetails.name);
+    if(firm){
+      await setDoc(doc(db,"phaad", newDetails.name),{...newDetails, name: firm.name, place:firm.place, date: Timestamp.fromDate(new Date())});
+    
+      await updateDoc(doc(db, "allFirms", firm.name), {
+        phaadPrevious : newDetails.previous,
+        phaadCurrent : newDetails.current,
+        phaadPayer : newDetails.payer,
+        phaadMobile : newDetails.mobile,
+        phaadReciever : newDetails.reciever
+      })
+    }
+    else{
+      console.log("No firm found in all firms");
+      await setDoc(doc(db,"phaad", newDetails.name),{...newDetails, date: Timestamp.fromDate(new Date())});
+    
+      await setDoc(doc(db, "allFirms", newDetails.name), {
+        name: newDetails.name,
+        place: newDetails.place,
+        phaadPrevious : newDetails.previous,
+        phaadCurrent : newDetails.current,
+        phaadPayer : newDetails.payer,
+        phaadMobile : newDetails.mobile,
+        phaadReciever : newDetails.reciever,
+        sikshanidhiPrevious : 0,
+        sikshanidhiCurrent : 0,
+        sikshanidhiPayer : "",
+        sikshanidhiMobile : "",
+        sikshanidhiReciever : ""
+      })
+    }
+    setNewDetails({name : "", place: "", previous: 0, current: 0, payer: "", mobile: "", reciever: ""});
     document.getElementById('newFirmClose').click();
   }
 
-  const saveUpdatedFirm = (firmDetails) => {
-    const newData = results.map(firm => firm.id === firmDetails.id ? firmDetails : firm);
-    setResults(newData);
-    localStorage.setItem('data', JSON.stringify(newData));
+  const saveUpdatedFirm = async () => {
+    let updatingPhaadBody = {};
+    let updatingAllBody = {};
+    if(currentDetails.previous > 0){ 
+      updatingPhaadBody = {...updatingPhaadBody, previous: currentDetails.previous}
+      updatingAllBody = {...updatingAllBody, phaadPrevious: currentDetails}
+    }
+    if(currentDetails.current > 0){
+       updatingPhaadBody = {...updatingPhaadBody, current: currentDetails.current}
+       updatingAllBody = {...updatingAllBody, phaadCurrent: currentDetails.current}
+    }
+    if(currentDetails.payer){
+       updatingPhaadBody = {...updatingPhaadBody, payer: currentDetails.payer}
+       updatingAllBody = {...updatingAllBody, phaadPayer: currentDetails.payer}
+    }
+    if(currentDetails.mobile ){
+       updatingPhaadBody = {...updatingPhaadBody, mobile: currentDetails.mobile}
+       updatingAllBody = {...updatingAllBody, phaadMobile: currentDetails.mobile}
+    }
+    if(currentDetails.reciever){
+       updatingPhaadBody = {...updatingPhaadBody, reciever: currentDetails.reciever}
+       updatingAllBody = {...updatingAllBody, phaadReciever: currentDetails.reciever}
+    }
+
+    await updateDoc(doc(db, "phaad", currentDetails.name), updatingPhaadBody);
+    await updateDoc(doc(db, "allFirms", currentDetails.name), updatingAllBody);
+
     document.getElementById('newFirmClose').click();
   }
 
-  const deleteFirm = (firmDetails) => {
-    const newData = results.filter(firm=> firm.id !== firmDetails.id);
-    setResults(newData);
-    localStorage.setItem('data', JSON.stringify(newData));
+  const deleteFirm = async (firmDetails) => {
+   
     document.getElementById('newFirmClose').click(); 
   }
   
@@ -62,22 +128,10 @@ const Phaad = () => {
     setCurrentPage(1);
   }, [phaad]);
 
-  const handleChange = (event) => {
-    setSearchTerm(event.target.value);
-    debouncedSearch(event.target.value);
-  };
-
-  const debouncedSearch = debounce((searchTerm) => {
-    const filteredResults = phaad.filter((item) =>
-      item.firmName.toLowerCase().includes(searchTerm.toLowerCase().trim())
-    );
-    setResults(filteredResults);
-  }, 500);
-
-  const totalPages = Math.ceil(phaad.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(results?.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentItems = phaad.slice(startIndex, endIndex);
+  const currentItems = results?.slice(startIndex, endIndex);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -85,7 +139,7 @@ const Phaad = () => {
 
   const downloadTable = () => {
     const doc = new jsPDF();
-    doc.text("Collections 2023", 15, 12);
+    doc.text(`Phaada ${dayId}`, 15, 12);
     autoTable(doc, { html: '#fullDataTable' });
     doc.save('collections.pdf')
 }
@@ -101,10 +155,10 @@ const Phaad = () => {
                 <Link to="/phaad">Phaad</Link> / <Link to={`/phaad/${dayId}`}>{dayId}</Link>
               </span>
             </div>
-            <input className="py-0 px-3 border rounded-4 border-opacity-50" type="text" placeholder="Search" onChange={handleChange} />
-           { phaad.length > 0 ? <button onClick={downloadTable} className="btn btn-outline-dark" title="Download Records PDF"><i class="bi bi-file-earmark-arrow-down-fill"></i></button> : <button className="invisible pe-none"></button>}
+            <input className="py-0 px-3 border rounded-4 border-opacity-50" type="text" placeholder="Search" value={searchTerm} onChange={event=>setSearchTerm(event.target.value)} />
+           { results?.length > 0 ? <button onClick={downloadTable} className="btn btn-outline-dark" title="Download Records PDF"><i className="bi bi-file-earmark-arrow-down-fill"></i></button> : <button className="invisible pe-none"></button>}
           </div>
-          {phaad.length > 0 ? (
+          {results?.length > 0 ? (
             <table className="table table-bordered table-hover" id="collectionTable">
               <thead>
                 <tr>
@@ -121,14 +175,14 @@ const Phaad = () => {
                   return (
                     <tr  key={firm.id}>
                       <td className="text-center border-3">{firm.date}</td>
-                      <td role="button" className="fw-bold border-3" data-bs-toggle="modal" data-bs-target="#updateDetails" onClick={()=> setCurrentDetails(firm)}>{firm.name}</td>
+                      <td role="button" className="fw-bold border-3" data-bs-toggle="modal" data-bs-target="#updateDetails" onClick={()=> setCurrentDetails({...currentDetails, name: firm.name})}>{firm.name}</td>
                       <td className="text-center border-3">{firm.place}</td>
                       <td className="border-3 text-center border-3">
                         {firm.previous >0 ? firm.previous : "-"}
                       </td>
                       <td className="text-center border-3">{firm.current >0 ? firm.current : "-"}</td>
                      <td className="text-center border-3 d-flex gap-3 justify-content-center">
-                      <i class="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm)}></i>
+                      <i className="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm)}></i>
                       </td>
                     </tr>
                   );
@@ -143,14 +197,14 @@ const Phaad = () => {
                 className="btn btn-outline-success"
                 data-bs-toggle="modal"
                 data-bs-target="#addNew"
-                onClick={()=>setNewDetails({...newDetails, firmName: searchTerm})}
+                onClick={()=>setNewDetails({...newDetails, name: searchTerm})}
               >
                 Add New Firm
               </button>
             </div>
           )}
 
-          {phaad.length > ITEMS_PER_PAGE && (
+          {results?.length > ITEMS_PER_PAGE && (
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -179,7 +233,7 @@ const Phaad = () => {
           </div>
         </div>
       </footer>
-      <div className="modal fade" id="updateDetails" tabindex="-1" aria-labelledby="updateDetailsLabel" aria-hidden="true">
+      <div className="modal fade" id="updateDetails" tabIndex="-1" aria-labelledby="updateDetailsLabel" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered modal-xl">
           <div className="modal-content">
             <div className="modal-header">
@@ -188,45 +242,45 @@ const Phaad = () => {
             </div>
             <div className="modal-body">
               <div className="mb-3 row">
-                <label for="name" className="col-sm-2 col-form-label">Firm Name</label>
+                <label htmlFor="name" className="col-sm-2 col-form-label">Firm Name</label>
                 <div className="col-sm-10">
                   <input type="text" className="form-control" id="name" value={currentDetails?.name} onChange={e=>setCurrentDetails({...currentDetails, name: e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="place" className="col-sm-2 col-form-label">Place</label>
+                <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
                 <div className="col-sm-10">
                   <input type="text" className="form-control" id="place" value={currentDetails?.place} onChange={e=>setCurrentDetails({...currentDetails, place: e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="previous" className="col-sm-2 col-form-label">Previous (2022)</label>
+                <label htmlFor="previous" className="col-sm-2 col-form-label">Previous (2022)</label>
                 <div className="col-sm-10">
                   <input type="number" min="0" placeholder="-" className="form-control" id="previous" value={currentDetails?.previous} onChange={e=>setCurrentDetails({...currentDetails, previous: Number(e.target.value)})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="current" className="col-sm-2 col-form-label">Current (2023)</label>
+                <label htmlFor="current" className="col-sm-2 col-form-label">Current (2023)</label>
                 <div className="col-sm-10">
                   <input type="number" min="0" placeholder="-" className="form-control" id="current" value={currentDetails?.current} onChange={e=>setCurrentDetails({...currentDetails, current: Number(e.target.value)})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="payerName" className="col-sm-2 col-form-label">Haste (Payer)</label>
+                <label htmlFor="payerName" className="col-sm-2 col-form-label">Haste (Payer)</label>
                 <div className="col-sm-10">
                   <input type="text" placeholder="-" className="form-control" id="payerName" value={currentDetails?.payer} onChange={e=>setCurrentDetails({...currentDetails, payer: e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="payerNumber" className="col-sm-2 col-form-label">Mobile Number</label>
+                <label htmlFor="payerNumber" className="col-sm-2 col-form-label">Mobile Number</label>
                 <div className="col-sm-10">
                   <input type="text" placeholder="-" className="form-control" id="payerNumber" value={currentDetails?.mobile} onChange={e=>setCurrentDetails({...currentDetails, mobile:  e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="receiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
+                <label htmlFor="receiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
                 <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="receiver" value={currentDetails?.reciever} onChange={e=>setCurrentDetails({...currentDetails, reciever: e.target.value})}/>
+                  <input type="text" placeholder="-" className="form-control" id="receiver" value={currentDetails?.receiver} onChange={e=>setCurrentDetails({...currentDetails, receiver: e.target.value})}/>
                 </div>
               </div>
             </div>
@@ -237,7 +291,7 @@ const Phaad = () => {
           </div>
         </div>
       </div>
-      <div className="modal fade" id="addNew" tabindex="-1" aria-labelledby="addNewLabel" aria-hidden="true">
+      <div className="modal fade" id="addNew" tabIndex="-1" aria-labelledby="addNewLabel" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered modal-xl">
           <div className="modal-content">
             <div className="modal-header">
@@ -246,43 +300,43 @@ const Phaad = () => {
             </div>
             <div className="modal-body">
               <div className="mb-3 row">
-                <label for="firmName" className="col-sm-2 col-form-label">Firm Name</label>
+                <label htmlFor="name" className="col-sm-2 col-form-label">Firm Name</label>
                 <div className="col-sm-10">
-                  <input type="text" className="form-control" id="firmName" placeholder="Firm Name"  value={newDetails?.firmName} onChange={e=>setNewDetails({...newDetails, firmName: e.target.value})}/>
+                  <input type="text" className="form-control" id="name" placeholder="Firm Name"  value={newDetails?.name} onChange={e=>setNewDetails({...newDetails, name: e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="place" className="col-sm-2 col-form-label">Place</label>
+                <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
                 <div className="col-sm-10">
                   <input type="text" className="form-control" id="place" value={newDetails?.place} onChange={e=>setNewDetails({...newDetails, place: e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="inputPassword" className="col-sm-2 col-form-label">Previous (2022)</label>
+                <label htmlFor="inputPassword" className="col-sm-2 col-form-label">Previous (2022)</label>
                 <div className="col-sm-10">
-                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" onChange={e=>setNewDetails({...newDetails, previousYearAmount: Number(e.target.value)})}/>
+                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" onChange={e=>setNewDetails({...newDetails, previous: Number(e.target.value)})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="inputPassword" className="col-sm-2 col-form-label">Current (2023)</label>
+                <label htmlFor="inputPassword" className="col-sm-2 col-form-label">Current (2023)</label>
                 <div className="col-sm-10">
-                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" onChange={e=>setNewDetails({...newDetails, currentYearAmount: Number(e.target.value)})}/>
+                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" onChange={e=>setNewDetails({...newDetails, current: Number(e.target.value)})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="payerName" className="col-sm-2 col-form-label">Haste (Payer)</label>
+                <label htmlFor="payerName" className="col-sm-2 col-form-label">Haste (Payer)</label>
                 <div className="col-sm-10">
                   <input type="text" placeholder="-" className="form-control" id="payerName" value={newDetails?.payer} onChange={e=>setNewDetails({...newDetails, payer: e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="payerNumber" className="col-sm-2 col-form-label">Mobile Number</label>
+                <label htmlFor="payerNumber" className="col-sm-2 col-form-label">Mobile Number</label>
                 <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="payerNumber" value={newDetails?.payerMobile} onChange={e=>setNewDetails({...newDetails, payerMobile:  e.target.value})}/>
+                  <input type="text" placeholder="-" className="form-control" id="payerNumber" value={newDetails?.mobile} onChange={e=>setNewDetails({...newDetails, mobile:  e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="receiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
+                <label htmlFor="receiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
                 <div className="col-sm-10">
                   <input type="text" placeholder="-" className="form-control" id="receiver" value={newDetails?.receiver} onChange={e=>setNewDetails({...newDetails, receiver: e.target.value})}/>
                 </div>
@@ -290,7 +344,7 @@ const Phaad = () => {
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary" onClick={()=>saveNewFirm(newDetails)}>Add Firm</button>
+              <button type="button" className="btn btn-primary" onClick={()=>saveNewFirm()}>Add Firm</button>
             </div>
           </div>
         </div>
@@ -301,24 +355,17 @@ const Phaad = () => {
             <th className="col-6 border-3">Firm Name</th>
             <th className="text-center border-3">Prev (2022)</th>
             <th className="text-center border-3">Curr (2023)</th>
-            <th className="text-center border-3">Siksha Nidhi</th>
-            <th className="text-center border-3">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {phaad.map((firm) => {
+          {currentItems?.map((firm) => {
             return (
               <tr role="button" key={firm.id}>
-                <td className="border-3">{firm.firmName}</td>
+                <td className="border-3">{firm.name}</td>
                 <td className="border-3 text-center border-3">
-                  {firm.previousYearAmount >0 ? firm.previousYearAmount : "-"}
+                  {firm.previous >0 ? firm.previous : "-"}
                 </td>
-                <td className="text-center border-3">{firm.currentYearAmount >0 ? firm.currentYearAmount : "-"}</td>
-                <td className="text-center border-3">{firm.sikshaNidhiAmount >0 ? firm.sikshaNidhiAmount : "-"}</td>
-                <td className="text-center border-3 d-flex gap-3 justify-content-center">
-                <i class="bi bi-building-fill-gear"></i>
-                <i class="bi bi-trash3-fill"></i>
-                </td>
+                <td className="text-center border-3">{firm.current >0 ? firm.current : "-"}</td>
               </tr>
             );
           })}

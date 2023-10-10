@@ -3,6 +3,7 @@ import Navbar from "../../../components/Navbar/Navbar";
 import UmiyaMataji from "../../../assets/umiya-mataji.png";
 import { useData } from "../../../contexts/DataContext";
 import { useEffect, useState } from "react";
+import { Timestamp } from "firebase/firestore";
 
 const daysIndex = {
     "15/10/2023" : 1,
@@ -16,19 +17,19 @@ const daysIndex = {
     "23/10/2023" : 9
 }
 
-const PhaadIndex = () => {
-    const {dataState: {phaad}} = useData();
+const DatarIndex = () => {
+    const {dataState: {datar}} = useData();
     const [day, setDay] = useState(0);
     let elements = [];
 
     useEffect(()=>{
-        setDay(daysIndex[phaad[phaad?.length-1]?.date]);
-    },[phaad]);
+        setDay(daysIndex[(new Timestamp(datar[datar.length-1]?.created_at.seconds, datar[datar.length-1]?.created_at.nanoseconds)).toDate().toLocaleDateString('en-GB')]);
+    },[datar]);
 
     for(let i=1; i<=day; i++) {
         elements.push(
             <div className="day-one d-grid mb-2 mx-5" key={i}>
-                <Link to={`/phaad/day-${i}`} className="btn btn-outline-dark d-flex">
+                <Link to={`/datar/day-${i}`} className="btn btn-outline-dark d-flex">
                     <span className="me-auto">Day {i}</span> 
                     <span className="me-3">Total</span>
                 </Link>
@@ -41,11 +42,11 @@ const PhaadIndex = () => {
         <Navbar />
         <main className="container mt-3 flex-fill">
             <div className="d-flex justify-content-between mb-1">
-                <h2>Phaad</h2>
+                <h2>Datar</h2>
             </div>
             <div className="day-index">
                 <div className="all d-grid my-2 mx-5">
-                    <Link to="/phaad/all" className="btn btn-outline-dark d-flex"><span className="me-auto">All</span> <span className="me-3">Total</span></Link>
+                    <Link to="/datar/all" className="btn btn-outline-dark d-flex"><span className="me-auto">All</span> <span className="me-3">Total</span></Link>
                 </div>
                 {
                     elements.map(element => element)
@@ -77,4 +78,4 @@ const PhaadIndex = () => {
     )
 }
 
-export default PhaadIndex
+export default DatarIndex

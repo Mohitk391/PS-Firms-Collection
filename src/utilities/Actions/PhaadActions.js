@@ -1,12 +1,11 @@
 import { db } from "../../firebase-config.js";
-import { collection, onSnapshot, query } from "firebase/firestore";
+import { Timestamp, collection, onSnapshot, orderBy, query } from "firebase/firestore";
 
 
 export function readPhaad(q, state, dispatch){
     return onSnapshot(q, (queryResult)=>{
         queryResult.docs.map(doc => {
-            const dayId = doc.data().name;
-            return onSnapshot(query(collection(db, `phaad/${dayId}/firms`)),
+            return onSnapshot(query(collection(db, `phaad`), orderBy("date")),
             (snapshot)=>{
                 let collections = state.phaad;
                 let action = null;
@@ -14,7 +13,7 @@ export function readPhaad(q, state, dispatch){
                 snapshot.docChanges().forEach((change)=>{
                     if (change.type === "added") {
                         console.log("New firm: ", change.doc.data());
-                        collections = [...collections, {...change.doc.data(), id: change.doc.id}];
+                        collections = [...collections, {...change.doc.data(), id: change.doc.id, date: (new Timestamp(change.doc.data().date.seconds, change.doc.data().date.nanoseconds)).toDate().toLocaleDateString('en-GB')}];
                         action="added";
                     }
                     if (change.type === "modified") {

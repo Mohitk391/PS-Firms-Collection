@@ -8,6 +8,8 @@ import Navbar from "../../../components/Navbar/Navbar";
 import { useData } from "../../../contexts/DataContext";
 import { Link } from "react-router-dom";
 import { Loader } from "../../../utilities/Loader/Loader"
+import { doc, setDoc, updateDoc } from "firebase/firestore";
+import { db } from "../../../firebase-config";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -28,6 +30,10 @@ const AllFirms = () => {
     setLoading(true)}
     // eslint-disable-next-line react-hooks/exhaustive-deps
     ,[]);
+
+    useEffect(()=>{
+      setResults(allFirms.filter((item)=>item.name.toLowerCase().includes(searchTerm.toLocaleLowerCase().trim())))
+    },[searchTerm, allFirms]);
   
   const handleModalClose = () => {
     setCurrentDetails({});  
@@ -38,20 +44,107 @@ const AllFirms = () => {
 // While saving any new firm with either of only phaad, only sikshanidhi or both, add today's date as the respective collection's date . For example for only phaad add today's date as phaadDate.
 // For only phaad or only sikshanidhi, make sure to add blank values for the other collection. For example,  for only phaad, add all sikshanidhi values as blank(apprpriately) and vice-versa.
 
-  const saveNewFirm = (firmDetails) => {
-   
+  const saveNewFirm = async (firmDetails) => {
+    await setDoc(doc(db, "allFirms", firmDetails.name), {
+      name: firmDetails.name,
+      place: firmDetails.place,
+      phaadPrevious : firmDetails.phaadPrevious,
+      phaadCurrent : firmDetails.phaadCurrent,
+      phaadPayer : firmDetails.phaadPayer,
+      phaadMobile : firmDetails.phaadMobile,
+      phaadReciever : firmDetails.phaadReciever,
+      sikshanidhiPrevious : firmDetails.sikshanidhiPrevious,
+      sikshanidhiCurrent : firmDetails.sikshanidhiCurrent,
+      sikshanidhiPayer : firmDetails.sikshanidhiPayer,
+      sikshanidhiMobile : firmDetails.sikshanidhiMobile,
+      sikshanidhiReciever : firmDetails.sikshanidhiReciever
+    })
   }
 
-  const saveNewFirmPhaad = (firmDetails) => {
-   
+  const saveNewFirmPhaad = async (firmDetails) => {
+    await setDoc(doc(db, "allFirms", firmDetails.name), {
+      name: firmDetails.name,
+      place: firmDetails.place,
+      phaadPrevious : firmDetails.phaadPrevious,
+      phaadCurrent : firmDetails.phaadCurrent,
+      phaadPayer : firmDetails.phaadPayer,
+      phaadMobile : firmDetails.phaadMobile,
+      phaadReciever : firmDetails.phaadReciever,
+      sikshanidhiPrevious : 0,
+      sikshanidhiCurrent : 0,
+      sikshanidhiPayer : "",
+      sikshanidhiMobile : "",
+      sikshanidhiReciever : ""
+    })
   }
 
-  const saveNewFirmSikshanidhi = (firmDetails) => {
-   
+  const saveNewFirmSikshanidhi = async (firmDetails) => {
+    await setDoc(doc(db, "allFirms", firmDetails.name), {
+      name: firmDetails.name,
+      place: firmDetails.place,
+      phaadPrevious : 0,
+      phaadCurrent : 0,
+      phaadPayer : "",
+      phaadMobile : "",
+      phaadReciever : "",
+      sikshanidhiPrevious : firmDetails.sikshanidhiPrevious,
+      sikshanidhiCurrent : firmDetails.sikshanidhiCurrent,
+      sikshanidhiPayer : firmDetails.sikshanidhiPayer,
+      sikshanidhiMobile : firmDetails.sikshanidhiMobile,
+      sikshanidhiReciever : firmDetails.sikshanidhiReciever
+    })
   }
 
-  const saveUpdatedFirm = (firmDetails) => {
-   
+  const saveUpdatedFirm = async (firmDetails) => {
+    let updatingAllBody = {};
+    let updatingPhaadBody = {};
+    let updatingSikshanidhiBody = {};
+    if(currentDetails.sikshanidhiPrevious > 0){ 
+      updatingAllBody = {...updatingAllBody, sikshanidhiPrevious: currentDetails.sikshanidhiPrevious}
+      updatingSikshanidhiBody = {...updatingSikshanidhiBody, previous: currentDetails.sikshanidhiPrevious}
+    }
+    if(currentDetails.sikshanidhiCurrent > 0){
+      updatingSikshanidhiBody = {...updatingSikshanidhiBody, current: currentDetails.sikshanidhiCurrent}
+       updatingAllBody = {...updatingAllBody, sikshanidhiCurrent: currentDetails.sikshanidhiCurrent}
+    }
+    if(currentDetails.sikshanidhiPayer){
+      updatingSikshanidhiBody = {...updatingSikshanidhiBody, payer: currentDetails.sikshanidhiPayer}
+      updatingAllBody = {...updatingAllBody, sikshanidhiPayer: currentDetails.sikshanidhiPayer}
+    }
+    if(currentDetails.sikshanidhiMobile){
+      updatingSikshanidhiBody = {...updatingSikshanidhiBody, mobile: currentDetails.sikshanidhiMobile}
+       updatingAllBody = {...updatingAllBody, sikshanidhiMobile: currentDetails.sikshanidhiMobile}
+    }
+    if(currentDetails.sikshanidhiReciever){
+      updatingSikshanidhiBody = {...updatingSikshanidhiBody, reciever: currentDetails.sikshanidhiReciever}
+       updatingAllBody = {...updatingAllBody, sikshanidhiReciever: currentDetails.sikshanidhiReciever}
+    }
+    if(currentDetails.phaadPrevious > 0){ 
+      updatingAllBody = {...updatingAllBody, phaadPrevious: currentDetails.phaadPrevious}
+      updatingPhaadBody = {...updatingPhaadBody, previous: currentDetails.phaadPrevious}
+    }
+    if(currentDetails.phaadCurrent > 0){
+       updatingAllBody = {...updatingAllBody, phaadCurrent: currentDetails.phaadCurrent}
+       updatingPhaadBody = {...updatingPhaadBody, current: currentDetails.phaadCurrent}
+    }
+    if(currentDetails.phaadPayer){
+       updatingAllBody = {...updatingAllBody, phaadPayer: currentDetails.phaadPayer}
+       updatingPhaadBody = {...updatingPhaadBody, payer: currentDetails.phaadPayer}
+    }
+    if(currentDetails.phaadMobile ){
+       updatingAllBody = {...updatingAllBody, phaadMobile: currentDetails.phaadMobile}
+       updatingPhaadBody = {...updatingPhaadBody, mobile: currentDetails.phaadMobile}
+    }
+    if(currentDetails.phaadReciever){
+       updatingAllBody = {...updatingAllBody, phaadReciever: currentDetails.phaadReciever}
+       updatingPhaadBody = {...updatingPhaadBody, reciever: currentDetails.phaadReciever}
+    }
+
+    await updateDoc(doc(db,"allFirms", currentDetails.name), updatingAllBody);
+    if(updatingPhaadBody)
+      await updateDoc(doc(db,"allFirms", currentDetails.name), updatingAllBody);
+    
+
   }
 
   const deleteFirm = (firmDetails) => {
@@ -82,9 +175,7 @@ const AllFirms = () => {
     setCurrentPage(1);
   }, [results]);
 
-  useEffect(()=>{
-    setResults(allFirms.filter((item)=>item.name.toLowerCase().includes(searchTerm.toLocaleLowerCase().trim())))
-  },[searchTerm, allFirms]);
+ 
 
   const totalPages = Math.ceil(results.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -111,7 +202,7 @@ const AllFirms = () => {
               <span className="h2">All Firms</span>
             </div>
             <input className="py-0 px-3 border rounded-4 border-opacity-50" type="text" placeholder="Search" value={searchTerm} onChange={event=>setSearchTerm(event.target.value)} />
-           { allFirms.length > 0 ? <button onClick={downloadTable} className="btn btn-outline-dark" title="Download Records PDF"><i class="bi bi-file-earmark-arrow-down-fill"></i></button> : <button className="invisible pe-none"></button>}
+           { allFirms.length > 0 ? <button onClick={downloadTable} className="btn btn-outline-dark" title="Download Records PDF"><i className="bi bi-file-earmark-arrow-down-fill"></i></button> : <button className="invisible pe-none"></button>}
           </div>
           { loading ? <Loader loading={loading} /> :
           results.length > 0 ? (
@@ -146,7 +237,7 @@ const AllFirms = () => {
                       </td>
                       <td className="text-center border-3">{firm.sikshanidhiCurrent >0 ? firm.sikshanidhiCurrent : "-"}</td>
                      <td className="text-center border-3 d-flex gap-3 justify-content-center">
-                      <i class="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm)}></i>
+                      <i className="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm)}></i>
                       </td>
                     </tr>
                   );
@@ -161,7 +252,7 @@ const AllFirms = () => {
                 className="btn btn-outline-success"
                 data-bs-toggle="modal"
                 data-bs-target="#addNewIndex"
-                onClick={()=>setNewDetails({...newDetails, firmName: searchTerm})}
+                onClick={()=>setNewDetails({...newDetails, name: searchTerm})}
               >
                 Add New Firm
               </button>
@@ -197,7 +288,7 @@ const AllFirms = () => {
           </div>
         </div>
       </footer>
-      <div className="modal fade" id="updateDetails" tabindex="-1" aria-labelledby="updateDetailsLabel" aria-hidden="true">
+      <div className="modal fade" id="updateDetails" tabIndex="-1" aria-labelledby="updateDetailsLabel" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered modal-xl">
           <div className="modal-content">
             <div className="modal-header">
@@ -206,13 +297,13 @@ const AllFirms = () => {
             </div>
             <div className="modal-body">
                 <div className="mb-3 row">
-                    <label for="name" className="col-sm-2 col-form-label">Firm Name</label>
+                    <label htmlFor="name" className="col-sm-2 col-form-label">Firm Name</label>
                     <div className="col-sm-10">
                     <input type="text" className="form-control" id="name" value={currentDetails?.name} onChange={e=>setCurrentDetails({...currentDetails, name: e.target.value})}/>
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label for="place" className="col-sm-2 col-form-label">Place</label>
+                    <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
                     <div className="col-sm-10">
                     <input type="text" className="form-control" id="place" value={currentDetails?.place} onChange={e=>setCurrentDetails({...currentDetails, place: e.target.value})}/>
                     </div>
@@ -221,66 +312,66 @@ const AllFirms = () => {
                     <div className="table col-sm border border-2 me-2 pt-2 caption-top">
                         <caption><u><b>Phaad</b></u></caption>
                         <div className="mb-3 row">
-                            <label for="phaadPrevious" className="col-sm-4 col-form-label">Previous (2022)</label>
+                            <label htmlFor="phaadPrevious" className="col-sm-4 col-form-label">Previous (2022)</label>
                             <div className="col-sm-8">
-                            <input type="number" min="0" placeholder="-" className="form-control" id="phaadPrevious" value={currentDetails?.phaadPrevious} onChange={e=>setCurrentDetails({...currentDetails, previous: Number(e.target.value)})}/>
+                            <input type="number" min="0" placeholder="-" className="form-control" id="phaadPrevious" value={currentDetails?.phaadPrevious} onChange={e=>setCurrentDetails({...currentDetails, phaadPrevious: Number(e.target.value)})}/>
                             </div>
                         </div>
                         <div className="mb-3 row">
-                            <label for="phaadCurrent" className="col-sm-4 col-form-label">Current (2023)</label>
+                            <label htmlFor="phaadCurrent" className="col-sm-4 col-form-label">Current (2023)</label>
                             <div className="col-sm-8">
-                            <input type="number" min="0" placeholder="-" className="form-control" id="phaadCurrent" value={currentDetails?.phaadCurrent} onChange={e=>setCurrentDetails({...currentDetails, current: Number(e.target.value)})}/>
+                            <input type="number" min="0" placeholder="-" className="form-control" id="phaadCurrent" value={currentDetails?.phaadCurrent} onChange={e=>setCurrentDetails({...currentDetails, phaadCurrent: Number(e.target.value)})}/>
                             </div>
                         </div>
                         <div className="mb-3 row">
-                            <label for="phaadPayerName" className="col-sm-4 col-form-label">Haste (Payer)</label>
+                            <label htmlFor="phaadPayerName" className="col-sm-4 col-form-label">Haste (Payer)</label>
                             <div className="col-sm-8">
-                            <input type="text" placeholder="-" className="form-control" id="phaadPayerName" value={currentDetails?.phaadPayer} onChange={e=>setCurrentDetails({...currentDetails, payer: e.target.value})}/>
+                            <input type="text" placeholder="-" className="form-control" id="phaadPayerName" value={currentDetails?.phaadPayer} onChange={e=>setCurrentDetails({...currentDetails, phaadPayer: e.target.value})}/>
                             </div>
                         </div>
                         <div className="mb-3 row">
-                            <label for="phaadPayerNumber" className="col-sm-4 col-form-label">Mobile Number</label>
+                            <label htmlFor="phaadPayerNumber" className="col-sm-4 col-form-label">Mobile Number</label>
                             <div className="col-sm-8">
-                            <input type="text" placeholder="-" className="form-control" id="phaadPayerNumber" value={currentDetails?.phaadMobile} onChange={e=>setCurrentDetails({...currentDetails, mobile:  e.target.value})}/>
+                            <input type="text" placeholder="-" className="form-control" id="phaadPayerNumber" value={currentDetails?.phaadMobile} onChange={e=>setCurrentDetails({...currentDetails, phaadMobile:  e.target.value})}/>
                             </div>
                         </div>
                         <div className="mb-3 row">
-                            <label for="phaadReceiver" className="col-sm-4 col-form-label">Haste (Receiver)</label>
+                            <label htmlFor="phaadReceiver" className="col-sm-4 col-form-label">Haste (Receiver)</label>
                             <div className="col-sm-8">
-                            <input type="text" placeholder="-" className="form-control" id="phaadReceiver" value={currentDetails?.phaadReciever} onChange={e=>setCurrentDetails({...currentDetails, reciever: e.target.value})}/>
+                            <input type="text" placeholder="-" className="form-control" id="phaadReceiver" value={currentDetails?.phaadReciever} onChange={e=>setCurrentDetails({...currentDetails, phaadReciever: e.target.value})}/>
                             </div>
                         </div>
                     </div>
                     <div className="table col-sm border border-2 ms-2 pt-2 caption-top">
                         <caption><u><b>Sikshanidhi</b></u></caption>
                         <div className="mb-3 row">
-                            <label for="sikshanidhiPrevious" className="col-sm-4 col-form-label">Previous (2022)</label>
+                            <label htmlFor="sikshanidhiPrevious" className="col-sm-4 col-form-label">Previous (2022)</label>
                             <div className="col-sm-8">
-                            <input type="number" min="0" placeholder="-" className="form-control" id="sikshanidhiPrevious" value={currentDetails?.sikshanidhiPrevious} onChange={e=>setCurrentDetails({...currentDetails, previous: Number(e.target.value)})}/>
+                            <input type="number" min="0" placeholder="-" className="form-control" id="sikshanidhiPrevious" value={currentDetails?.sikshanidhiPrevious} onChange={e=>setCurrentDetails({...currentDetails, sikshanidhiPrevious: Number(e.target.value)})}/>
                             </div>
                         </div>
                         <div className="mb-3 row">
-                            <label for="sikshanidhiCurrent" className="col-sm-4 col-form-label">Current (2023)</label>
+                            <label htmlFor="sikshanidhiCurrent" className="col-sm-4 col-form-label">Current (2023)</label>
                             <div className="col-sm-8">
-                            <input type="number" min="0" placeholder="-" className="form-control" id="sikshanidhiCurrent" value={currentDetails?.sikshanidhiCurrent} onChange={e=>setCurrentDetails({...currentDetails, current: Number(e.target.value)})}/>
+                            <input type="number" min="0" placeholder="-" className="form-control" id="sikshanidhiCurrent" value={currentDetails?.sikshanidhiCurrent} onChange={e=>setCurrentDetails({...currentDetails, sikshanidhiCurrent: Number(e.target.value)})}/>
                             </div>
                         </div>
                         <div className="mb-3 row">
-                            <label for="sikshanidhiPayerName" className="col-sm-4 col-form-label">Haste (Payer)</label>
+                            <label htmlFor="sikshanidhiPayerName" className="col-sm-4 col-form-label">Haste (Payer)</label>
                             <div className="col-sm-8">
-                            <input type="text" placeholder="-" className="form-control" id="sikshanidhiPayerName" value={currentDetails?.sikshanidhiPayer} onChange={e=>setCurrentDetails({...currentDetails, payer: e.target.value})}/>
+                            <input type="text" placeholder="-" className="form-control" id="sikshanidhiPayerName" value={currentDetails?.sikshanidhiPayer} onChange={e=>setCurrentDetails({...currentDetails, sikshanidhiPayer: e.target.value})}/>
                             </div>
                         </div>
                         <div className="mb-3 row">
-                            <label for="sikshanidhiPayerNumber" className="col-sm-4 col-form-label">Mobile Number</label>
+                            <label htmlFor="sikshanidhiPayerNumber" className="col-sm-4 col-form-label">Mobile Number</label>
                             <div className="col-sm-8">
-                            <input type="text" placeholder="-" className="form-control" id="sikshanidhiPayerNumber" value={currentDetails?.sikshanidhiMobile} onChange={e=>setCurrentDetails({...currentDetails, mobile:  e.target.value})}/>
+                            <input type="text" placeholder="-" className="form-control" id="sikshanidhiPayerNumber" value={currentDetails?.sikshanidhiMobile} onChange={e=>setCurrentDetails({...currentDetails, sikshanidhiMobile:  e.target.value})}/>
                             </div>
                         </div>
                         <div className="mb-3 row">
-                            <label for="sikshanidhiReceiver" className="col-sm-4 col-form-label">Haste (Receiver)</label>
+                            <label htmlFor="sikshanidhiReceiver" className="col-sm-4 col-form-label">Haste (Receiver)</label>
                             <div className="col-sm-8">
-                            <input type="text" placeholder="-" className="form-control" id="sikshanidhiReceiver" value={currentDetails?.sikshanidhiReciever} onChange={e=>setCurrentDetails({...currentDetails, reciever: e.target.value})}/>
+                            <input type="text" placeholder="-" className="form-control" id="sikshanidhiReceiver" value={currentDetails?.sikshanidhiReciever} onChange={e=>setCurrentDetails({...currentDetails, sikshanidhiReciever: e.target.value})}/>
                             </div>
                         </div>
                     </div>
@@ -293,7 +384,7 @@ const AllFirms = () => {
           </div>
         </div>
       </div>
-      <div className="modal fade" id="addNewIndex" tabindex="-1" aria-labelledby="addNewIndexLabel" aria-hidden="true">
+      <div className="modal fade" id="addNewIndex" tabIndex="-1" aria-labelledby="addNewIndexLabel" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered modal-xl">
           <div className="modal-content">
             <div className="modal-header">
@@ -302,13 +393,13 @@ const AllFirms = () => {
             </div>
             <div className="modal-body">
                 <div className="mb-3 row">
-                    <label for="name" className="col-sm-2 col-form-label">Firm Name</label>
+                    <label htmlFor="name" className="col-sm-2 col-form-label">Firm Name</label>
                     <div className="col-sm-10">
                     <input type="text" className="form-control" id="name" value={newDetails?.name} onChange={e=>setNewDetails({...newDetails, name: e.target.value})}/>
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label for="place" className="col-sm-2 col-form-label">Place</label>
+                    <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
                     <div className="col-sm-10">
                     <input type="text" className="form-control" id="place" value={newDetails?.place} onChange={e=>setNewDetails({...newDetails, place: e.target.value})}/>
                     </div>
@@ -316,15 +407,15 @@ const AllFirms = () => {
                 <div className="mb-3 row form-check">
                     <div className="form-check form-check-inline">
                         <input type="radio"  name="Selector" className="form-check-input" id="phaadSelector" value="Phaad" data-bs-target="#addNewPhaad" data-bs-toggle="modal"/>
-                        <label for="phaadSelector" className="form-check-label">Phaad</label>
+                        <label htmlFor="phaadSelector" className="form-check-label">Phaad</label>
                     </div>
                     <div className="form-check form-check-inline">
                         <input type="radio"  name="Selector" className="form-check-input" id="sikshanidhiSelector" value="Sikshanidhi" data-bs-target="#addNewSikshanidhi" data-bs-toggle="modal"/>
-                        <label for="sikshanidhiSelector" className="form-check-label">Sikshanidhi</label>
+                        <label htmlFor="sikshanidhiSelector" className="form-check-label">Sikshanidhi</label>
                     </div>
                     <div className="form-check form-check-inline">
                         <input type="radio" name="Selector" className="form-check-input" id="bothSelector" value="Both" data-bs-target="#addNew" data-bs-toggle="modal"/>
-                        <label for="bothSelector" className="form-check-label">Both</label>
+                        <label htmlFor="bothSelector" className="form-check-label">Both</label>
                     </div>
                 </div>
             </div>
@@ -334,7 +425,7 @@ const AllFirms = () => {
           </div>
         </div>
       </div>
-      <div className="modal fade" id="addNew" tabindex="-1" aria-labelledby="addNewLabel" aria-hidden="true">
+      <div className="modal fade" id="addNew" tabIndex="-1" aria-labelledby="addNewLabel" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered modal-xl">
           <div className="modal-content">
             <div className="modal-header">
@@ -343,13 +434,13 @@ const AllFirms = () => {
             </div>
             <div className="modal-body">
                 <div className="mb-3 row">
-                    <label for="name" className="col-sm-2 col-form-label">Firm Name</label>
+                    <label htmlFor="name" className="col-sm-2 col-form-label">Firm Name</label>
                     <div className="col-sm-10">
                     <input type="text" className="form-control" id="name" value={newDetails?.name} onChange={e=>setNewDetails({...newDetails, name: e.target.value})}/>
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label for="place" className="col-sm-2 col-form-label">Place</label>
+                    <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
                     <div className="col-sm-10">
                     <input type="text" className="form-control" id="place" value={newDetails?.place} onChange={e=>setNewDetails({...newDetails, place: e.target.value})}/>
                     </div>
@@ -358,66 +449,66 @@ const AllFirms = () => {
                     <div className="table col-sm border border-2 me-2 pt-2 caption-top">
                         <caption><u><b>Phaad</b></u></caption>
                         <div className="mb-3 row">
-                            <label for="phaadPrevious" className="col-sm-4 col-form-label">Previous (2022)</label>
+                            <label htmlFor="phaadPrevious" className="col-sm-4 col-form-label">Previous (2022)</label>
                             <div className="col-sm-8">
-                            <input type="number" min="0" placeholder="-" className="form-control" id="phaadPrevious" value={newDetails?.phaadPrevious} onChange={e=>setNewDetails({...newDetails, previous: Number(e.target.value)})}/>
+                            <input type="number" min="0" placeholder="-" className="form-control" id="phaadPrevious" value={newDetails?.phaadPrevious} onChange={e=>setNewDetails({...newDetails, phaadPrevious: Number(e.target.value)})}/>
                             </div>
                         </div>
                         <div className="mb-3 row">
-                            <label for="phaadCurrent" className="col-sm-4 col-form-label">Current (2023)</label>
+                            <label htmlFor="phaadCurrent" className="col-sm-4 col-form-label">Current (2023)</label>
                             <div className="col-sm-8">
-                            <input type="number" min="0" placeholder="-" className="form-control" id="phaadCurrent" value={newDetails?.phaadCurrent} onChange={e=>setNewDetails({...newDetails, current: Number(e.target.value)})}/>
+                            <input type="number" min="0" placeholder="-" className="form-control" id="phaadCurrent" value={newDetails?.phaadCurrent} onChange={e=>setNewDetails({...newDetails, phaadCurrent: Number(e.target.value)})}/>
                             </div>
                         </div>
                         <div className="mb-3 row">
-                            <label for="phaadPayerName" className="col-sm-4 col-form-label">Haste (Payer)</label>
+                            <label htmlFor="phaadPayerName" className="col-sm-4 col-form-label">Haste (Payer)</label>
                             <div className="col-sm-8">
-                            <input type="text" placeholder="-" className="form-control" id="phaadPayerName" value={newDetails?.phaadPayer} onChange={e=>setNewDetails({...newDetails, payer: e.target.value})}/>
+                            <input type="text" placeholder="-" className="form-control" id="phaadPayerName" value={newDetails?.phaadPayer} onChange={e=>setNewDetails({...newDetails, phaadPayer: e.target.value})}/>
                             </div>
                         </div>
                         <div className="mb-3 row">
-                            <label for="phaadPayerNumber" className="col-sm-4 col-form-label">Mobile Number</label>
+                            <label htmlFor="phaadPayerNumber" className="col-sm-4 col-form-label">Mobile Number</label>
                             <div className="col-sm-8">
-                            <input type="text" placeholder="-" className="form-control" id="phaadPayerNumber" value={newDetails?.phaadMobile} onChange={e=>setNewDetails({...newDetails, mobile:  e.target.value})}/>
+                            <input type="text" placeholder="-" className="form-control" id="phaadPayerNumber" value={newDetails?.phaadMobile} onChange={e=>setNewDetails({...newDetails, phaadMobile:  e.target.value})}/>
                             </div>
                         </div>
                         <div className="mb-3 row">
-                            <label for="phaadReceiver" className="col-sm-4 col-form-label">Haste (Receiver)</label>
+                            <label htmlFor="phaadReceiver" className="col-sm-4 col-form-label">Haste (Receiver)</label>
                             <div className="col-sm-8">
-                            <input type="text" placeholder="-" className="form-control" id="phaadReceiver" value={newDetails?.phaadReciever} onChange={e=>setNewDetails({...newDetails, reciever: e.target.value})}/>
+                            <input type="text" placeholder="-" className="form-control" id="phaadReceiver" value={newDetails?.phaadReciever} onChange={e=>setNewDetails({...newDetails, phaadReciever: e.target.value})}/>
                             </div>
                         </div>
                     </div>
                     <div className="table col-sm border border-2 ms-2 pt-2 caption-top">
                         <caption><u><b>Sikshanidhi</b></u></caption>
                         <div className="mb-3 row">
-                            <label for="sikshanidhiPrevious" className="col-sm-4 col-form-label">Previous (2022)</label>
+                            <label htmlFor="sikshanidhiPrevious" className="col-sm-4 col-form-label">Previous (2022)</label>
                             <div className="col-sm-8">
-                            <input type="number" min="0" placeholder="-" className="form-control" id="sikshanidhiPrevious" value={newDetails?.sikshanidhiPrevious} onChange={e=>setNewDetails({...newDetails, previous: Number(e.target.value)})}/>
+                            <input type="number" min="0" placeholder="-" className="form-control" id="sikshanidhiPrevious" value={newDetails?.sikshanidhiPrevious} onChange={e=>setNewDetails({...newDetails, sikshanidhiPrevious: Number(e.target.value)})}/>
                             </div>
                         </div>
                         <div className="mb-3 row">
-                            <label for="sikshanidhiCurrent" className="col-sm-4 col-form-label">Current (2023)</label>
+                            <label htmlFor="sikshanidhiCurrent" className="col-sm-4 col-form-label">Current (2023)</label>
                             <div className="col-sm-8">
-                            <input type="number" min="0" placeholder="-" className="form-control" id="sikshanidhiCurrent" value={newDetails?.sikshanidhiCurrent} onChange={e=>setNewDetails({...newDetails, current: Number(e.target.value)})}/>
+                            <input type="number" min="0" placeholder="-" className="form-control" id="sikshanidhiCurrent" value={newDetails?.sikshanidhiCurrent} onChange={e=>setNewDetails({...newDetails, sikshanidhiCurrent: Number(e.target.value)})}/>
                             </div>
                         </div>
                         <div className="mb-3 row">
-                            <label for="sikshanidhiPayerName" className="col-sm-4 col-form-label">Haste (Payer)</label>
+                            <label htmlFor="sikshanidhiPayerName" className="col-sm-4 col-form-label">Haste (Payer)</label>
                             <div className="col-sm-8">
-                            <input type="text" placeholder="-" className="form-control" id="sikshanidhiPayerName" value={newDetails?.sikshanidhiPayer} onChange={e=>setNewDetails({...newDetails, payer: e.target.value})}/>
+                            <input type="text" placeholder="-" className="form-control" id="sikshanidhiPayerName" value={newDetails?.sikshanidhiPayer} onChange={e=>setNewDetails({...newDetails, sikshanidhiPayer: e.target.value})}/>
                             </div>
                         </div>
                         <div className="mb-3 row">
-                            <label for="sikshanidhiPayerNumber" className="col-sm-4 col-form-label">Mobile Number</label>
+                            <label htmlFor="sikshanidhiPayerNumber" className="col-sm-4 col-form-label">Mobile Number</label>
                             <div className="col-sm-8">
-                            <input type="text" placeholder="-" className="form-control" id="sikshanidhiPayerNumber" value={newDetails?.sikshanidhiMobile} onChange={e=>setNewDetails({...newDetails, mobile:  e.target.value})}/>
+                            <input type="text" placeholder="-" className="form-control" id="sikshanidhiPayerNumber" value={newDetails?.sikshanidhiMobile} onChange={e=>setNewDetails({...newDetails, sikshanidhiMobile:  e.target.value})}/>
                             </div>
                         </div>
                         <div className="mb-3 row">
-                            <label for="sikshanidhiReceiver" className="col-sm-4 col-form-label">Haste (Receiver)</label>
+                            <label htmlFor="sikshanidhiReceiver" className="col-sm-4 col-form-label">Haste (Receiver)</label>
                             <div className="col-sm-8">
-                            <input type="text" placeholder="-" className="form-control" id="sikshanidhiReceiver" value={newDetails?.sikshanidhiReciever} onChange={e=>setNewDetails({...newDetails, reciever: e.target.value})}/>
+                            <input type="text" placeholder="-" className="form-control" id="sikshanidhiReceiver" value={newDetails?.sikshanidhiReciever} onChange={e=>setNewDetails({...newDetails, sikshanidhiReciever: e.target.value})}/>
                             </div>
                         </div>
                     </div>
@@ -430,7 +521,7 @@ const AllFirms = () => {
           </div>
         </div>
       </div>
-      <div className="modal fade" id="addNewPhaad" tabindex="-1" aria-labelledby="addNewPhaadLabel" aria-hidden="true">
+      <div className="modal fade" id="addNewPhaad" tabIndex="-1" aria-labelledby="addNewPhaadLabel" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered modal-xl">
           <div className="modal-content">
             <div className="modal-header">
@@ -439,45 +530,45 @@ const AllFirms = () => {
             </div>
             <div className="modal-body">
                 <div className="mb-3 row">
-                    <label for="name" className="col-sm-2 col-form-label">Firm Name</label>
+                    <label htmlFor="name" className="col-sm-2 col-form-label">Firm Name</label>
                     <div className="col-sm-10">
                     <input type="text" className="form-control" id="name" value={newDetails?.name} onChange={e=>setNewDetails({...newDetails, name: e.target.value})}/>
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label for="place" className="col-sm-2 col-form-label">Place</label>
+                    <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
                     <div className="col-sm-10">
                     <input type="text" className="form-control" id="place" value={newDetails?.place} onChange={e=>setNewDetails({...newDetails, place: e.target.value})}/>
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label for="phaadPrevious" className="col-sm-2 col-form-label">Previous (2022)</label>
+                    <label htmlFor="phaadPrevious" className="col-sm-2 col-form-label">Previous (2022)</label>
                     <div className="col-sm-10">
-                    <input type="number" min="0" placeholder="-" className="form-control" id="phaadPrevious" value={newDetails?.phaadPrevious} onChange={e=>setNewDetails({...newDetails, previous: Number(e.target.value)})}/>
+                    <input type="number" min="0" placeholder="-" className="form-control" id="phaadPrevious" value={newDetails?.phaadPrevious} onChange={e=>setNewDetails({...newDetails, phaadPrevious: Number(e.target.value)})}/>
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label for="phaadCurrent" className="col-sm-2 col-form-label">Current (2023)</label>
+                    <label htmlFor="phaadCurrent" className="col-sm-2 col-form-label">Current (2023)</label>
                     <div className="col-sm-10">
-                    <input type="number" min="0" placeholder="-" className="form-control" id="phaadCurrent" value={newDetails?.phaadCurrent} onChange={e=>setNewDetails({...newDetails, current: Number(e.target.value)})}/>
+                    <input type="number" min="0" placeholder="-" className="form-control" id="phaadCurrent" value={newDetails?.phaadCurrent} onChange={e=>setNewDetails({...newDetails, phaadCurrent: Number(e.target.value)})}/>
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label for="phaadPayerName" className="col-sm-2 col-form-label">Haste (Payer)</label>
+                    <label htmlFor="phaadPayerName" className="col-sm-2 col-form-label">Haste (Payer)</label>
                     <div className="col-sm-10">
-                    <input type="text" placeholder="-" className="form-control" id="phaadPayerName" value={newDetails?.phaadPayer} onChange={e=>setNewDetails({...newDetails, payer: e.target.value})}/>
+                    <input type="text" placeholder="-" className="form-control" id="phaadPayerName" value={newDetails?.phaadPayer} onChange={e=>setNewDetails({...newDetails, phaadPayer: e.target.value})}/>
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label for="phaadPayerNumber" className="col-sm-2 col-form-label">Mobile Number</label>
+                    <label htmlFor="phaadPayerNumber" className="col-sm-2 col-form-label">Mobile Number</label>
                     <div className="col-sm-10">
-                    <input type="text" placeholder="-" className="form-control" id="phaadPayerNumber" value={newDetails?.phaadMobile} onChange={e=>setNewDetails({...newDetails, mobile:  e.target.value})}/>
+                    <input type="text" placeholder="-" className="form-control" id="phaadPayerNumber" value={newDetails?.phaadMobile} onChange={e=>setNewDetails({...newDetails, phaadMobile:  e.target.value})}/>
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label for="phaadReceiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
+                    <label htmlFor="phaadReceiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
                     <div className="col-sm-10">
-                    <input type="text" placeholder="-" className="form-control" id="phaadReceiver" value={newDetails?.phaadReciever} onChange={e=>setNewDetails({...newDetails, reciever: e.target.value})}/>
+                    <input type="text" placeholder="-" className="form-control" id="phaadReceiver" value={newDetails?.phaadReciever} onChange={e=>setNewDetails({...newDetails, phaadReciever: e.target.value})}/>
                     </div>
                 </div>
             </div>
@@ -488,7 +579,7 @@ const AllFirms = () => {
           </div>
         </div>
       </div>
-      <div className="modal fade" id="addNewSikshanidhi" tabindex="-1" aria-labelledby="addNewSikshanidhiLabel" aria-hidden="true">
+      <div className="modal fade" id="addNewSikshanidhi" tabIndex="-1" aria-labelledby="addNewSikshanidhiLabel" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered modal-xl">
           <div className="modal-content">
             <div className="modal-header">
@@ -497,45 +588,45 @@ const AllFirms = () => {
             </div>
             <div className="modal-body">
                 <div className="mb-3 row">
-                    <label for="name" className="col-sm-2 col-form-label">Firm Name</label>
+                    <label htmlFor="name" className="col-sm-2 col-form-label">Firm Name</label>
                     <div className="col-sm-10">
                     <input type="text" className="form-control" id="name" value={newDetails?.name} onChange={e=>setNewDetails({...newDetails, name: e.target.value})}/>
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label for="place" className="col-sm-2 col-form-label">Place</label>
+                    <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
                     <div className="col-sm-10">
                     <input type="text" className="form-control" id="place" value={newDetails?.place} onChange={e=>setNewDetails({...newDetails, place: e.target.value})}/>
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label for="sikshanidhiPrevious" className="col-sm-2 col-form-label">Previous (2022)</label>
+                    <label htmlFor="sikshanidhiPrevious" className="col-sm-2 col-form-label">Previous (2022)</label>
                     <div className="col-sm-10">
-                    <input type="number" min="0" placeholder="-" className="form-control" id="sikshanidhiPrevious" value={newDetails?.sikshanidhiPrevious} onChange={e=>setNewDetails({...newDetails, previous: Number(e.target.value)})}/>
+                    <input type="number" min="0" placeholder="-" className="form-control" id="sikshanidhiPrevious" value={newDetails?.sikshanidhiPrevious} onChange={e=>setNewDetails({...newDetails, sikshanidhiPrevious: Number(e.target.value)})}/>
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label for="sikshanidhiCurrent" className="col-sm-2 col-form-label">Current (2023)</label>
+                    <label htmlFor="sikshanidhiCurrent" className="col-sm-2 col-form-label">Current (2023)</label>
                     <div className="col-sm-10">
-                    <input type="number" min="0" placeholder="-" className="form-control" id="sikshanidhiCurrent" value={newDetails?.sikshanidhiCurrent} onChange={e=>setNewDetails({...newDetails, current: Number(e.target.value)})}/>
+                    <input type="number" min="0" placeholder="-" className="form-control" id="sikshanidhiCurrent" value={newDetails?.sikshanidhiCurrent} onChange={e=>setNewDetails({...newDetails, sikshanidhiCurrent: Number(e.target.value)})}/>
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label for="sikshanidhiPayerName" className="col-sm-2 col-form-label">Haste (Payer)</label>
+                    <label htmlFor="sikshanidhiPayerName" className="col-sm-2 col-form-label">Haste (Payer)</label>
                     <div className="col-sm-10">
-                    <input type="text" placeholder="-" className="form-control" id="sikshanidhiPayerName" value={newDetails?.sikshanidhiPayer} onChange={e=>setNewDetails({...newDetails, payer: e.target.value})}/>
+                    <input type="text" placeholder="-" className="form-control" id="sikshanidhiPayerName" value={newDetails?.sikshanidhiPayer} onChange={e=>setNewDetails({...newDetails, sikshanidhiPayer: e.target.value})}/>
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label for="sikshanidhiPayerNumber" className="col-sm-2 col-form-label">Mobile Number</label>
+                    <label htmlFor="sikshanidhiPayerNumber" className="col-sm-2 col-form-label">Mobile Number</label>
                     <div className="col-sm-10">
-                    <input type="text" placeholder="-" className="form-control" id="sikshanidhiPayerNumber" value={newDetails?.sikshanidhiMobile} onChange={e=>setNewDetails({...newDetails, mobile:  e.target.value})}/>
+                    <input type="text" placeholder="-" className="form-control" id="sikshanidhiPayerNumber" value={newDetails?.sikshanidhiMobile} onChange={e=>setNewDetails({...newDetails, sikshanidhiMobile:  e.target.value})}/>
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label for="sikshanidhiReceiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
+                    <label htmlFor="sikshanidhiReceiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
                     <div className="col-sm-10">
-                    <input type="text" placeholder="-" className="form-control" id="sikshanidhiReceiver" value={newDetails?.sikshanidhiReciever} onChange={e=>setNewDetails({...newDetails, reciever: e.target.value})}/>
+                    <input type="text" placeholder="-" className="form-control" id="sikshanidhiReceiver" value={newDetails?.sikshanidhiReciever} onChange={e=>setNewDetails({...newDetails, sikshanidhiReciever: e.target.value})}/>
                     </div>
                 </div>
             </div>
@@ -547,34 +638,43 @@ const AllFirms = () => {
         </div>
       </div>
       <table className="table table-bordered" id="fullDataTable" style={{display: 'none'}}>
-        <thead>
-          <tr>
-            <th className="col-6 border-3">Firm Name</th>
-            <th className="text-center border-3">Prev (2022)</th>
-            <th className="text-center border-3">Curr (2023)</th>
-            <th className="text-center border-3">Siksha Nidhi</th>
-            <th className="text-center border-3">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {results.map((firm) => {
-            return (
-              <tr role="button" key={firm.id}>
-                <td className="border-3">{firm.firmName}</td>
-                <td className="border-3 text-center border-3">
-                  {firm.previousYearAmount >0 ? firm.previousYearAmount : "-"}
-                </td>
-                <td className="text-center border-3">{firm.currentYearAmount >0 ? firm.currentYearAmount : "-"}</td>
-                <td className="text-center border-3">{firm.sikshaNidhiAmount >0 ? firm.sikshaNidhiAmount : "-"}</td>
-                <td className="text-center border-3 d-flex gap-3 justify-content-center">
-                <i class="bi bi-building-fill-gear"></i>
-                <i class="bi bi-trash3-fill"></i>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+              <thead>
+                <tr>
+                  <th className="col-3 text-center border-3 align-middle" rowSpan={2}>Firm Name</th>
+                  <th className="col-2 text-center border-3 align-middle" rowSpan={2}>Place</th>
+                  <th className="col-3 text-center border-3" colSpan={2}>Phaad</th>
+                  <th className="col-3 text-center border-3" colSpan={2}>Sikshanidhi</th>
+                  <th className="col-2 text-center border-3 align-middle" rowSpan={2}>Actions</th>
+                </tr>
+                <tr>
+                  <th className="text-center border-3">Prev (2022)</th>
+                  <th className="text-center border-3">Curr (2023)</th>
+                  <th className="text-center border-3">Prev (2022)</th>
+                  <th className="text-center border-3">Curr (2023)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentItems.map((firm) => {
+                  return (
+                    <tr  key={firm.id}>
+                      <td role="button" className="fw-bold border-3" data-bs-toggle="modal" data-bs-target="#updateDetails" onClick={()=> setCurrentDetails(firm)}>{firm.name}</td>
+                      <td className="text-center border-3">{firm.place}</td>
+                      <td className="border-3 text-center border-3">
+                        {firm.phaadPrevious >0 ? firm.phaadPrevious : "-"}
+                      </td>
+                      <td className="text-center border-3">{firm.phaadCurrent >0 ? firm.phaadCurrent : "-"}</td>
+                      <td className="border-3 text-center border-3">
+                        {firm.sikshanidhiPrevious >0 ? firm.sikshanidhiPrevious : "-"}
+                      </td>
+                      <td className="text-center border-3">{firm.sikshanidhiCurrent >0 ? firm.sikshanidhiCurrent : "-"}</td>
+                     <td className="text-center border-3 d-flex gap-3 justify-content-center">
+                      <i className="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm)}></i>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
     </div>
   );
 }

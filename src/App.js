@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import Homepage from "./pages/homepage/Homepage";
 import { RequiresAuth } from "./utilities/Auth/RequiresAuth";
 import PhaadIndex from "./pages/collections/phaad/PhaadIndex";
+import SikshanidhiIndex from "./pages/collections/sikshanidhi/SikshanidhiIndex";
 
 function App() {
   useEffect(()=>{
@@ -34,11 +35,14 @@ function App() {
           </RequiresAuth>
         } />
         <Route path="phaad/:dayId" element={<Phaad />} />
+
         <Route path="/sikshanidhi" element={
           <RequiresAuth>
-            <Sikshanidhi />
+            <SikshanidhiIndex />
           </RequiresAuth>
         } />
+        <Route path="sikshanidhi/:dayId" element={<Sikshanidhi />} />
+
         <Route path="/datar" element={
           <RequiresAuth>
             <Datar />

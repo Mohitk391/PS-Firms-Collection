@@ -3,30 +3,38 @@ const DataReducer = (dataState, action) => {
         case "SET_PHAAD":
             return {...dataState, phaad: action.value};
         case "UPDATE_PHAAD":
-            return {};
+            return {...dataState, phaad : updateCollection(dataState.phaad, action.value)};
         case "REMOVE_PHAAD":
-            return {};
+            return {...dataState, phaad : removeCollection(dataState.phaad, action.value)};
         case "SET_SIKSHANIDHI":
             return {...dataState, sikshanidhi: action.value};
         case "UPDATE_SIKSHANIDHI":
-            return {};
+            return {...dataState, sikshanidhi: updateCollection(dataState.sikshanidhi, action.value)};
         case "REMOVE_SIKSHANIDHI":
-            return {};
+            return {...dataState, sikshanidhi: removeCollection(dataState.sikshanidhi, action.value)};
         case "SET_DATAR":
             return {...dataState, datar: action.value};
         case "UPDATE_DATAR":
-            return {};
+            return {...dataState, datar: updateCollection(dataState.datar, action.value)};
         case "REMOVE_DATAR":
-            return {};
+            return {...dataState, datar: removeCollection(dataState.datar, action.value)};
         case "SET_ALLFIRMS":
             return {...dataState, allFirms: action.value};
         case "UPDATE_ALLFIRMS":
-            return {};
+            return {...dataState, allFirms: updateCollection(dataState.allFirms, action.value)};
         case "REMOVE_ALLFIRMS":
-            return {};
+            return {...dataState, allFirms: removeCollection(dataState.allFirms, action.value)};
         default:
             return dataState;
     }
+}
+
+const updateCollection = (collection, updatedFirm) => {
+    collection = collection.map(firm => firm.id === updatedFirm.id ? updatedFirm : firm);
+}
+
+const removeCollection = (collection, removedFirm) => {
+    collection = collection.filter(firm => firm.id !== removedFirm.id);
 }
 
 export {DataReducer}

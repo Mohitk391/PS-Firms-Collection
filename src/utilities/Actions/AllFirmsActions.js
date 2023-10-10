@@ -2,7 +2,7 @@ import { onSnapshot} from "firebase/firestore";
 
 export function readAllFirms(q, state, dispatch){
     return onSnapshot(q, (snapshot)=>{
-        let firms = [];
+        let firms = state.allFirms;
         let action = null;
         let updatedValue = null;
         snapshot.docChanges().forEach((change)=>{

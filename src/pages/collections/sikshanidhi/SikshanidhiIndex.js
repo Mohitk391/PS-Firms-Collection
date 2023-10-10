@@ -3,6 +3,8 @@ import Navbar from "../../../components/Navbar/Navbar";
 import UmiyaMataji from "../../../assets/umiya-mataji.png";
 import { useData } from "../../../contexts/DataContext";
 import { useEffect, useState } from "react";
+import { Timestamp } from "firebase/firestore";
+
 
 const daysIndex = {
     "15/10/2023" : 1,
@@ -16,19 +18,20 @@ const daysIndex = {
     "23/10/2023" : 9
 }
 
-const PhaadIndex = () => {
-    const {dataState: {phaad}} = useData();
+const SikshanidhiIndex = () => {
+    
+    const {dataState: {sikshanidhi}} = useData();
     const [day, setDay] = useState(0);
     let elements = [];
 
     useEffect(()=>{
-        setDay(daysIndex[phaad[phaad?.length-1]?.date]);
-    },[phaad]);
+        setDay(daysIndex[(new Timestamp(sikshanidhi[sikshanidhi.length-1]?.created_at.seconds, sikshanidhi[sikshanidhi.length-1]?.created_at.nanoseconds)).toDate().toLocaleDateString('en-GB')]);
+    },[sikshanidhi]);
 
     for(let i=1; i<=day; i++) {
         elements.push(
             <div className="day-one d-grid mb-2 mx-5" key={i}>
-                <Link to={`/phaad/day-${i}`} className="btn btn-outline-dark d-flex">
+                <Link to={`/sikshanidhi/day-${i}`} className="btn btn-outline-dark d-flex">
                     <span className="me-auto">Day {i}</span> 
                     <span className="me-3">Total</span>
                 </Link>
@@ -36,20 +39,22 @@ const PhaadIndex = () => {
         );
     }
 
+
     return (
     <div className="App d-flex flex-column min-vh-100">
         <Navbar />
         <main className="container mt-3 flex-fill">
             <div className="d-flex justify-content-between mb-1">
-                <h2>Phaad</h2>
+                <h2>Sikshanidhi</h2>
             </div>
             <div className="day-index">
                 <div className="all d-grid my-2 mx-5">
-                    <Link to="/phaad/all" className="btn btn-outline-dark d-flex"><span className="me-auto">All</span> <span className="me-3">Total</span></Link>
+                    <Link to="/sikshanidhi/all" className="btn btn-outline-dark d-flex"><span className="me-auto">All</span> <span className="me-3">Total</span></Link>
                 </div>
                 {
                     elements.map(element => element)
                 }
+
             </div>
         </main>
         <footer className="page-footer shadow-lg border-top">
@@ -77,4 +82,4 @@ const PhaadIndex = () => {
     )
 }
 
-export default PhaadIndex
+export default SikshanidhiIndex

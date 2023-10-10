@@ -1,53 +1,116 @@
 import UmiyaMataji from "../../../assets/umiya-mataji.png";
-import {data} from "../../../data/data";
 import { useState } from "react";
-import debounce from "lodash.debounce";
 import Pagination from "../../../utilities/Pagination/Pagination";
 import { useEffect } from "react";
 import jsPDF from "jspdf";
 import autoTable from 'jspdf-autotable';
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
+import { useData } from "../../../contexts/DataContext";
+import { Timestamp, doc, setDoc, updateDoc } from "firebase/firestore";
+import { db } from "../../../firebase-config";
 
 const ITEMS_PER_PAGE = 10;
+const days = {
+  "day-1" : new Date("10/15/2023").toLocaleDateString("en-GB"),
+  "day-2" : new Date("10/16/2023").toLocaleDateString("en-GB"),
+  "day-3" : new Date("10/17/2023").toLocaleDateString("en-GB"),
+  "day-4" : new Date("10/18/2023").toLocaleDateString("en-GB"),
+  "day-5" : new Date("10/19/2023").toLocaleDateString("en-GB"),
+  "day-6" : new Date("10/20/2023").toLocaleDateString("en-GB"),
+  "day-7" : new Date("10/21/2023").toLocaleDateString("en-GB"),
+  "day-8" : new Date("10/22/2023").toLocaleDateString("en-GB"),
+  "day-9" : new Date("10/23/2023").toLocaleDateString("en-GB"),
+}
 
 const Sikshanidhi = () => {
+  const { dayId } = useParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [results, setResults] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({});
+  const [newDetails, setNewDetails] = useState({});
+  const {dataState : {sikshanidhi, allFirms}} = useData();  
 
-  useEffect(() => {
-    const storedData = localStorage.getItem('data');
-    if (storedData) {
-      setResults(JSON.parse(storedData));
-    }
-  }, []);
-  
+  useEffect(()=>{
+    setResults((dayId==="all" ? sikshanidhi : sikshanidhi.filter(firm=>firm.date === days[dayId])).filter((item) =>
+    item.firmName.toLowerCase().includes(searchTerm.toLowerCase().trim())
+  ));
+  },[dayId, sikshanidhi, searchTerm]);
   
   const handleModalClose = () => {
     setCurrentDetails({});  
+    setNewDetails({});  
     setSearchTerm('');
   };
 
-  const saveNewFirm = (firmDetails) => {
-    const newData = [...results, firmDetails];
-    setResults(newData);
-    localStorage.setItem('data', JSON.stringify(newData));
+  const saveNewFirm = async (firmDetails) => {
+    let firm = allFirms.find(firm => firm.id === firmDetails.name);
+    if(firm){
+      await setDoc(doc(db,"sikshanidhi", firmDetails.name),{...firmDetails, name: firm.name, place:firm.place, date: Timestamp.fromDate(new Date())});
+    
+      await updateDoc(doc(db, "allFirms", firm.name), {
+        sikshanidhiPrevious : firmDetails.previous,
+        sikshanidhiCurrent : firmDetails.current,
+        sikshanidhiPayer : firmDetails.payer,
+        sikshanidhiMobile : firmDetails.mobile,
+        sikshanidhiReciever : firmDetails.reciever
+      })
+    }
+    else{
+      console.log("No firm found in all firms");
+      await setDoc(doc(db,"sikshanidhi", firmDetails.name),{...firmDetails, date: Timestamp.fromDate(new Date())});
+    
+      await setDoc(doc(db, "allFirms", firmDetails.name), {
+        name: firmDetails.name,
+        place: firmDetails.place,
+        sikshanidhiPrevious : firmDetails.previous,
+        sikshanidhiCurrent : firmDetails.current,
+        sikshanidhiPayer : firmDetails.payer,
+        sikshanidhiMobile : firmDetails.mobile,
+        sikshanidhiReciever : firmDetails.reciever,
+        phaadPrevious : 0,
+        phaadCurrent : 0,
+        phaadPayer : "",
+        phaadMobile : "",
+        phaadReciever : ""
+      })
+    }
     document.getElementById('newFirmClose').click();
   }
 
-  const saveUpdatedFirm = (firmDetails) => {
-    const newData = results.map(firm => firm.id === firmDetails.id ? firmDetails : firm);
-    setResults(newData);
-    localStorage.setItem('data', JSON.stringify(newData));
+  const saveUpdatedFirm = async () => {
+    let updatingSikshanidhiBody = {};
+    let updatingAllBody = {};
+    if(currentDetails.previous > 0){ 
+      updatingSikshanidhiBody = {...updatingSikshanidhiBody, previous: currentDetails.previous}
+      updatingAllBody = {...updatingAllBody, sikshanidhiPrevious: currentDetails}
+    }
+    if(currentDetails.current > 0){
+       updatingSikshanidhiBody = {...updatingSikshanidhiBody, current: currentDetails.current}
+       updatingAllBody = {...updatingAllBody, sikshanidhiCurrent: currentDetails.current}
+    }
+    if(currentDetails.payer){
+       updatingSikshanidhiBody = {...updatingSikshanidhiBody, payer: currentDetails.payer}
+       updatingAllBody = {...updatingAllBody, sikshanidhiPayer: currentDetails.payer}
+    }
+    if(currentDetails.mobile ){
+       updatingSikshanidhiBody = {...updatingSikshanidhiBody, mobile: currentDetails.mobile}
+       updatingAllBody = {...updatingAllBody, sikshanidhiMobile: currentDetails.mobile}
+    }
+    if(currentDetails.reciever){
+       updatingSikshanidhiBody = {...updatingSikshanidhiBody, reciever: currentDetails.reciever}
+       updatingAllBody = {...updatingAllBody, sikshanidhiReciever: currentDetails.reciever}
+    }
+
+    await updateDoc(doc(db, "sikshanidhi", currentDetails.name), updatingSikshanidhiBody);
+    await updateDoc(doc(db, "allFirms", currentDetails.name), updatingAllBody);
+
     document.getElementById('newFirmClose').click();
   }
 
   const deleteFirm = (firmDetails) => {
-    const newData = results.filter(firm=> firm.id !== firmDetails.id);
-    setResults(newData);
-    localStorage.setItem('data', JSON.stringify(newData));
+   
     document.getElementById('newFirmClose').click(); 
   }
   
@@ -64,24 +127,12 @@ const Sikshanidhi = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [results]);
+  }, [sikshanidhi]);
 
-  const handleChange = (event) => {
-    setSearchTerm(event.target.value);
-    debouncedSearch(event.target.value);
-  };
-
-  const debouncedSearch = debounce((searchTerm) => {
-    const filteredResults = data.filter((item) =>
-      item.firmName.toLowerCase().includes(searchTerm.toLowerCase().trim())
-    );
-    setResults(filteredResults);
-  }, 500);
-
-  const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(results?.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentItems = results.slice(startIndex, endIndex);
+  const currentItems = results?.slice(startIndex, endIndex);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -89,21 +140,26 @@ const Sikshanidhi = () => {
 
   const downloadTable = () => {
     const doc = new jsPDF();
-    doc.text("Collections 2023", 15, 12);
+    doc.text(`Sikshanidhi ${dayId}`, 15, 12);
     autoTable(doc, { html: '#fullDataTable' });
     doc.save('collections.pdf')
 }
 
   return (
     <div className="App d-flex flex-column min-vh-100">
-      <Navbar />
+     <Navbar />
       <main className="container mt-3 flex-fill">
-          <div className="d-flex justify-content-between mb-1">
-            <h2>Sikshanidhi</h2>
-            <input className="py-0 px-3 border rounded-4 border-opacity-50" type="text" placeholder="Search" onChange={handleChange} />
-            <button onClick={downloadTable} className="btn btn-outline-dark" title="Download Records PDF"><i class="bi bi-file-earmark-arrow-down-fill"></i></button>
+          <div className="d-flex justify-content-between mb-2">
+            <div className="header">
+              <span className="h2">Sikshanidhi</span>
+              <span className=" px-3 fs-6">
+                <Link to="/sikshanidhi">Sikshanidhi</Link> / <Link to={`/sikshanidhi/${dayId}`}>{dayId}</Link>
+              </span>
+            </div>
+            <input className="py-0 px-3 border rounded-4 border-opacity-50" type="text" placeholder="Search" value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} />
+           { results?.length > 0 ? <button onClick={downloadTable} className="btn btn-outline-dark" title="Download Records PDF"><i className="bi bi-file-earmark-arrow-down-fill"></i></button> : <button className="invisible pe-none"></button>}
           </div>
-          {results.length > 0 ? (
+          {results?.length > 0 ? (
             <table className="table table-bordered table-hover" id="collectionTable">
               <thead>
                 <tr>
@@ -118,17 +174,16 @@ const Sikshanidhi = () => {
               <tbody>
                 {currentItems.map((firm) => {
                   return (
-                    <tr role="button" key={firm.id}>
+                    <tr  key={firm.id}>
                       <td className="text-center border-3">{firm.date}</td>
-                      <td className="border-3">{firm.firmName}</td>
-                      <td className="text-center border-3">Fafadih</td>
+                      <td role="button" className="fw-bold border-3" data-bs-toggle="modal" data-bs-target="#updateDetails" onClick={()=> setCurrentDetails(firm)}>{firm.name}</td>
+                      <td className="text-center border-3">{firm.place}</td>
                       <td className="border-3 text-center border-3">
-                        {firm.previousYearAmount >0 ? firm.previousYearAmount : "-"}
+                        {firm.previous >0 ? firm.previous : "-"}
                       </td>
-                      <td className="text-center border-3">{firm.currentYearAmount >0 ? firm.currentYearAmount : "-"}</td>
-                      <td className="text-center border-3 d-flex gap-3 justify-content-center">
-                      <i class="bi bi-building-fill-gear" data-bs-toggle="modal" data-bs-target="#updateDetails" onClick={()=> setCurrentDetails(firm)} title="Update Firm Details"></i>
-                      <i class="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm)}></i>
+                      <td className="text-center border-3">{firm.current >0 ? firm.current : "-"}</td>
+                     <td className="text-center border-3 d-flex gap-3 justify-content-center">
+                      <i className="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm)}></i>
                       </td>
                     </tr>
                   );
@@ -143,14 +198,14 @@ const Sikshanidhi = () => {
                 className="btn btn-outline-success"
                 data-bs-toggle="modal"
                 data-bs-target="#addNew"
-                onClick={()=>setCurrentDetails({...currentDetails, firmName: searchTerm})}
+                onClick={()=>setNewDetails({...newDetails, name: searchTerm})}
               >
                 Add New Firm
               </button>
             </div>
           )}
 
-          {results.length > ITEMS_PER_PAGE && (
+          {results?.length > ITEMS_PER_PAGE && (
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -179,7 +234,7 @@ const Sikshanidhi = () => {
           </div>
         </div>
       </footer>
-      <div className="modal fade" id="updateDetails" tabindex="-1" aria-labelledby="updateDetailsLabel" aria-hidden="true">
+      <div className="modal fade" id="updateDetails" tabIndex="-1" aria-labelledby="updateDetailsLabel" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered modal-xl">
           <div className="modal-content">
             <div className="modal-header">
@@ -188,27 +243,45 @@ const Sikshanidhi = () => {
             </div>
             <div className="modal-body">
               <div className="mb-3 row">
-                <label for="firmName" className="col-sm-2 col-form-label">Firm Name</label>
+                <label htmlFor="name" className="col-sm-2 col-form-label">Firm Name</label>
                 <div className="col-sm-10">
-                  <input type="text" className="form-control" id="firmName" value={currentDetails?.firmName} onChange={e=>setCurrentDetails({...currentDetails, firmName: e.target.value})}/>
+                  <input type="text" className="form-control" id="name" value={currentDetails?.name} onChange={e=>setCurrentDetails({...currentDetails, name: e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="previousYearAmount" className="col-sm-2 col-form-label">Previous (2022)</label>
+                <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
                 <div className="col-sm-10">
-                  <input type="number" min="0" placeholder="-" className="form-control" id="previousYearAmount" value={currentDetails?.previousYearAmount} onChange={e=>setCurrentDetails({...currentDetails, previousYearAmount: Number(e.target.value)})}/>
+                  <input type="text" className="form-control" id="place" value={currentDetails?.place} onChange={e=>setCurrentDetails({...currentDetails, place: e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="currentYearAmount" className="col-sm-2 col-form-label">Current (2023)</label>
+                <label htmlFor="previous" className="col-sm-2 col-form-label">Previous (2022)</label>
                 <div className="col-sm-10">
-                  <input type="number" min="0" placeholder="-" className="form-control" id="currentYearAmount" value={currentDetails?.currentYearAmount} onChange={e=>setCurrentDetails({...currentDetails, currentYearAmount: Number(e.target.value)})}/>
+                  <input type="number" min="0" placeholder="-" className="form-control" id="previous" value={currentDetails?.previous} onChange={e=>setCurrentDetails({...currentDetails, previous: Number(e.target.value)})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="sikshaNidhiAmount" className="col-sm-2 col-form-label">Siksha Nidhi</label>
+                <label htmlFor="current" className="col-sm-2 col-form-label">Current (2023)</label>
                 <div className="col-sm-10">
-                  <input type="number" min="0" placeholder="-" className="form-control" id="sikshaNidhiAmount" value={currentDetails?.sikshaNidhiAmount} onChange={e=>setCurrentDetails({...currentDetails, sikshaNidhiAmount: Number(e.target.value)})}/>
+                  <input type="number" min="0" placeholder="-" className="form-control" id="current" value={currentDetails?.current} onChange={e=>setCurrentDetails({...currentDetails, current: Number(e.target.value)})}/>
+                </div>
+              </div>
+              <div className="mb-3 row">
+                <label htmlFor="payerName" className="col-sm-2 col-form-label">Haste (Payer)</label>
+                <div className="col-sm-10">
+                  <input type="text" placeholder="-" className="form-control" id="payerName" value={currentDetails?.payer} onChange={e=>setCurrentDetails({...currentDetails, payer: e.target.value})}/>
+                </div>
+              </div>
+              <div className="mb-3 row">
+                <label htmlFor="payerNumber" className="col-sm-2 col-form-label">Mobile Number</label>
+                <div className="col-sm-10">
+                  <input type="text" placeholder="-" className="form-control" id="payerNumber" value={currentDetails?.mobile} onChange={e=>setCurrentDetails({...currentDetails, mobile:  e.target.value})}/>
+                </div>
+              </div>
+              <div className="mb-3 row">
+                <label htmlFor="receiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
+                <div className="col-sm-10">
+                  <input type="text" placeholder="-" className="form-control" id="receiver" value={currentDetails?.receiver} onChange={e=>setCurrentDetails({...currentDetails, receiver: e.target.value})}/>
                 </div>
               </div>
             </div>
@@ -219,7 +292,7 @@ const Sikshanidhi = () => {
           </div>
         </div>
       </div>
-      <div className="modal fade" id="addNew" tabindex="-1" aria-labelledby="addNewLabel" aria-hidden="true">
+      <div className="modal fade" id="addNew" tabIndex="-1" aria-labelledby="addNewLabel" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered modal-xl">
           <div className="modal-content">
             <div className="modal-header">
@@ -228,33 +301,51 @@ const Sikshanidhi = () => {
             </div>
             <div className="modal-body">
               <div className="mb-3 row">
-                <label for="firmName" className="col-sm-2 col-form-label">Firm Name</label>
+                <label htmlFor="firmName" className="col-sm-2 col-form-label">Firm Name</label>
                 <div className="col-sm-10">
-                  <input type="text" className="form-control" id="firmName" placeholder="Firm Name"  value={currentDetails?.firmName} onChange={e=>setCurrentDetails({...currentDetails, firmName: e.target.value})}/>
+                  <input type="text" className="form-control" id="firmName" placeholder="Firm Name"  value={newDetails?.name} onChange={e=>setNewDetails({...newDetails, name: e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="inputPassword" className="col-sm-2 col-form-label">Previous (2022)</label>
+                <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
                 <div className="col-sm-10">
-                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" onChange={e=>setCurrentDetails({...currentDetails, previousYearAmount: Number(e.target.value)})}/>
+                  <input type="text" className="form-control" id="place" value={newDetails?.place} onChange={e=>setNewDetails({...newDetails, place: e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="inputPassword" className="col-sm-2 col-form-label">Current (2023)</label>
+                <label htmlFor="inputPassword" className="col-sm-2 col-form-label">Previous (2022)</label>
                 <div className="col-sm-10">
-                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" onChange={e=>setCurrentDetails({...currentDetails, currentYearAmount: Number(e.target.value)})}/>
+                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" onChange={e=>setNewDetails({...newDetails, previous: Number(e.target.value)})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label for="inputPassword" className="col-sm-2 col-form-label">Siksha Nidhi</label>
+                <label htmlFor="inputPassword" className="col-sm-2 col-form-label">Current (2023)</label>
                 <div className="col-sm-10">
-                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" onChange={e=>setCurrentDetails({...currentDetails, sikshaNidhiAmount: Number(e.target.value)})}/>
+                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" onChange={e=>setNewDetails({...newDetails, current: Number(e.target.value)})}/>
+                </div>
+              </div>
+              <div className="mb-3 row">
+                <label htmlFor="payerName" className="col-sm-2 col-form-label">Haste (Payer)</label>
+                <div className="col-sm-10">
+                  <input type="text" placeholder="-" className="form-control" id="payerName" value={newDetails?.payer} onChange={e=>setNewDetails({...newDetails, payer: e.target.value})}/>
+                </div>
+              </div>
+              <div className="mb-3 row">
+                <label htmlFor="payerNumber" className="col-sm-2 col-form-label">Mobile Number</label>
+                <div className="col-sm-10">
+                  <input type="text" placeholder="-" className="form-control" id="payerNumber" value={newDetails?.mobile} onChange={e=>setNewDetails({...newDetails, mobile:  e.target.value})}/>
+                </div>
+              </div>
+              <div className="mb-3 row">
+                <label htmlFor="receiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
+                <div className="col-sm-10">
+                  <input type="text" placeholder="-" className="form-control" id="receiver" value={newDetails?.receiver} onChange={e=>setNewDetails({...newDetails, receiver: e.target.value})}/>
                 </div>
               </div>
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary" onClick={()=>saveNewFirm(currentDetails)}>Add Firm</button>
+              <button type="button" className="btn btn-primary" onClick={()=>saveNewFirm(newDetails)}>Add Firm</button>
             </div>
           </div>
         </div>
@@ -265,24 +356,17 @@ const Sikshanidhi = () => {
             <th className="col-6 border-3">Firm Name</th>
             <th className="text-center border-3">Prev (2022)</th>
             <th className="text-center border-3">Curr (2023)</th>
-            <th className="text-center border-3">Siksha Nidhi</th>
-            <th className="text-center border-3">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {results.map((firm) => {
+          {currentItems?.map((firm) => {
             return (
               <tr role="button" key={firm.id}>
-                <td className="border-3">{firm.firmName}</td>
+                <td className="border-3">{firm.name}</td>
                 <td className="border-3 text-center border-3">
-                  {firm.previousYearAmount >0 ? firm.previousYearAmount : "-"}
+                  {firm.previous >0 ? firm.previous : "-"}
                 </td>
-                <td className="text-center border-3">{firm.currentYearAmount >0 ? firm.currentYearAmount : "-"}</td>
-                <td className="text-center border-3">{firm.sikshaNidhiAmount >0 ? firm.sikshaNidhiAmount : "-"}</td>
-                <td className="text-center border-3 d-flex gap-3 justify-content-center">
-                <i class="bi bi-building-fill-gear"></i>
-                <i class="bi bi-trash3-fill"></i>
-                </td>
+                <td className="text-center border-3">{firm.current >0 ? firm.current : "-"}</td>
               </tr>
             );
           })}
