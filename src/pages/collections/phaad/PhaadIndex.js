@@ -16,6 +16,19 @@ const daysIndex = {
     "23/10/2023" : 9
 }
 
+const days = {
+    "day-1" : new Date("10/15/2023").toLocaleDateString("en-GB"),
+    "day-2" : new Date("10/16/2023").toLocaleDateString("en-GB"),
+    "day-3" : new Date("10/17/2023").toLocaleDateString("en-GB"),
+    "day-4" : new Date("10/18/2023").toLocaleDateString("en-GB"),
+    "day-5" : new Date("10/19/2023").toLocaleDateString("en-GB"),
+    "day-6" : new Date("10/20/2023").toLocaleDateString("en-GB"),
+    "day-7" : new Date("10/21/2023").toLocaleDateString("en-GB"),
+    "day-8" : new Date("10/22/2023").toLocaleDateString("en-GB"),
+    "day-9" : new Date("10/23/2023").toLocaleDateString("en-GB"),
+  }
+  
+
 const PhaadIndex = () => {
     const {dataState: {phaad}} = useData();
     const [day, setDay] = useState(0);
@@ -26,11 +39,12 @@ const PhaadIndex = () => {
     },[phaad]);
 
     for(let i=1; i<=day; i++) {
+        let total = (phaad.filter(firm=>firm.date === days[`day-${i}`])).reduce((acc,curr)=>acc+curr.current,0);
         elements.push(
             <div className="day-one d-grid mb-2 mx-5" key={i}>
                 <Link to={`/phaad/day-${i}`} className="btn btn-outline-dark d-flex">
                     <span className="me-auto">Day {i}</span> 
-                    <span className="me-3">Total</span>
+                    <span className="me-3">Total - {total}</span>
                 </Link>
             </div>
         );
@@ -45,7 +59,7 @@ const PhaadIndex = () => {
             </div>
             <div className="day-index">
                 <div className="all d-grid my-2 mx-5">
-                    <Link to="/phaad/all" className="btn btn-outline-dark d-flex"><span className="me-auto">All</span> <span className="me-3">Total</span></Link>
+                    <Link to="/phaad/all" className="btn btn-outline-dark d-flex"><span className="me-auto">All</span> <span className="me-3">Total - {phaad.reduce((acc,curr)=>acc+curr.current,0)}</span></Link>
                 </div>
                 {
                     elements.map(element => element)

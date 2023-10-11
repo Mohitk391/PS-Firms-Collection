@@ -34,7 +34,7 @@ const Datar = () => {
 
   useEffect(()=>{
     setResults((dayId==="all" ? datar : datar.filter(firm=>firm.date === days[dayId])).filter((item) =>
-    item.firmName.toLowerCase().includes(searchTerm.toLowerCase().trim())
+    item.name.toLowerCase().includes(searchTerm.toLowerCase().trim())
   ));
   },[dayId, datar, searchTerm]);
   
@@ -245,7 +245,7 @@ const Datar = () => {
               <div className="mb-3 row">
                 <label htmlFor="receiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
                 <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="receiver" value={currentDetails?.receiver} onChange={e=>setCurrentDetails({...currentDetails, receiver: e.target.value})}/>
+                  <input type="text" placeholder="-" className="form-control" id="receiver" value={currentDetails?.reciever} onChange={e=>setCurrentDetails({...currentDetails, reciever: e.target.value})}/>
                 </div>
               </div>
             </div>
@@ -303,7 +303,7 @@ const Datar = () => {
               <div className="mb-3 row">
                 <label htmlFor="receiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
                 <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="receiver" value={newDetails?.receiver} onChange={e=>setNewDetails({...newDetails, receiver: e.target.value})}/>
+                  <input type="text" placeholder="-" className="form-control" id="receiver" value={newDetails?.reciever} onChange={e=>setNewDetails({...newDetails, reciever: e.target.value})}/>
                 </div>
               </div>
             </div>
@@ -314,8 +314,6 @@ const Datar = () => {
           </div>
         </div>
       </div>
-      <table className="table table-bordered" id="fullDataTable" style={{display: 'none'}}>
-      </table>
       <table className="table table-bordered" id="fullDataTable" style={{display: 'none'}}>
               <thead>
                 <tr>

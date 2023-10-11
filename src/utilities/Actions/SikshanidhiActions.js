@@ -5,8 +5,7 @@ import { Timestamp, collection, onSnapshot, query } from "firebase/firestore";
 export function readSikshanidhi(q, state, dispatch){
     return onSnapshot(q, (queryResult)=>{
         queryResult.docs.map(doc => {
-            const dayId = doc.data().name;
-            return onSnapshot(query(collection(db, `sikshanidhi/${dayId}/firms`)),
+            return onSnapshot(query(collection(db, `sikshanidhi`)),
             (snapshot)=>{
                 let collections = state.sikshanidhi;
                 let action = null;

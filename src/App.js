@@ -10,6 +10,7 @@ import Homepage from "./pages/homepage/Homepage";
 import { RequiresAuth } from "./utilities/Auth/RequiresAuth";
 import PhaadIndex from "./pages/collections/phaad/PhaadIndex";
 import SikshanidhiIndex from "./pages/collections/sikshanidhi/SikshanidhiIndex";
+import DatarIndex from "./pages/collections/datar/DatarIndex";
 
 function App() {
   useEffect(()=>{
@@ -45,9 +46,11 @@ function App() {
 
         <Route path="/datar" element={
           <RequiresAuth>
-            <Datar />
+            <DatarIndex />
           </RequiresAuth>
         } />
+        <Route path="datar/:dayId" element={<Datar />} />
+
         <Route path="/login" element={<Login />} />
       </Routes>
     </div>

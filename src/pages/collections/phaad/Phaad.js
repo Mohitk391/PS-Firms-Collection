@@ -175,7 +175,7 @@ const Phaad = () => {
                   return (
                     <tr  key={firm.id}>
                       <td className="text-center border-3">{firm.date}</td>
-                      <td role="button" className="fw-bold border-3" data-bs-toggle="modal" data-bs-target="#updateDetails" onClick={()=> setCurrentDetails({...currentDetails, name: firm.name})}>{firm.name}</td>
+                      <td role="button" className="fw-bold border-3" data-bs-toggle="modal" data-bs-target="#updateDetails" onClick={()=> setCurrentDetails(firm)}>{firm.name}</td>
                       <td className="text-center border-3">{firm.place}</td>
                       <td className="border-3 text-center border-3">
                         {firm.previous >0 ? firm.previous : "-"}
@@ -280,7 +280,7 @@ const Phaad = () => {
               <div className="mb-3 row">
                 <label htmlFor="receiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
                 <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="receiver" value={currentDetails?.receiver} onChange={e=>setCurrentDetails({...currentDetails, receiver: e.target.value})}/>
+                  <input type="text" placeholder="-" className="form-control" id="receiver" value={currentDetails?.reciever} onChange={e=>setCurrentDetails({...currentDetails, reciever: e.target.value})}/>
                 </div>
               </div>
             </div>

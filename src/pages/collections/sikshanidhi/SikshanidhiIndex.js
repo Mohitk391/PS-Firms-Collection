@@ -3,7 +3,6 @@ import Navbar from "../../../components/Navbar/Navbar";
 import UmiyaMataji from "../../../assets/umiya-mataji.png";
 import { useData } from "../../../contexts/DataContext";
 import { useEffect, useState } from "react";
-import { Timestamp } from "firebase/firestore";
 
 
 const daysIndex = {
@@ -18,6 +17,18 @@ const daysIndex = {
     "23/10/2023" : 9
 }
 
+const days = {
+    "day-1" : new Date("10/15/2023").toLocaleDateString("en-GB"),
+    "day-2" : new Date("10/16/2023").toLocaleDateString("en-GB"),
+    "day-3" : new Date("10/17/2023").toLocaleDateString("en-GB"),
+    "day-4" : new Date("10/18/2023").toLocaleDateString("en-GB"),
+    "day-5" : new Date("10/19/2023").toLocaleDateString("en-GB"),
+    "day-6" : new Date("10/20/2023").toLocaleDateString("en-GB"),
+    "day-7" : new Date("10/21/2023").toLocaleDateString("en-GB"),
+    "day-8" : new Date("10/22/2023").toLocaleDateString("en-GB"),
+    "day-9" : new Date("10/23/2023").toLocaleDateString("en-GB"),
+  }
+
 const SikshanidhiIndex = () => {
     
     const {dataState: {sikshanidhi}} = useData();
@@ -25,15 +36,16 @@ const SikshanidhiIndex = () => {
     let elements = [];
 
     useEffect(()=>{
-        setDay(daysIndex[(new Timestamp(sikshanidhi[sikshanidhi.length-1]?.created_at.seconds, sikshanidhi[sikshanidhi.length-1]?.created_at.nanoseconds)).toDate().toLocaleDateString('en-GB')]);
+        setDay(daysIndex[sikshanidhi[sikshanidhi?.length-1]?.date]);
     },[sikshanidhi]);
 
     for(let i=1; i<=day; i++) {
+        let total = (sikshanidhi.filter(firm=>firm.date === days[`day-${i}`])).reduce((acc,curr)=>acc+curr.current,0);
         elements.push(
             <div className="day-one d-grid mb-2 mx-5" key={i}>
                 <Link to={`/sikshanidhi/day-${i}`} className="btn btn-outline-dark d-flex">
                     <span className="me-auto">Day {i}</span> 
-                    <span className="me-3">Total</span>
+                    <span className="me-3">Total - {total}</span>
                 </Link>
             </div>
         );
@@ -49,7 +61,7 @@ const SikshanidhiIndex = () => {
             </div>
             <div className="day-index">
                 <div className="all d-grid my-2 mx-5">
-                    <Link to="/sikshanidhi/all" className="btn btn-outline-dark d-flex"><span className="me-auto">All</span> <span className="me-3">Total</span></Link>
+                    <Link to="/sikshanidhi/all" className="btn btn-outline-dark d-flex"><span className="me-auto">All</span> <span className="me-3">Total - {sikshanidhi.reduce((acc,curr)=>acc+curr.current,0)}</span></Link>
                 </div>
                 {
                     elements.map(element => element)

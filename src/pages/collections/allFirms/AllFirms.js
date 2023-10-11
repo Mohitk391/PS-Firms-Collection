@@ -8,7 +8,7 @@ import Navbar from "../../../components/Navbar/Navbar";
 import { useData } from "../../../contexts/DataContext";
 import { Link } from "react-router-dom";
 import { Loader } from "../../../utilities/Loader/Loader"
-import { doc, setDoc, updateDoc } from "firebase/firestore";
+import { Timestamp, doc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase-config";
 
 const ITEMS_PER_PAGE = 10;
@@ -19,7 +19,7 @@ const AllFirms = () => {
   const [results, setResults] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({});
-  const [newDetails, setNewDetails] = useState({});
+  const [newDetails, setNewDetails] = useState({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: ""});
   const {dataState : {allFirms}} = useData();  
 
   useEffect(()=> {
@@ -36,66 +36,111 @@ const AllFirms = () => {
     },[searchTerm, allFirms]);
   
   const handleModalClose = () => {
-    setCurrentDetails({});  
-    setNewDetails({});  
-    setSearchTerm('');
+    setCurrentDetails({}); 
   };
 
 // While saving any new firm with either of only phaad, only sikshanidhi or both, add today's date as the respective collection's date . For example for only phaad add today's date as phaadDate.
 // For only phaad or only sikshanidhi, make sure to add blank values for the other collection. For example,  for only phaad, add all sikshanidhi values as blank(apprpriately) and vice-versa.
 
-  const saveNewFirm = async (firmDetails) => {
-    await setDoc(doc(db, "allFirms", firmDetails.name), {
-      name: firmDetails.name,
-      place: firmDetails.place,
-      phaadPrevious : firmDetails.phaadPrevious,
-      phaadCurrent : firmDetails.phaadCurrent,
-      phaadPayer : firmDetails.phaadPayer,
-      phaadMobile : firmDetails.phaadMobile,
-      phaadReciever : firmDetails.phaadReciever,
-      sikshanidhiPrevious : firmDetails.sikshanidhiPrevious,
-      sikshanidhiCurrent : firmDetails.sikshanidhiCurrent,
-      sikshanidhiPayer : firmDetails.sikshanidhiPayer,
-      sikshanidhiMobile : firmDetails.sikshanidhiMobile,
-      sikshanidhiReciever : firmDetails.sikshanidhiReciever
+  const saveNewFirm = async () => {
+    console.log(newDetails);
+    console.log(searchTerm);
+    await setDoc(doc(db, "allFirms", newDetails.name), {
+      name: newDetails.name,
+      place: newDetails.place,
+      phaadPrevious : newDetails.phaadPrevious,
+      phaadCurrent : newDetails.phaadCurrent,
+      phaadPayer : newDetails.phaadPayer,
+      phaadMobile : newDetails.phaadMobile,
+      phaadReciever : newDetails.phaadReciever,
+      sikshanidhiPrevious : newDetails.sikshanidhiPrevious,
+      sikshanidhiCurrent : newDetails.sikshanidhiCurrent,
+      sikshanidhiPayer : newDetails.sikshanidhiPayer,
+      sikshanidhiMobile : newDetails.sikshanidhiMobile,
+      sikshanidhiReciever : newDetails.sikshanidhiReciever
     })
+
+    await setDoc(doc(db, "phaad", newDetails.name), {
+      name: newDetails.name,
+      place: newDetails.place,
+      previous : newDetails.phaadPrevious,
+      current : newDetails.phaadCurrent,
+      payer : newDetails.phaadPayer,
+      mobile : newDetails.phaadMobile,
+      reciever : newDetails.phaadReciever,
+      date : Timestamp.fromDate(new Date())
+    })
+
+    await setDoc(doc(db, "sikshanidhi", newDetails.name), {
+      name: newDetails.name,
+      place: newDetails.place,
+      previous : newDetails.sikshanidhiPrevious,
+      current : newDetails.sikshanidhiCurrent,
+      payer : newDetails.sikshanidhiPayer,
+      mobile : newDetails.sikshanidhiMobile,
+      reciever : newDetails.sikshanidhiReciever,
+      date: Timestamp.fromDate(new Date())
+    })
+
   }
 
-  const saveNewFirmPhaad = async (firmDetails) => {
-    await setDoc(doc(db, "allFirms", firmDetails.name), {
-      name: firmDetails.name,
-      place: firmDetails.place,
-      phaadPrevious : firmDetails.phaadPrevious,
-      phaadCurrent : firmDetails.phaadCurrent,
-      phaadPayer : firmDetails.phaadPayer,
-      phaadMobile : firmDetails.phaadMobile,
-      phaadReciever : firmDetails.phaadReciever,
+  const saveNewFirmPhaad = async () => {
+    await setDoc(doc(db, "allFirms", newDetails.name), {
+      name: newDetails.name,
+      place: newDetails.place,
+      phaadPrevious : newDetails.phaadPrevious,
+      phaadCurrent : newDetails.phaadCurrent,
+      phaadPayer : newDetails.phaadPayer,
+      phaadMobile : newDetails.phaadMobile,
+      phaadReciever : newDetails.phaadReciever,
       sikshanidhiPrevious : 0,
       sikshanidhiCurrent : 0,
       sikshanidhiPayer : "",
       sikshanidhiMobile : "",
       sikshanidhiReciever : ""
     })
+
+    await setDoc(doc(db, "phaad", newDetails.name), {
+      name: newDetails.name,
+      place: newDetails.place,
+      previous : newDetails.phaadPrevious,
+      current : newDetails.phaadCurrent,
+      payer : newDetails.phaadPayer,
+      mobile : newDetails.phaadMobile,
+      reciever : newDetails.phaadReciever,
+      date : Timestamp.fromDate(new Date())
+    })
   }
 
-  const saveNewFirmSikshanidhi = async (firmDetails) => {
-    await setDoc(doc(db, "allFirms", firmDetails.name), {
-      name: firmDetails.name,
-      place: firmDetails.place,
+  const saveNewFirmSikshanidhi = async () => {
+    await setDoc(doc(db, "allFirms", newDetails.name), {
+      name: newDetails.name,
+      place: newDetails.place,
       phaadPrevious : 0,
       phaadCurrent : 0,
       phaadPayer : "",
       phaadMobile : "",
       phaadReciever : "",
-      sikshanidhiPrevious : firmDetails.sikshanidhiPrevious,
-      sikshanidhiCurrent : firmDetails.sikshanidhiCurrent,
-      sikshanidhiPayer : firmDetails.sikshanidhiPayer,
-      sikshanidhiMobile : firmDetails.sikshanidhiMobile,
-      sikshanidhiReciever : firmDetails.sikshanidhiReciever
-    })
+      sikshanidhiPrevious : newDetails.sikshanidhiPrevious,
+      sikshanidhiCurrent : newDetails.sikshanidhiCurrent,
+      sikshanidhiPayer : newDetails.sikshanidhiPayer,
+      sikshanidhiMobile : newDetails.sikshanidhiMobile,
+      sikshanidhiReciever : newDetails.sikshanidhiReciever
+    });
+
+    await setDoc(doc(db, "sikshanidhi", newDetails.name), {
+      name: newDetails.name,
+      place: newDetails.place,
+      previous : newDetails.sikshanidhiPrevious,
+      current : newDetails.sikshanidhiCurrent,
+      payer : newDetails.sikshanidhiPayer,
+      mobile : newDetails.sikshanidhiMobile,
+      reciever : newDetails.sikshanidhiReciever,
+      date : Timestamp.fromDate(new Date())
+    });
   }
 
-  const saveUpdatedFirm = async (firmDetails) => {
+  const saveUpdatedFirm = async () => {
     let updatingAllBody = {};
     let updatingPhaadBody = {};
     let updatingSikshanidhiBody = {};
@@ -142,8 +187,9 @@ const AllFirms = () => {
 
     await updateDoc(doc(db,"allFirms", currentDetails.name), updatingAllBody);
     if(updatingPhaadBody)
-      await updateDoc(doc(db,"allFirms", currentDetails.name), updatingAllBody);
-    
+      await updateDoc(doc(db,"phaad", currentDetails.name), updatingPhaadBody);
+    if(updatingSikshanidhiBody)
+      await updateDoc(doc(db, "sikshanidhi", currentDetails.name), updatingSikshanidhiBody);
 
   }
 
@@ -516,7 +562,7 @@ const AllFirms = () => {
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary" onClick={()=>saveNewFirm(newDetails)}>Add Firm</button>
+              <button type="button" className="btn btn-primary" onClick={()=>saveNewFirm()}>Add Firm</button>
             </div>
           </div>
         </div>

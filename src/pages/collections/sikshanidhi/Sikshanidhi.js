@@ -34,7 +34,7 @@ const Sikshanidhi = () => {
 
   useEffect(()=>{
     setResults((dayId==="all" ? sikshanidhi : sikshanidhi.filter(firm=>firm.date === days[dayId])).filter((item) =>
-    item.firmName.toLowerCase().includes(searchTerm.toLowerCase().trim())
+    item.name.toLowerCase().includes(searchTerm.toLowerCase().trim())
   ));
   },[dayId, sikshanidhi, searchTerm]);
   
@@ -281,7 +281,7 @@ const Sikshanidhi = () => {
               <div className="mb-3 row">
                 <label htmlFor="receiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
                 <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="receiver" value={currentDetails?.receiver} onChange={e=>setCurrentDetails({...currentDetails, receiver: e.target.value})}/>
+                  <input type="text" placeholder="-" className="form-control" id="receiver" value={currentDetails?.reciever} onChange={e=>setCurrentDetails({...currentDetails, reciever: e.target.value})}/>
                 </div>
               </div>
             </div>
@@ -339,7 +339,7 @@ const Sikshanidhi = () => {
               <div className="mb-3 row">
                 <label htmlFor="receiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
                 <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="receiver" value={newDetails?.receiver} onChange={e=>setNewDetails({...newDetails, receiver: e.target.value})}/>
+                  <input type="text" placeholder="-" className="form-control" id="receiver" value={newDetails?.reciever} onChange={e=>setNewDetails({...newDetails, reciever: e.target.value})}/>
                 </div>
               </div>
             </div>
