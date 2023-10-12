@@ -150,9 +150,9 @@ const Phaad = () => {
       <main className="container mt-3 flex-fill">
           <div className="d-flex justify-content-between mb-2">
             <div className="header">
-              <span className="h2">Phaad</span>
+              <span className="h2">Phaado</span>
               <span className=" px-3 fs-6">
-                <Link to="/phaad">Phaad</Link> / <Link to={`/phaad/${dayId}`}>{dayId}</Link>
+                <Link to="/phaad">Phaado</Link> / <Link to={`/phaad/${dayId}`}>{dayId}</Link>
               </span>
             </div>
             <input className="py-0 px-3 border rounded-4 border-opacity-50" type="text" placeholder="Search" value={searchTerm} onChange={event=>setSearchTerm(event.target.value)} />
@@ -248,10 +248,17 @@ const Phaad = () => {
                 </div>
               </div>
               <div className="mb-3 row">
-                <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
-                <div className="col-sm-10">
-                  <input type="text" className="form-control" id="place" value={currentDetails?.place} onChange={e=>setCurrentDetails({...currentDetails, place: e.target.value})}/>
-                </div>
+                  <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
+                  <div className="col-sm-10">
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Bhanpuri" checked={currentDetails?.place === "Bhanpuri"} onChange={e=>setCurrentDetails({...currentDetails, place: "Bhanpuri"})}/>
+                      <label className="form-check-label" htmlFor="Bhanpuri">Bhanpuri</label>
+                    </div>
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Fafadih" checked={currentDetails?.place === "Fafadih"} onChange={e=>setCurrentDetails({...currentDetails, place: "Fafadih"})}/>
+                      <label className="form-check-label" htmlFor="Fafadih">Fafadih</label>
+                    </div>
+                  </div>
               </div>
               <div className="mb-3 row">
                 <label htmlFor="previous" className="col-sm-2 col-form-label">Previous (2022)</label>
@@ -306,11 +313,18 @@ const Phaad = () => {
                 </div>
               </div>
               <div className="mb-3 row">
-                <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
-                <div className="col-sm-10">
-                  <input type="text" className="form-control" id="place" value={newDetails?.place} onChange={e=>setNewDetails({...newDetails, place: e.target.value})}/>
+                  <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
+                  <div className="col-sm-10">
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Bhanpuri" value="option1" onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
+                      <label className="form-check-label" htmlFor="Bhanpuri">Bhanpuri</label>
+                    </div>
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Fafadih" value="option2" onChange={e=>setNewDetails({...newDetails, place: "Fafadih"})}/>
+                      <label className="form-check-label" htmlFor="Fafadih">Fafadih</label>
+                    </div>
+                  </div>
                 </div>
-              </div>
               <div className="mb-3 row">
                 <label htmlFor="inputPassword" className="col-sm-2 col-form-label">Previous (2022)</label>
                 <div className="col-sm-10">
@@ -338,7 +352,7 @@ const Phaad = () => {
               <div className="mb-3 row">
                 <label htmlFor="receiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
                 <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="receiver" value={newDetails?.receiver} onChange={e=>setNewDetails({...newDetails, receiver: e.target.value})}/>
+                  <input type="text" placeholder="-" className="form-control" id="receiver" value={newDetails?.reciever} onChange={e=>setNewDetails({...newDetails, reciever: e.target.value})}/>
                 </div>
               </div>
             </div>
@@ -358,7 +372,7 @@ const Phaad = () => {
           </tr>
         </thead>
         <tbody>
-          {currentItems?.map((firm) => {
+          {results.map((firm) => {
             return (
               <tr role="button" key={firm.id}>
                 <td className="border-3">{firm.name}</td>

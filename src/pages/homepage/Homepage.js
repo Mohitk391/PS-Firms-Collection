@@ -34,7 +34,7 @@ const Homepage = () => {
               <div class="col-md-4 col-xl-3" onClick={()=>navigate("/phaad")} role="button">
                   <div class="card bg-c-yellow text-white">
                       <div class="card-block">
-                          <h4 class="m-b-20">Phaad</h4>
+                          <h4 class="m-b-20">Phaado</h4>
                           <p class="m-b-0">Phaad Collected<span class="f-right">{phaad.reduce((acc,curr)=>acc+curr.current,0)}</span></p>
                       </div>
                   </div>
@@ -45,6 +45,22 @@ const Homepage = () => {
                       <div class="card-block">
                           <h4 class="m-b-20">Sikshanidhi</h4>
                           <p class="m-b-0">Sikshanidhi Collected<span class="f-right">{sikshanidhi.reduce((acc,curr)=>acc+curr.current,0)}</span></p>
+                      </div>
+                  </div>
+              </div>
+              <div class="col-md-4 col-xl-3" onClick={()=>navigate("/sikshanidhi")} role="button">
+                  <div class="card bg-c-brown text-white">
+                      <div class="card-block">
+                          <h4 class="m-b-20">Samiti</h4>
+                          <p class="m-b-0">Samiti Count<span class="f-right">{sikshanidhi.reduce((acc,curr)=>acc+curr.current,0)}</span></p>
+                      </div>
+                  </div>
+              </div>
+              <div class="col-md-4 col-xl-3" onClick={()=>navigate("/sikshanidhi")} role="button">
+                  <div class="card bg-c-gray text-white">
+                      <div class="card-block">
+                          <h4 class="m-b-20">Kharcha</h4>
+                          <p class="m-b-0">Total Expense<span class="f-right">{sikshanidhi.reduce((acc,curr)=>acc+curr.current,0)}</span></p>
                       </div>
                   </div>
               </div>

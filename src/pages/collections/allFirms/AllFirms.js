@@ -8,7 +8,7 @@ import Navbar from "../../../components/Navbar/Navbar";
 import { useData } from "../../../contexts/DataContext";
 import { Link } from "react-router-dom";
 import { Loader } from "../../../utilities/Loader/Loader"
-import { Timestamp, doc, setDoc, updateDoc } from "firebase/firestore";
+import { Timestamp, deleteDoc, doc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase-config";
 
 const ITEMS_PER_PAGE = 10;
@@ -20,7 +20,9 @@ const AllFirms = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({});
   const [newDetails, setNewDetails] = useState({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: ""});
-  const {dataState : {allFirms}} = useData();  
+  const {dataState : {allFirms, phaad, sikshanidhi}} = useData();  
+
+  console.log(searchTerm);
 
   useEffect(()=> {
     if(allFirms) 
@@ -80,8 +82,10 @@ const AllFirms = () => {
       mobile : newDetails.sikshanidhiMobile,
       reciever : newDetails.sikshanidhiReciever,
       date: Timestamp.fromDate(new Date())
-    })
+    });
 
+    setNewDetails({});
+    setSearchTerm('');
   }
 
   const saveNewFirmPhaad = async () => {
@@ -109,7 +113,10 @@ const AllFirms = () => {
       mobile : newDetails.phaadMobile,
       reciever : newDetails.phaadReciever,
       date : Timestamp.fromDate(new Date())
-    })
+    });
+
+    setNewDetails({});
+    setSearchTerm('');
   }
 
   const saveNewFirmSikshanidhi = async () => {
@@ -138,6 +145,9 @@ const AllFirms = () => {
       reciever : newDetails.sikshanidhiReciever,
       date : Timestamp.fromDate(new Date())
     });
+
+    setNewDetails({});
+    setSearchTerm('');
   }
 
   const saveUpdatedFirm = async () => {
@@ -193,8 +203,12 @@ const AllFirms = () => {
 
   }
 
-  const deleteFirm = (firmDetails) => {
-
+  const deleteFirm = async (firmDetails) => {
+    await deleteDoc(doc(db, "allFirms", firmDetails.name));
+    if(phaad.find(firm=>firm.name===firmDetails.name))
+      await deleteDoc(doc(db, "phaad", firmDetails.name));
+    if(sikshanidhi.find(firm=>firm.name===firmDetails.name))
+      await deleteDoc(doc(db, "sikshanidhi", firmDetails.name));
   }
   
   useEffect(() => {
@@ -234,9 +248,9 @@ const AllFirms = () => {
 
   const downloadTable = () => {
     const doc = new jsPDF();
-    doc.text("Collections 2023", 15, 12);
+    doc.text(`All Firms Details`, 15, 12);
     autoTable(doc, { html: '#fullDataTable' });
-    doc.save('collections.pdf')
+    doc.save('All Firms Details.pdf')
 }
 
   return (
@@ -248,7 +262,7 @@ const AllFirms = () => {
               <span className="h2">All Firms</span>
             </div>
             <input className="py-0 px-3 border rounded-4 border-opacity-50" type="text" placeholder="Search" value={searchTerm} onChange={event=>setSearchTerm(event.target.value)} />
-           { allFirms.length > 0 ? <button onClick={downloadTable} className="btn btn-outline-dark" title="Download Records PDF"><i className="bi bi-file-earmark-arrow-down-fill"></i></button> : <button className="invisible pe-none"></button>}
+           { results?.length > 0 ? <button onClick={downloadTable} className="btn btn-outline-dark" title="Download Records PDF"><i className="bi bi-file-earmark-arrow-down-fill"></i></button> : <button className="invisible pe-none"></button>}
           </div>
           { loading ? <Loader loading={loading} /> :
           results.length > 0 ? (
@@ -349,11 +363,18 @@ const AllFirms = () => {
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
-                    <div className="col-sm-10">
-                    <input type="text" className="form-control" id="place" value={currentDetails?.place} onChange={e=>setCurrentDetails({...currentDetails, place: e.target.value})}/>
+                  <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
+                  <div className="col-sm-10">
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Bhanpuri" checked={currentDetails?.place === "Bhanpuri"} onChange={e=>setCurrentDetails({...currentDetails, place: "Bhanpuri"})}/>
+                      <label className="form-check-label" htmlFor="Bhanpuri">Bhanpuri</label>
                     </div>
-                </div>
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Fafadih" checked={currentDetails?.place === "Fafadih"} onChange={e=>setCurrentDetails({...currentDetails, place: "Fafadih"})}/>
+                      <label className="form-check-label" htmlFor="Fafadih">Fafadih</label>
+                    </div>
+                  </div>
+              </div>
                 <div className="row">
                     <div className="table col-sm border border-2 me-2 pt-2 caption-top">
                         <caption><u><b>Phaad</b></u></caption>
@@ -445,12 +466,21 @@ const AllFirms = () => {
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
-                    <div className="col-sm-10">
-                    <input type="text" className="form-control" id="place" value={newDetails?.place} onChange={e=>setNewDetails({...newDetails, place: e.target.value})}/>
+                  <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
+                  <div className="col-sm-10">
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Bhanpuri" value="option1" onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
+                      <label className="form-check-label" htmlFor="Bhanpuri">Bhanpuri</label>
                     </div>
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Fafadih" value="option2" onChange={e=>setNewDetails({...newDetails, place: "Fafadih"})}/>
+                      <label className="form-check-label" htmlFor="Fafadih">Fafadih</label>
+                    </div>
+                  </div>
                 </div>
-                <div className="mb-3 row form-check">
+                <div className="mb-3 row">
+                  <label htmlFor="place" className="col-sm-2 col-form-label">Type of Collection</label>
+                  <div className="col-sm-10">
                     <div className="form-check form-check-inline">
                         <input type="radio"  name="Selector" className="form-check-input" id="phaadSelector" value="Phaad" data-bs-target="#addNewPhaad" data-bs-toggle="modal"/>
                         <label htmlFor="phaadSelector" className="form-check-label">Phaad</label>
@@ -463,6 +493,7 @@ const AllFirms = () => {
                         <input type="radio" name="Selector" className="form-check-input" id="bothSelector" value="Both" data-bs-target="#addNew" data-bs-toggle="modal"/>
                         <label htmlFor="bothSelector" className="form-check-label">Both</label>
                     </div>
+                  </div>
                 </div>
             </div>
             <div className="modal-footer">
@@ -486,10 +517,17 @@ const AllFirms = () => {
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
-                    <div className="col-sm-10">
-                    <input type="text" className="form-control" id="place" value={newDetails?.place} onChange={e=>setNewDetails({...newDetails, place: e.target.value})}/>
+                  <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
+                  <div className="col-sm-10">
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Bhanpuri" value="option1" onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
+                      <label className="form-check-label" htmlFor="Bhanpuri">Bhanpuri</label>
                     </div>
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Fafadih" value="option2" onChange={e=>setNewDetails({...newDetails, place: "Fafadih"})}/>
+                      <label className="form-check-label" htmlFor="Fafadih">Fafadih</label>
+                    </div>
+                  </div>
                 </div>
                 <div className="row">
                     <div className="table col-sm border border-2 me-2 pt-2 caption-top">
@@ -582,10 +620,17 @@ const AllFirms = () => {
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
-                    <div className="col-sm-10">
-                    <input type="text" className="form-control" id="place" value={newDetails?.place} onChange={e=>setNewDetails({...newDetails, place: e.target.value})}/>
+                  <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
+                  <div className="col-sm-10">
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Bhanpuri" value="option1" onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
+                      <label className="form-check-label" htmlFor="Bhanpuri">Bhanpuri</label>
                     </div>
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Fafadih" value="option2" onChange={e=>setNewDetails({...newDetails, place: "Fafadih"})}/>
+                      <label className="form-check-label" htmlFor="Fafadih">Fafadih</label>
+                    </div>
+                  </div>
                 </div>
                 <div className="mb-3 row">
                     <label htmlFor="phaadPrevious" className="col-sm-2 col-form-label">Previous (2022)</label>
@@ -640,10 +685,29 @@ const AllFirms = () => {
                     </div>
                 </div>
                 <div className="mb-3 row">
-                    <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
-                    <div className="col-sm-10">
-                    <input type="text" className="form-control" id="place" value={newDetails?.place} onChange={e=>setNewDetails({...newDetails, place: e.target.value})}/>
+                  <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
+                  <div className="col-sm-10">
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Bhanpuri" value="option1" onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
+                      <label className="form-check-label" htmlFor="Bhanpuri">Bhanpuri</label>
                     </div>
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Fafadih" value="option2" onChange={e=>setNewDetails({...newDetails, place: "Fafadih"})}/>
+                      <label className="form-check-label" htmlFor="Fafadih">Fafadih</label>
+                    </div>
+                  </div>
+                </div> <div className="mb-3 row">
+                  <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
+                  <div className="col-sm-10">
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Bhanpuri" value="option1" onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
+                      <label className="form-check-label" htmlFor="Bhanpuri">Bhanpuri</label>
+                    </div>
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Fafadih" value="option2" onChange={e=>setNewDetails({...newDetails, place: "Fafadih"})}/>
+                      <label className="form-check-label" htmlFor="Fafadih">Fafadih</label>
+                    </div>
+                  </div>
                 </div>
                 <div className="mb-3 row">
                     <label htmlFor="sikshanidhiPrevious" className="col-sm-2 col-form-label">Previous (2022)</label>
@@ -700,7 +764,7 @@ const AllFirms = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentItems.map((firm) => {
+                {results.map((firm) => {
                   return (
                     <tr  key={firm.id}>
                       <td role="button" className="fw-bold border-3" data-bs-toggle="modal" data-bs-target="#updateDetails" onClick={()=> setCurrentDetails(firm)}>{firm.name}</td>

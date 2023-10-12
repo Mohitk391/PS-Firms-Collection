@@ -18,6 +18,14 @@
     background: linear-gradient(45deg,#FF5370,#ff869a);
 }
 
+.bg-c-brown {
+    background: linear-gradient(45deg,#b17861,#dea67f);
+}
+
+.bg-c-gray {
+    background: linear-gradient(45deg,#ababab,#c1c1c1);
+}
+
 
 .card {
     border-radius: 5px;

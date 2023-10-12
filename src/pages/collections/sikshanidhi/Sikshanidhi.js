@@ -249,10 +249,17 @@ const Sikshanidhi = () => {
                 </div>
               </div>
               <div className="mb-3 row">
-                <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
-                <div className="col-sm-10">
-                  <input type="text" className="form-control" id="place" value={currentDetails?.place} onChange={e=>setCurrentDetails({...currentDetails, place: e.target.value})}/>
-                </div>
+                  <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
+                  <div className="col-sm-10">
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Bhanpuri" checked={currentDetails?.place === "Bhanpuri"} onChange={e=>setCurrentDetails({...currentDetails, place: "Bhanpuri"})}/>
+                      <label className="form-check-label" htmlFor="Bhanpuri">Bhanpuri</label>
+                    </div>
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Fafadih" checked={currentDetails?.place === "Fafadih"} onChange={e=>setCurrentDetails({...currentDetails, place: "Fafadih"})}/>
+                      <label className="form-check-label" htmlFor="Fafadih">Fafadih</label>
+                    </div>
+                  </div>
               </div>
               <div className="mb-3 row">
                 <label htmlFor="previous" className="col-sm-2 col-form-label">Previous (2022)</label>
@@ -307,11 +314,18 @@ const Sikshanidhi = () => {
                 </div>
               </div>
               <div className="mb-3 row">
-                <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
-                <div className="col-sm-10">
-                  <input type="text" className="form-control" id="place" value={newDetails?.place} onChange={e=>setNewDetails({...newDetails, place: e.target.value})}/>
+                  <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
+                  <div className="col-sm-10">
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Bhanpuri" value="option1" onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
+                      <label className="form-check-label" htmlFor="Bhanpuri">Bhanpuri</label>
+                    </div>
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Fafadih" value="option2" onChange={e=>setNewDetails({...newDetails, place: "Fafadih"})}/>
+                      <label className="form-check-label" htmlFor="Fafadih">Fafadih</label>
+                    </div>
+                  </div>
                 </div>
-              </div>
               <div className="mb-3 row">
                 <label htmlFor="inputPassword" className="col-sm-2 col-form-label">Previous (2022)</label>
                 <div className="col-sm-10">
@@ -359,7 +373,7 @@ const Sikshanidhi = () => {
           </tr>
         </thead>
         <tbody>
-          {currentItems?.map((firm) => {
+          {results.map((firm) => {
             return (
               <tr role="button" key={firm.id}>
                 <td className="border-3">{firm.name}</td>
