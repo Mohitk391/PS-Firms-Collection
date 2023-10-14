@@ -7,7 +7,7 @@ import autoTable from 'jspdf-autotable';
 import { Link, useParams } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import { useData } from "../../../contexts/DataContext";
-import { Timestamp, collection, deleteDoc, doc, setDoc, updateDoc } from "firebase/firestore";
+import { Timestamp, addDoc, collection, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase-config";
 
 const ITEMS_PER_PAGE = 10;
@@ -23,20 +23,20 @@ const days = {
   "day-9" : new Date("10/23/2023").toLocaleDateString("en-GB"),
 }
 
-const Datar = () => {
+const Kharcha = () => {
   const { dayId } = useParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [results, setResults] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({});
   const [newDetails, setNewDetails] = useState({});
-  const {dataState : {datar}} = useData();  
+  const {dataState : {kharcha}} = useData();  
 
   useEffect(()=>{
-    setResults((dayId==="all" ? datar : datar.filter(firm=>firm.date === days[dayId])).filter((item) =>
+    setResults((dayId==="all" ? kharcha : kharcha.filter(firm=>firm.date === days[dayId])).filter((item) =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase().trim()) || item.place.toLowerCase().includes(searchTerm.toLowerCase().trim())
   ));
-  },[dayId, datar, searchTerm]);
+  },[dayId, kharcha, searchTerm]);
   
   const handleModalClose = () => {
     setCurrentDetails({});  
@@ -44,37 +44,31 @@ const Datar = () => {
     setSearchTerm('');
   };
 
-  const saveNewFirm = async (firmDetails) => {
-    const docRef = await setDoc(collection(db,"datar", firmDetails.name),{...firmDetails, date: Timestamp.fromDate(new Date())})
+  const saveNewKharcha = async () => {
+    const docRef = await addDoc(collection(db,"kharcha"),{...newDetails, date: Timestamp.fromDate(new Date())})
     console.log("Document written with document id: ", docRef);
     document.getElementById('newFirmClose').click();
   }
 
-  const saveUpdatedFirm = async () => {
-    let updatingDatarBody = {};
-    if(currentDetails.data){ 
-      updatingDatarBody = {...updatingDatarBody, data: currentDetails.data}
+  const saveUpdatedKharcha = async () => {
+    let updatingKharchaBody = {};
+    if(currentDetails.kharcha){ 
+      updatingKharchaBody = {...updatingKharchaBody, kharcha: currentDetails.kharcha}
+    }
+    if(currentDetails.place){ 
+      updatingKharchaBody = {...updatingKharchaBody, place: currentDetails.place}
     }
     if(currentDetails.amount > 0){
-       updatingDatarBody = {...updatingDatarBody, amount: currentDetails.amount}
-    }
-    if(currentDetails.payer){
-       updatingDatarBody = {...updatingDatarBody, payer: currentDetails.payer}
-    }
-    if(currentDetails.mobile ){
-       updatingDatarBody = {...updatingDatarBody, mobile: currentDetails.mobile}
-    }
-    if(currentDetails.reciever){
-       updatingDatarBody = {...updatingDatarBody, reciever: currentDetails.reciever}
+       updatingKharchaBody = {...updatingKharchaBody, amount: currentDetails.amount}
     }
 
-    await updateDoc(doc(db, "datar", currentDetails.name), updatingDatarBody);
+    await updateDoc(doc(db, "kharcha", currentDetails.id), updatingKharchaBody);
 
     document.getElementById('newFirmClose').click();
   }
 
-  const deleteFirm = async (name) => {
-    await deleteDoc(doc(db, "datar", name));
+  const deleteEntry = async (name) => {
+    await deleteDoc(doc(db, "kharcha", name));
     document.getElementById('newFirmClose').click(); 
   }
   
@@ -91,7 +85,7 @@ const Datar = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [datar]);
+  }, [kharcha]);
 
   const totalPages = Math.ceil(results?.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -104,7 +98,7 @@ const Datar = () => {
 
   const downloadTable = () => {
     const doc = new jsPDF();
-    doc.text(`datar ${dayId}`, 15, 12);
+    doc.text(`Kharcha ${dayId}`, 15, 12);
     autoTable(doc, { html: '#fullDataTable' });
     doc.save('collections.pdf')
 }
@@ -115,9 +109,9 @@ const Datar = () => {
       <main className="container mt-3 flex-fill">
           <div className="d-flex justify-content-between mb-2">
             <div className="header">
-              <span className="h2">Datar</span>
+              <span className="h2">Kharcha</span>
               <span className=" px-3 fs-6">
-                <Link to="/datar">Datar</Link> / <Link to={`/datar/${dayId}`}>{dayId}</Link>
+                <Link to="/kharcha">Kharcha</Link> / <Link to={`/kharcha/${dayId}`}>{dayId}</Link>
               </span>
             </div>
             <input className="py-0 px-3 border rounded-4 border-opacity-50" type="text" placeholder="Search" value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} />
@@ -128,26 +122,22 @@ const Datar = () => {
               <thead>
                 <tr>
                   <th className="col-1 text-center border-3">Date</th>
-                  <th className="col-5 border-3">Firm Name</th>
+                  <th className="col-5 border-3">Kharcha</th>
                   <th className="col-1 text-center border-3">Place</th>
-                  <th className="text-center border-3">Data</th>
                   <th className="text-center border-3">Amount</th>
                   <th className="text-center border-3">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {currentItems.map((firm) => {
+                {currentItems.map((entry) => {
                   return (
-                    <tr  key={firm.id}>
-                      <td className="text-center border-3">{firm.date}</td>
-                      <td role="button" className="fw-bold border-3" data-bs-toggle="modal" data-bs-target="#updateDetails" onClick={()=> setCurrentDetails(firm)}>{firm.name}</td>
-                      <td className="text-center border-3">{firm.place}</td>
-                      <td className="border-3 text-center border-3">
-                        {firm.data}
-                      </td>
-                      <td className="text-center border-3">{firm.amount >0 ? firm.amount : "-"}</td>
+                    <tr  key={entry.id}>
+                      <td className="text-center border-3">{entry.date}</td>
+                      <td role="button" className="fw-bold border-3" data-bs-toggle="modal" data-bs-target="#updateDetails" onClick={()=> setCurrentDetails(entry)}>{entry.kharcha}</td>
+                      <td className="text-center border-3">{entry.place}</td>
+                      <td className="text-center border-3">{entry.amount >0 ? entry.amount : "-"}</td>
                      <td className="text-center border-3 d-flex gap-3 justify-content-center">
-                      <i className="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm.name)}></i>
+                      <i className="bi bi-trash3-fill" title="Delete Entry" onClick={()=>deleteEntry(entry)}></i>
                       </td>
                     </tr>
                   );
@@ -202,14 +192,14 @@ const Datar = () => {
         <div className="modal-dialog modal-dialog-centered modal-xl">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="updateDetailsLabel">Firm Details</h5>
+              <h5 className="modal-title" id="updateDetailsLabel">Kharcha Details</h5>
               <button type="button" className="btn-close" id="newFirmClose"  data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body">
               <div className="mb-3 row">
-                <label htmlFor="name" className="col-sm-2 col-form-label">Firm Name</label>
+                <label htmlFor="kharcha" className="col-sm-2 col-form-label">Kharcha</label>
                 <div className="col-sm-10">
-                  <input type="text" className="form-control" id="name" value={currentDetails?.name} onChange={e=>setCurrentDetails({...currentDetails, name: e.target.value})}/>
+                  <input type="text" className="form-control" id="kharcha" value={currentDetails?.kharcha} onChange={e=>setCurrentDetails({...currentDetails, kharcha: e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">
@@ -226,39 +216,15 @@ const Datar = () => {
                   </div>
               </div>
               <div className="mb-3 row">
-                <label htmlFor="previous" className="col-sm-2 col-form-label">Data</label>
-                <div className="col-sm-10">
-                  <input type="number" min="0" placeholder="-" className="form-control" id="previous" value={currentDetails?.data} onChange={e=>setCurrentDetails({...currentDetails, data: e.target.value})}/>
-                </div>
-              </div>
-              <div className="mb-3 row">
                 <label htmlFor="current" className="col-sm-2 col-form-label">Amount</label>
                 <div className="col-sm-10">
                   <input type="number" min="0" placeholder="-" className="form-control" id="current" value={currentDetails?.amount} onChange={e=>setCurrentDetails({...currentDetails, amount: Number(e.target.value)})}/>
                 </div>
               </div>
-              <div className="mb-3 row">
-                <label htmlFor="payerName" className="col-sm-2 col-form-label">Haste (Payer)</label>
-                <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="payerName" value={currentDetails?.payer} onChange={e=>setCurrentDetails({...currentDetails, payer: e.target.value})}/>
-                </div>
-              </div>
-              <div className="mb-3 row">
-                <label htmlFor="payerNumber" className="col-sm-2 col-form-label">Mobile Number</label>
-                <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="payerNumber" value={currentDetails?.mobile} onChange={e=>setCurrentDetails({...currentDetails, mobile:  e.target.value})}/>
-                </div>
-              </div>
-              <div className="mb-3 row">
-                <label htmlFor="receiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
-                <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="receiver" value={currentDetails?.reciever} onChange={e=>setCurrentDetails({...currentDetails, reciever: e.target.value})}/>
-                </div>
-              </div>
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary" onClick={()=>saveUpdatedFirm(currentDetails)}>Save changes</button>
+              <button type="button" className="btn btn-primary" onClick={()=>saveUpdatedKharcha()}>Save changes</button>
             </div>
           </div>
         </div>
@@ -267,14 +233,14 @@ const Datar = () => {
         <div className="modal-dialog modal-dialog-centered modal-xl">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="addNewLabel">Firm Details</h5>
+              <h5 className="modal-title" id="addNewLabel">Kharcha Details</h5>
               <button type="button" className="btn-close" data-bs-dismiss="modal" id="newFirmClose" aria-label="Close"></button>
             </div>
             <div className="modal-body">
               <div className="mb-3 row">
-                <label htmlFor="name" className="col-sm-2 col-form-label">Firm Name</label>
+                <label htmlFor="kharcha" className="col-sm-2 col-form-label">Kharcha</label>
                 <div className="col-sm-10">
-                  <input type="text" className="form-control" id="name" placeholder="Firm Name"  value={newDetails?.name} onChange={e=>setNewDetails({...newDetails, name: e.target.value})}/>
+                  <input type="text" className="form-control" id="kharcha" placeholder="Firm Name"  value={newDetails?.kharcha} onChange={e=>setNewDetails({...newDetails, kharcha: e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">
@@ -291,39 +257,15 @@ const Datar = () => {
                   </div>
                 </div>
               <div className="mb-3 row">
-                <label htmlFor="inputPassword" className="col-sm-2 col-form-label">Data</label>
-                <div className="col-sm-10">
-                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" onChange={e=>setNewDetails({...newDetails, data: e.target.value})}/>
-                </div>
-              </div>
-              <div className="mb-3 row">
                 <label htmlFor="inputPassword" className="col-sm-2 col-form-label">Amount</label>
                 <div className="col-sm-10">
                   <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" onChange={e=>setNewDetails({...newDetails, amount: Number(e.target.value)})}/>
                 </div>
               </div>
-              <div className="mb-3 row">
-                <label htmlFor="payerName" className="col-sm-2 col-form-label">Haste (Payer)</label>
-                <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="payerName" value={newDetails?.payer} onChange={e=>setNewDetails({...newDetails, payer: e.target.value})}/>
-                </div>
-              </div>
-              <div className="mb-3 row">
-                <label htmlFor="payerNumber" className="col-sm-2 col-form-label">Mobile Number</label>
-                <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="payerNumber" value={newDetails?.payerMobile} onChange={e=>setNewDetails({...newDetails, mobile:  e.target.value})}/>
-                </div>
-              </div>
-              <div className="mb-3 row">
-                <label htmlFor="receiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
-                <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="receiver" value={newDetails?.reciever} onChange={e=>setNewDetails({...newDetails, reciever: e.target.value})}/>
-                </div>
-              </div>
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary" onClick={()=>saveNewFirm(newDetails)}>Add Firm</button>
+              <button type="button" className="btn btn-primary" onClick={()=>saveNewKharcha()}>Add Firm</button>
             </div>
           </div>
         </div>
@@ -332,9 +274,8 @@ const Datar = () => {
               <thead>
                 <tr>
                   <th className="col-1 text-center border-3">Date</th>
-                  <th className="col-5 border-3">Firm Name</th>
+                  <th className="col-5 border-3">Kharcha</th>
                   <th className="col-1 text-center border-3">Place</th>
-                  <th className="text-center border-3">Data</th>
                   <th className="text-center border-3">Amount</th>
                 </tr>
               </thead>
@@ -343,9 +284,8 @@ const Datar = () => {
                   return (
                     <tr key={firm.id}>
                       <td className="text-center border-3">{firm.date}</td>
-                      <td className="fw-bold border-3">{firm.name}</td>
+                      <td className="fw-bold border-3">{firm.kharcha}</td>
                       <td className="text-center border-3">{firm.place}</td>
-                      <td className="border-3 text-center border-3">{firm.data}</td>
                       <td className="text-center border-3">{firm.amount >0 ? firm.amount : "-"}</td>
                     </tr>
                   );
@@ -356,4 +296,4 @@ const Datar = () => {
   );
 }
 
-export default Datar;
+export default Kharcha;

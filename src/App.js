@@ -11,6 +11,10 @@ import { RequiresAuth } from "./utilities/Auth/RequiresAuth";
 import PhaadIndex from "./pages/collections/phaad/PhaadIndex";
 import SikshanidhiIndex from "./pages/collections/sikshanidhi/SikshanidhiIndex";
 import DatarIndex from "./pages/collections/datar/DatarIndex";
+import SamitiIndex from "./pages/collections/samiti/SamitiIndex";
+import Samiti from "./pages/collections/samiti/Samiti";
+import KharchaIndex from "./pages/collections/kharcha/KharchaIndex";
+import Kharcha from "./pages/collections/kharcha/Kharcha";
 
 function App() {
   useEffect(()=>{
@@ -50,6 +54,20 @@ function App() {
           </RequiresAuth>
         } />
         <Route path="datar/:dayId" element={<Datar />} />
+
+        <Route path="/samiti" element={
+          <RequiresAuth>
+            <SamitiIndex />
+          </RequiresAuth>
+        } />
+        <Route path="samiti/:type" element={<Samiti />} />
+
+        <Route path="/kharcha" element={
+          <RequiresAuth>
+            <KharchaIndex />
+          </RequiresAuth>
+        } />
+        <Route path="kharcha/:dayId" element={<Kharcha />} />
 
         <Route path="/login" element={<Login />} />
       </Routes>

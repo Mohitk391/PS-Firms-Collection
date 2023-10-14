@@ -6,7 +6,7 @@ import { useData } from "../../contexts/DataContext";
 
 const Homepage = () => {
     const navigate = useNavigate();
-    const { dataState : {allFirms, phaad, datar, sikshanidhi}} = useData();
+    const { dataState : {allFirms, phaad, datar, sikshanidhi, kharcha}} = useData();
 
     return (
         <div className="App d-flex flex-column min-vh-100">
@@ -35,7 +35,7 @@ const Homepage = () => {
                   <div class="card bg-c-yellow text-white">
                       <div class="card-block">
                           <h4 class="m-b-20">Phaado</h4>
-                          <p class="m-b-0">Phaad Collected<span class="f-right">{phaad.reduce((acc,curr)=>acc+curr.current,0)}</span></p>
+                          <p class="m-b-0">Phaado Collected<span class="f-right">{phaad.reduce((acc,curr)=>acc+curr.current,0)}</span></p>
                       </div>
                   </div>
               </div>
@@ -48,7 +48,7 @@ const Homepage = () => {
                       </div>
                   </div>
               </div>
-              <div class="col-md-4 col-xl-3" onClick={()=>navigate("/sikshanidhi")} role="button">
+              <div class="col-md-4 col-xl-3" onClick={()=>navigate("/samiti")} role="button">
                   <div class="card bg-c-brown text-white">
                       <div class="card-block">
                           <h4 class="m-b-20">Samiti</h4>
@@ -56,11 +56,11 @@ const Homepage = () => {
                       </div>
                   </div>
               </div>
-              <div class="col-md-4 col-xl-3" onClick={()=>navigate("/sikshanidhi")} role="button">
+              <div class="col-md-4 col-xl-3" onClick={()=>navigate("/kharcha")} role="button">
                   <div class="card bg-c-gray text-white">
                       <div class="card-block">
                           <h4 class="m-b-20">Kharcha</h4>
-                          <p class="m-b-0">Total Expense<span class="f-right">{sikshanidhi.reduce((acc,curr)=>acc+curr.current,0)}</span></p>
+                          <p class="m-b-0">Total Expense<span class="f-right">{kharcha.reduce((acc,curr)=>acc+curr.amount,0)}</span></p>
                       </div>
                   </div>
               </div>

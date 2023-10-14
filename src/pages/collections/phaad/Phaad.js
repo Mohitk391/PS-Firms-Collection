@@ -7,7 +7,7 @@ import autoTable from 'jspdf-autotable';
 import { Link, useParams } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import { useData } from "../../../contexts/DataContext";
-import { Timestamp, doc, setDoc, updateDoc } from "firebase/firestore";
+import { Timestamp, deleteDoc, doc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase-config";
 
 const ITEMS_PER_PAGE = 10;
@@ -33,7 +33,7 @@ const Phaad = () => {
   const {dataState : {phaad, allFirms}} = useData();  
 
   useEffect(()=>{
-    setResults((dayId==="all" ? phaad : phaad.filter(firm=>firm.date === days[dayId])).filter(item =>item.name.toLowerCase().includes(searchTerm.toLowerCase().trim())) );
+    setResults((dayId==="all" ? phaad : phaad.filter(firm=>firm.date === days[dayId])).filter(item =>item.name.toLowerCase().includes(searchTerm.toLowerCase().trim()) || item.place.toLowerCase().includes(searchTerm.toLowerCase().trim())) );
   },[dayId, phaad, searchTerm]);
   
   const handleModalClose = () => {
@@ -108,8 +108,15 @@ const Phaad = () => {
     document.getElementById('newFirmClose').click();
   }
 
-  const deleteFirm = async (firmDetails) => {
-   
+  const deleteFirm = async (name) => {
+    await deleteDoc(doc(db, "phaad", name));
+    await updateDoc(doc(db, "allFirms", name), {
+      phaadCurrent : 0,
+      phaadReciever: "",
+      phaadPrevious: 0,
+      phaadPayer : "",
+      phaadMobile : ""
+    })
     document.getElementById('newFirmClose').click(); 
   }
   
@@ -182,7 +189,7 @@ const Phaad = () => {
                       </td>
                       <td className="text-center border-3">{firm.current >0 ? firm.current : "-"}</td>
                      <td className="text-center border-3 d-flex gap-3 justify-content-center">
-                      <i className="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm)}></i>
+                      <i className="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm.name)}></i>
                       </td>
                     </tr>
                   );

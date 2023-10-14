@@ -13,7 +13,9 @@ const initialState = {
     phaad: [],
     sikshanidhi: [],
     datar: [],
-    allFirms: []
+    allFirms: [],
+    samiti : [],
+    kharcha : []
 }
 
 const DataProvider = ({children}) => {
@@ -24,17 +26,23 @@ const DataProvider = ({children}) => {
         const sikshanidhiQuery = query(collection(db, "sikshanidhi"));
         const datarQuery = query(collection(db, "datar"));
         const allFirmsQuery = query(collection(db, "allFirms"));
+        const samitiQuery = query(collection(db, "samiti"));
+        const kharchaQuery = query(collection(db, "kharcha"));
 
         const unsubscribePhaad = readPhaad(phaadQuery, dataState, dataDispatch);
         const unsubscribeSikshanidhi = readSikshanidhi(sikshanidhiQuery, dataState, dataDispatch);
         const unsubscribeDatar = readDatar(datarQuery, dataState, dataDispatch);
         const unsubscribeAllFirms = readAllFirms(allFirmsQuery, dataState, dataDispatch);
+        const unsubscribeSamiti = readDatar(samitiQuery, dataState, dataDispatch);
+        const unsubscribeKharcha = readAllFirms(kharchaQuery, dataState, dataDispatch);
 
         return ()=>{
             unsubscribePhaad();
             unsubscribeSikshanidhi();
             unsubscribeDatar();
             unsubscribeAllFirms();
+            unsubscribeSamiti();
+            unsubscribeKharcha();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     },[])

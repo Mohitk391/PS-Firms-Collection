@@ -7,7 +7,7 @@ import autoTable from 'jspdf-autotable';
 import { Link, useParams } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import { useData } from "../../../contexts/DataContext";
-import { Timestamp, doc, setDoc, updateDoc } from "firebase/firestore";
+import { Timestamp, deleteDoc, doc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase-config";
 
 const ITEMS_PER_PAGE = 10;
@@ -34,7 +34,7 @@ const Sikshanidhi = () => {
 
   useEffect(()=>{
     setResults((dayId==="all" ? sikshanidhi : sikshanidhi.filter(firm=>firm.date === days[dayId])).filter((item) =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase().trim())
+    item.name.toLowerCase().includes(searchTerm.toLowerCase().trim()) || item.place.toLowerCase().includes(searchTerm.toLowerCase().trim())
   ));
   },[dayId, sikshanidhi, searchTerm]);
   
@@ -109,8 +109,15 @@ const Sikshanidhi = () => {
     document.getElementById('newFirmClose').click();
   }
 
-  const deleteFirm = (firmDetails) => {
-   
+  const deleteFirm = async (name) => {
+    await deleteDoc(doc(db, "sikshanidhi", name));
+    await updateDoc(doc(db, "allFirms", name), {
+      sikshanidhiCurrent : 0,
+      sikshanidhiReciever: "",
+      sikshanidhiPrevious: 0,
+      sikshanidhiPayer : "",
+      sikshanidhiMobile : ""
+    })
     document.getElementById('newFirmClose').click(); 
   }
   
@@ -183,7 +190,7 @@ const Sikshanidhi = () => {
                       </td>
                       <td className="text-center border-3">{firm.current >0 ? firm.current : "-"}</td>
                      <td className="text-center border-3 d-flex gap-3 justify-content-center">
-                      <i className="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm)}></i>
+                      <i className="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm.name)}></i>
                       </td>
                     </tr>
                   );

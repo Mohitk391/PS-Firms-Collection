@@ -34,7 +34,7 @@ const AllFirms = () => {
     ,[]);
 
     useEffect(()=>{
-      setResults(allFirms.filter((item)=>item.name.toLowerCase().includes(searchTerm.toLocaleLowerCase().trim())))
+      setResults(allFirms.filter((item)=>item.name.toLowerCase().includes(searchTerm.toLocaleLowerCase().trim()) || item.place.toLowerCase().includes(searchTerm.toLowerCase().trim()) ))
     },[searchTerm, allFirms]);
   
   const handleModalClose = () => {
@@ -196,19 +196,28 @@ const AllFirms = () => {
     }
 
     await updateDoc(doc(db,"allFirms", currentDetails.name), updatingAllBody);
-    if(updatingPhaadBody)
-      await updateDoc(doc(db,"phaad", currentDetails.name), updatingPhaadBody);
-    if(updatingSikshanidhiBody)
-      await updateDoc(doc(db, "sikshanidhi", currentDetails.name), updatingSikshanidhiBody);
 
+    if(updatingPhaadBody){
+        if(phaad.find(firm => firm.name === currentDetails.name))
+          await updateDoc(doc(db,"phaad", currentDetails.name), updatingPhaadBody);
+        else
+          await setDoc(doc(db,"phaad", currentDetails.name), updatingPhaadBody);
+    }
+      
+    if(updatingSikshanidhiBody){
+      if(sikshanidhi.find(firm => firm.name === currentDetails.name))
+        await updateDoc(doc(db, "sikshanidhi", currentDetails.name), updatingSikshanidhiBody);
+      else  
+        await setDoc(doc(db, "sikshanidhi", currentDetails.name), updatingSikshanidhiBody);
+    }
   }
 
-  const deleteFirm = async (firmDetails) => {
-    await deleteDoc(doc(db, "allFirms", firmDetails.name));
-    if(phaad.find(firm=>firm.name===firmDetails.name))
-      await deleteDoc(doc(db, "phaad", firmDetails.name));
-    if(sikshanidhi.find(firm=>firm.name===firmDetails.name))
-      await deleteDoc(doc(db, "sikshanidhi", firmDetails.name));
+  const deleteFirm = async (name) => {
+    await deleteDoc(doc(db, "allFirms", name));
+    if(phaad.find(firm=>firm.name===name))
+      await deleteDoc(doc(db, "phaad", name));
+    if(sikshanidhi.find(firm=>firm.name===name))
+      await deleteDoc(doc(db, "sikshanidhi", name));
   }
   
   useEffect(() => {
@@ -271,7 +280,7 @@ const AllFirms = () => {
                 <tr>
                   <th className="col-3 text-center border-3 align-middle" rowSpan={2}>Firm Name</th>
                   <th className="col-2 text-center border-3 align-middle" rowSpan={2}>Place</th>
-                  <th className="col-3 text-center border-3" colSpan={2}>Phaad</th>
+                  <th className="col-3 text-center border-3" colSpan={2}>Phaado</th>
                   <th className="col-3 text-center border-3" colSpan={2}>Sikshanidhi</th>
                   <th className="col-2 text-center border-3 align-middle" rowSpan={2}>Actions</th>
                 </tr>
@@ -297,7 +306,7 @@ const AllFirms = () => {
                       </td>
                       <td className="text-center border-3">{firm.sikshanidhiCurrent >0 ? firm.sikshanidhiCurrent : "-"}</td>
                      <td className="text-center border-3 d-flex gap-3 justify-content-center">
-                      <i className="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm)}></i>
+                      <i className="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm.name)}></i>
                       </td>
                     </tr>
                   );
@@ -377,7 +386,7 @@ const AllFirms = () => {
               </div>
                 <div className="row">
                     <div className="table col-sm border border-2 me-2 pt-2 caption-top">
-                        <caption><u><b>Phaad</b></u></caption>
+                        <caption><u><b>Phaad0</b></u></caption>
                         <div className="mb-3 row">
                             <label htmlFor="phaadPrevious" className="col-sm-4 col-form-label">Previous (2022)</label>
                             <div className="col-sm-8">
@@ -531,7 +540,7 @@ const AllFirms = () => {
                 </div>
                 <div className="row">
                     <div className="table col-sm border border-2 me-2 pt-2 caption-top">
-                        <caption><u><b>Phaad</b></u></caption>
+                        <caption><u><b>Phaado</b></u></caption>
                         <div className="mb-3 row">
                             <label htmlFor="phaadPrevious" className="col-sm-4 col-form-label">Previous (2022)</label>
                             <div className="col-sm-8">
