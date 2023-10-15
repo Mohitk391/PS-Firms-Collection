@@ -9,20 +9,20 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 // Bootstrap Icons
 import "bootstrap-icons/font/bootstrap-icons.css";
-import { BrowserRouter } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
 import { DataProvider } from './contexts/DataContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <UserProvider>
         <DataProvider>
           <App />
         </DataProvider>
       </UserProvider>
-    </BrowserRouter>
+    </HashRouter>
   </React.StrictMode>
 );
 

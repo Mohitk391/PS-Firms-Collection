@@ -22,7 +22,6 @@ const AllFirms = () => {
   const [newDetails, setNewDetails] = useState({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: ""});
   const {dataState : {allFirms, phaad, sikshanidhi}} = useData();  
 
-  console.log(searchTerm);
 
   useEffect(()=> {
     if(allFirms) 
@@ -62,7 +61,8 @@ const AllFirms = () => {
       sikshanidhiReciever : newDetails.sikshanidhiReciever
     })
 
-    await setDoc(doc(db, "phaad", newDetails.name), {
+    if(newDetails.phaadCurrent>0){
+      await setDoc(doc(db, "phaad", newDetails.name), {
       name: newDetails.name,
       place: newDetails.place,
       previous : newDetails.phaadPrevious,
@@ -71,21 +71,25 @@ const AllFirms = () => {
       mobile : newDetails.phaadMobile,
       reciever : newDetails.phaadReciever,
       date : Timestamp.fromDate(new Date())
-    })
-
-    await setDoc(doc(db, "sikshanidhi", newDetails.name), {
-      name: newDetails.name,
-      place: newDetails.place,
-      previous : newDetails.sikshanidhiPrevious,
-      current : newDetails.sikshanidhiCurrent,
-      payer : newDetails.sikshanidhiPayer,
-      mobile : newDetails.sikshanidhiMobile,
-      reciever : newDetails.sikshanidhiReciever,
-      date: Timestamp.fromDate(new Date())
     });
+  }
 
-    setNewDetails({});
+  if(newDetails.sikshanidhiCurrent>0){
+    await setDoc(doc(db, "sikshanidhi", newDetails.name), {
+    name: newDetails.name,
+    place: newDetails.place,
+    previous : newDetails.sikshanidhiPrevious,
+    current : newDetails.sikshanidhiCurrent,
+    payer : newDetails.sikshanidhiPayer,
+    mobile : newDetails.sikshanidhiMobile,
+    reciever : newDetails.sikshanidhiReciever,
+    date : Timestamp.fromDate(new Date())
+  });
+}
+
+    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: ""});
     setSearchTerm('');
+    document.getElementById("newFirmClose").click();
   }
 
   const saveNewFirmPhaad = async () => {
@@ -104,19 +108,22 @@ const AllFirms = () => {
       sikshanidhiReciever : ""
     })
 
-    await setDoc(doc(db, "phaad", newDetails.name), {
-      name: newDetails.name,
-      place: newDetails.place,
-      previous : newDetails.phaadPrevious,
-      current : newDetails.phaadCurrent,
-      payer : newDetails.phaadPayer,
-      mobile : newDetails.phaadMobile,
-      reciever : newDetails.phaadReciever,
-      date : Timestamp.fromDate(new Date())
-    });
+    if(newDetails.phaadCurrent>0){
+        await setDoc(doc(db, "phaad", newDetails.name), {
+        name: newDetails.name,
+        place: newDetails.place,
+        previous : newDetails.phaadPrevious,
+        current : newDetails.phaadCurrent,
+        payer : newDetails.phaadPayer,
+        mobile : newDetails.phaadMobile,
+        reciever : newDetails.phaadReciever,
+        date : Timestamp.fromDate(new Date())
+      });
+    }
 
-    setNewDetails({});
+    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: ""});
     setSearchTerm('');
+    document.getElementById("newFirmClose").click();
   }
 
   const saveNewFirmSikshanidhi = async () => {
@@ -135,19 +142,22 @@ const AllFirms = () => {
       sikshanidhiReciever : newDetails.sikshanidhiReciever
     });
 
-    await setDoc(doc(db, "sikshanidhi", newDetails.name), {
-      name: newDetails.name,
-      place: newDetails.place,
-      previous : newDetails.sikshanidhiPrevious,
-      current : newDetails.sikshanidhiCurrent,
-      payer : newDetails.sikshanidhiPayer,
-      mobile : newDetails.sikshanidhiMobile,
-      reciever : newDetails.sikshanidhiReciever,
-      date : Timestamp.fromDate(new Date())
-    });
+    if(newDetails.sikshanidhiCurrent>0){
+        await setDoc(doc(db, "sikshanidhi", newDetails.name), {
+        name: newDetails.name,
+        place: newDetails.place,
+        previous : newDetails.sikshanidhiPrevious,
+        current : newDetails.sikshanidhiCurrent,
+        payer : newDetails.sikshanidhiPayer,
+        mobile : newDetails.sikshanidhiMobile,
+        reciever : newDetails.sikshanidhiReciever,
+        date : Timestamp.fromDate(new Date())
+      });
+    }
 
-    setNewDetails({});
+    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: ""});
     setSearchTerm('');
+    document.getElementById("newFirmClose").click();
   }
 
   const saveUpdatedFirm = async () => {
@@ -328,7 +338,7 @@ const AllFirms = () => {
             </div>
           )}
 
-          {allFirms.length > ITEMS_PER_PAGE && (
+          {results.length > ITEMS_PER_PAGE && (
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -478,12 +488,12 @@ const AllFirms = () => {
                   <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
                   <div className="col-sm-10">
                     <div className="form-check form-check-inline">
-                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Bhanpuri" value="option1" onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
-                      <label className="form-check-label" htmlFor="Bhanpuri">Bhanpuri</label>
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="BhanpuriIndex" value="Bhanpuri" onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
+                      <label className="form-check-label" htmlFor="BhanpuriIndex">Bhanpuri</label>
                     </div>
                     <div className="form-check form-check-inline">
-                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Fafadih" value="option2" onChange={e=>setNewDetails({...newDetails, place: "Fafadih"})}/>
-                      <label className="form-check-label" htmlFor="Fafadih">Fafadih</label>
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="FafadihIndex" value="Fafadih" onChange={e=>setNewDetails({...newDetails, place: "Fafadih"})}/>
+                      <label className="form-check-label" htmlFor="FafadihIndex">Fafadih</label>
                     </div>
                   </div>
                 </div>
@@ -632,11 +642,11 @@ const AllFirms = () => {
                   <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
                   <div className="col-sm-10">
                     <div className="form-check form-check-inline">
-                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Bhanpuri" value="option1" onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Bhanpuri" checked={newDetails.place==="Bhanpuri"} onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
                       <label className="form-check-label" htmlFor="Bhanpuri">Bhanpuri</label>
                     </div>
                     <div className="form-check form-check-inline">
-                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Fafadih" value="option2" onChange={e=>setNewDetails({...newDetails, place: "Fafadih"})}/>
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Fafadih" checked={newDetails.place==="Fafadih"} onChange={e=>setNewDetails({...newDetails, place: "Fafadih"})}/>
                       <label className="form-check-label" htmlFor="Fafadih">Fafadih</label>
                     </div>
                   </div>

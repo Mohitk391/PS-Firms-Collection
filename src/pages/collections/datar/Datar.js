@@ -209,7 +209,7 @@ const Datar = () => {
               <div className="mb-3 row">
                 <label htmlFor="name" className="col-sm-2 col-form-label">Firm Name</label>
                 <div className="col-sm-10">
-                  <input type="text" className="form-control" id="name" value={currentDetails?.name} onChange={e=>setCurrentDetails({...currentDetails, name: e.target.value})}/>
+                  <input type="text" className="form-control" id="name" value={currentDetails?.name} onChange={e=>setCurrentDetails({...currentDetails, name: e.target.value})} required/>
                 </div>
               </div>
               <div className="mb-3 row">
@@ -228,37 +228,37 @@ const Datar = () => {
               <div className="mb-3 row">
                 <label htmlFor="previous" className="col-sm-2 col-form-label">Data</label>
                 <div className="col-sm-10">
-                  <input type="number" min="0" placeholder="-" className="form-control" id="previous" value={currentDetails?.data} onChange={e=>setCurrentDetails({...currentDetails, data: e.target.value})}/>
+                  <input type="text" placeholder="-" className="form-control" id="previous" value={currentDetails?.data} onChange={e=>setCurrentDetails({...currentDetails, data: e.target.value})} required/>
                 </div>
               </div>
               <div className="mb-3 row">
                 <label htmlFor="current" className="col-sm-2 col-form-label">Amount</label>
                 <div className="col-sm-10">
-                  <input type="number" min="0" placeholder="-" className="form-control" id="current" value={currentDetails?.amount} onChange={e=>setCurrentDetails({...currentDetails, amount: Number(e.target.value)})}/>
+                  <input type="number" min="0" placeholder="-" className="form-control" id="current" value={currentDetails?.amount} onChange={e=>setCurrentDetails({...currentDetails, amount: Number(e.target.value)})} required/>
                 </div>
               </div>
               <div className="mb-3 row">
                 <label htmlFor="payerName" className="col-sm-2 col-form-label">Haste (Payer)</label>
                 <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="payerName" value={currentDetails?.payer} onChange={e=>setCurrentDetails({...currentDetails, payer: e.target.value})}/>
+                  <input type="text" placeholder="-" className="form-control" id="payerName" value={currentDetails?.payer} onChange={e=>setCurrentDetails({...currentDetails, payer: e.target.value})} required/>
                 </div>
               </div>
               <div className="mb-3 row">
                 <label htmlFor="payerNumber" className="col-sm-2 col-form-label">Mobile Number</label>
                 <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="payerNumber" value={currentDetails?.mobile} onChange={e=>setCurrentDetails({...currentDetails, mobile:  e.target.value})}/>
+                  <input type="text" placeholder="-" className="form-control" id="payerNumber" value={currentDetails?.mobile} onChange={e=>setCurrentDetails({...currentDetails, mobile:  e.target.value})} required/>
                 </div>
               </div>
               <div className="mb-3 row">
                 <label htmlFor="receiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
                 <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="receiver" value={currentDetails?.reciever} onChange={e=>setCurrentDetails({...currentDetails, reciever: e.target.value})}/>
+                  <input type="text" placeholder="-" className="form-control" id="receiver" value={currentDetails?.reciever} onChange={e=>setCurrentDetails({...currentDetails, reciever: e.target.value})} required/>
                 </div>
               </div>
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary" onClick={()=>saveUpdatedFirm(currentDetails)}>Save changes</button>
+              <button type="submit" className="btn btn-primary" onClick={()=>saveUpdatedFirm(currentDetails)}>Save changes</button>
             </div>
           </div>
         </div>
