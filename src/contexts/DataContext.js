@@ -6,6 +6,8 @@ import { readPhaad } from "../utilities/Actions/PhaadActions";
 import { readSikshanidhi } from "../utilities/Actions/SikshanidhiActions";
 import { readDatar } from "../utilities/Actions/DatarActions";
 import { readAllFirms } from "../utilities/Actions/AllFirmsActions";
+import { readKharcha } from "../utilities/Actions/KharchaActions";
+import { readSamiti } from "../utilities/Actions/SamitiActions";
 
 const DataContext = createContext();
 
@@ -33,8 +35,8 @@ const DataProvider = ({children}) => {
         const unsubscribeSikshanidhi = readSikshanidhi(sikshanidhiQuery, dataState, dataDispatch);
         const unsubscribeDatar = readDatar(datarQuery, dataState, dataDispatch);
         const unsubscribeAllFirms = readAllFirms(allFirmsQuery, dataState, dataDispatch);
-        const unsubscribeSamiti = readDatar(samitiQuery, dataState, dataDispatch);
-        const unsubscribeKharcha = readAllFirms(kharchaQuery, dataState, dataDispatch);
+        const unsubscribeSamiti = readSamiti(samitiQuery, dataState, dataDispatch);
+        const unsubscribeKharcha = readKharcha(kharchaQuery, dataState, dataDispatch);
 
         return ()=>{
             unsubscribePhaad();

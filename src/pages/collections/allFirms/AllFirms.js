@@ -386,7 +386,7 @@ const AllFirms = () => {
               </div>
                 <div className="row">
                     <div className="table col-sm border border-2 me-2 pt-2 caption-top">
-                        <caption><u><b>Phaad0</b></u></caption>
+                        <caption><u><b>Phaado</b></u></caption>
                         <div className="mb-3 row">
                             <label htmlFor="phaadPrevious" className="col-sm-4 col-form-label">Previous (2022)</label>
                             <div className="col-sm-8">

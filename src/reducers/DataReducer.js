@@ -18,6 +18,12 @@ const DataReducer = (dataState, action) => {
             return {...dataState, datar: updateCollection(dataState.datar, action.value)};
         case "REMOVE_DATAR":
             return {...dataState, datar: removeCollection(dataState.datar, action.value)};
+        case "SET_KHARCHA":
+            return {...dataState, kharcha: action.value};
+        case "UPDATE_KHARCHA":
+            return {...dataState, kharcha: updateCollection(dataState.kharcha, action.value)};
+        case "REMOVE_KHARCHA":
+            return {...dataState, kharcha: removeCollection(dataState.kharcha, action.value)};
         case "SET_ALLFIRMS":
             return {...dataState, allFirms: action.value};
         case "UPDATE_ALLFIRMS":
@@ -30,11 +36,11 @@ const DataReducer = (dataState, action) => {
 }
 
 const updateCollection = (collection, updatedFirm) => {
-    collection = collection.map(firm => firm.id === updatedFirm.id ? updatedFirm : firm);
+    return collection.map(firm => firm.id === updatedFirm.id ? updatedFirm : firm);
 }
 
 const removeCollection = (collection, removedFirm) => {
-    collection = collection.filter(firm => firm.id !== removedFirm.id);
+    return collection.filter(firm => firm.id !== removedFirm.id);
 }
 
 export {DataReducer}

@@ -6,7 +6,7 @@ import { useData } from "../../contexts/DataContext";
 
 const Homepage = () => {
     const navigate = useNavigate();
-    const { dataState : {allFirms, phaad, datar, sikshanidhi, kharcha}} = useData();
+    const { dataState : {allFirms, phaad, datar, sikshanidhi, kharcha, samiti}} = useData();
 
     return (
         <div className="App d-flex flex-column min-vh-100">
@@ -14,53 +14,53 @@ const Homepage = () => {
         <main className="container mt-3 flex-fill">
           <div className="container">
             <div className="row">
-              <div class="col-md-4 col-xl-3" onClick={()=>navigate("/allFirms")} role="button">
-                  <div class="card bg-c-blue text-white">
-                      <div class="card-block">
-                          <h4 class="m-b-20">All Firms</h4>
-                          <p class="m-b-0">Firms Count<span class="f-right">{allFirms.length}</span></p>
+              <div className="col-md-4 col-xl-3" onClick={()=>navigate("/allFirms")} role="button">
+                  <div className="card bg-c-blue text-white">
+                      <div className="card-block">
+                          <h4 className="m-b-20">All Firms</h4>
+                          <p className="m-b-0">Firms Count<span className="f-right">{allFirms.length}</span></p>
                       </div>
                   </div>
               </div>
-              <div class="col-md-4 col-xl-3" onClick={()=>navigate("/datar")} role="button">
-                  <div class="card bg-c-green text-white">
-                      <div class="card-block">
-                          <h4 class="m-b-20">Datar</h4>
-                          <p class="m-b-0">Datar Collected<span class="f-right">{datar.reduce((acc,curr)=>acc+curr.current,0)}</span></p>
-                      </div>
-                  </div>
-              </div>
-              
-              <div class="col-md-4 col-xl-3" onClick={()=>navigate("/phaad")} role="button">
-                  <div class="card bg-c-yellow text-white">
-                      <div class="card-block">
-                          <h4 class="m-b-20">Phaado</h4>
-                          <p class="m-b-0">Phaado Collected<span class="f-right">{phaad.reduce((acc,curr)=>acc+curr.current,0)}</span></p>
+              <div className="col-md-4 col-xl-3" onClick={()=>navigate("/datar")} role="button">
+                  <div className="card bg-c-green text-white">
+                      <div className="card-block">
+                          <h4 className="m-b-20">Datar</h4>
+                          <p className="m-b-0">Datar Collected<span className="f-right">{datar.reduce((acc,curr)=>acc+curr.current,0)}</span></p>
                       </div>
                   </div>
               </div>
               
-              <div class="col-md-4 col-xl-3" onClick={()=>navigate("/sikshanidhi")} role="button">
-                  <div class="card bg-c-pink text-white">
-                      <div class="card-block">
-                          <h4 class="m-b-20">Sikshanidhi</h4>
-                          <p class="m-b-0">Sikshanidhi Collected<span class="f-right">{sikshanidhi.reduce((acc,curr)=>acc+curr.current,0)}</span></p>
+              <div className="col-md-4 col-xl-3" onClick={()=>navigate("/phaad")} role="button">
+                  <div className="card bg-c-yellow text-white">
+                      <div className="card-block">
+                          <h4 className="m-b-20">Phaado</h4>
+                          <p className="m-b-0">Phaado Collected<span className="f-right">{phaad.reduce((acc,curr)=>acc+curr.current,0)}</span></p>
                       </div>
                   </div>
               </div>
-              <div class="col-md-4 col-xl-3" onClick={()=>navigate("/samiti")} role="button">
-                  <div class="card bg-c-brown text-white">
-                      <div class="card-block">
-                          <h4 class="m-b-20">Samiti</h4>
-                          <p class="m-b-0">Samiti Count<span class="f-right">{sikshanidhi.reduce((acc,curr)=>acc+curr.current,0)}</span></p>
+              
+              <div className="col-md-4 col-xl-3" onClick={()=>navigate("/sikshanidhi")} role="button">
+                  <div className="card bg-c-pink text-white">
+                      <div className="card-block">
+                          <h4 className="m-b-20">Sikshanidhi</h4>
+                          <p className="m-b-0">Sikshanidhi Collected<span className="f-right">{sikshanidhi.reduce((acc,curr)=>acc+curr.current,0)}</span></p>
                       </div>
                   </div>
               </div>
-              <div class="col-md-4 col-xl-3" onClick={()=>navigate("/kharcha")} role="button">
-                  <div class="card bg-c-gray text-white">
-                      <div class="card-block">
-                          <h4 class="m-b-20">Kharcha</h4>
-                          <p class="m-b-0">Total Expense<span class="f-right">{kharcha.reduce((acc,curr)=>acc+curr.amount,0)}</span></p>
+              <div className="col-md-4 col-xl-3 pe-none" onClick={()=>navigate("/samiti")} role="button" >
+                  <div className="card bg-c-brown text-white">
+                      <div className="card-block">
+                          <h4 className="m-b-20">Samiti</h4>
+                          <p className="m-b-0">Samiti Count<span className="f-right">{samiti.reduce((acc,curr)=>acc+curr.current,0)}</span></p>
+                      </div>
+                  </div>
+              </div>
+              <div className="col-md-4 col-xl-3" onClick={()=>navigate("/kharcha")} role="button">
+                  <div className="card bg-c-gray text-white">
+                      <div className="card-block">
+                          <h4 className="m-b-20">Kharcha</h4>
+                          <p className="m-b-0">Total Expense<span className="f-right">{kharcha.reduce((acc,curr)=>acc+Number(curr.amount),0)}</span></p>
                       </div>
                   </div>
               </div>

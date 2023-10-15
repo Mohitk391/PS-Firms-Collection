@@ -30,7 +30,7 @@ const Phaad = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({name : "", place: "", previous: 0, current: 0, payer: "", mobile: "", reciever: ""});
   const [newDetails, setNewDetails] = useState({name : "", place: "", previous: 0, current: 0, payer: "", mobile: "", reciever: ""});
-  const {dataState : {phaad, allFirms}} = useData();  
+  const {dataState : {phaad, allFirms, sikshanidhi}} = useData();  
 
   useEffect(()=>{
     setResults((dayId==="all" ? phaad : phaad.filter(firm=>firm.date === days[dayId])).filter(item =>item.name.toLowerCase().includes(searchTerm.toLowerCase().trim()) || item.place.toLowerCase().includes(searchTerm.toLowerCase().trim())) );
@@ -80,6 +80,7 @@ const Phaad = () => {
 
   const saveUpdatedFirm = async () => {
     let updatingPhaadBody = {};
+    let updatingSikshanidhiBody = {};
     let updatingAllBody = {};
     if(currentDetails.previous > 0){ 
       updatingPhaadBody = {...updatingPhaadBody, previous: currentDetails.previous}
@@ -89,6 +90,13 @@ const Phaad = () => {
        updatingPhaadBody = {...updatingPhaadBody, current: currentDetails.current}
        updatingAllBody = {...updatingAllBody, phaadCurrent: currentDetails.current}
     }
+    
+    if(currentDetails.place){
+      updatingPhaadBody = {...updatingPhaadBody, place: currentDetails.place}
+      updatingAllBody = {...updatingAllBody, place: currentDetails.place}
+      if(sikshanidhi.find(firm => firm.id === currentDetails.name))
+      updatingSikshanidhiBody = {...updatingSikshanidhiBody, place: currentDetails.place};
+   }
     if(currentDetails.payer){
        updatingPhaadBody = {...updatingPhaadBody, payer: currentDetails.payer}
        updatingAllBody = {...updatingAllBody, phaadPayer: currentDetails.payer}
@@ -104,6 +112,8 @@ const Phaad = () => {
 
     await updateDoc(doc(db, "phaad", currentDetails.name), updatingPhaadBody);
     await updateDoc(doc(db, "allFirms", currentDetails.name), updatingAllBody);
+    if(Object.keys(updatingSikshanidhiBody).length)
+      await updateDoc(doc(db, "sikshanidhi", currentDetails.name), updatingSikshanidhiBody);
 
     document.getElementById('newFirmClose').click();
   }

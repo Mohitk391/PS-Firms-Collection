@@ -39,7 +39,7 @@ const KharchaIndex = () => {
     },[kharcha]);
 
     for(let i=1; i<=day; i++) {
-        let total = (kharcha.filter(entry=>entry.date === days[`day-${i}`])).reduce((acc,curr)=>acc+curr.current,0);
+        let total = (kharcha.filter(entry=>entry.date === days[`day-${i}`])).reduce((acc,curr)=>acc+curr.amount,0);
         elements.push(
             <div className="day-one d-grid mb-2 mx-5" key={i}>
                 <Link to={`/kharcha/day-${i}`} className="btn btn-outline-dark d-flex">
@@ -59,7 +59,7 @@ const KharchaIndex = () => {
             </div>
             <div className="day-index">
                 <div className="all d-grid my-2 mx-5">
-                    <Link to="/kharcha/all" className="btn btn-outline-dark d-flex"><span className="me-auto">All</span> <span className="me-3">Total - {kharcha.reduce((acc,curr)=>acc+curr.current,0)}</span></Link>
+                    <Link to="/kharcha/all" className="btn btn-outline-dark d-flex"><span className="me-auto">All</span> <span className="me-3">Total - {kharcha.reduce((acc,curr)=>acc+curr.amount,0)}</span></Link>
                 </div>
                 {
                     elements.map(element => element)

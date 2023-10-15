@@ -7,7 +7,7 @@ import autoTable from 'jspdf-autotable';
 import { Link, useParams } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import { useData } from "../../../contexts/DataContext";
-import { Timestamp, collection, deleteDoc, doc, setDoc, updateDoc } from "firebase/firestore";
+import { Timestamp, deleteDoc, doc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase-config";
 
 const ITEMS_PER_PAGE = 10;
@@ -45,7 +45,7 @@ const Datar = () => {
   };
 
   const saveNewFirm = async (firmDetails) => {
-    const docRef = await setDoc(collection(db,"datar", firmDetails.name),{...firmDetails, date: Timestamp.fromDate(new Date())})
+    const docRef = await setDoc(doc(db,"datar", firmDetails.name),{...firmDetails, date: Timestamp.fromDate(new Date())})
     console.log("Document written with document id: ", docRef);
     document.getElementById('newFirmClose').click();
   }

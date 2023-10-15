@@ -5,8 +5,7 @@ import { Timestamp, collection, onSnapshot, query } from "firebase/firestore";
 export function readDatar(q, state, dispatch){
     return onSnapshot(q, (queryResult)=>{
         queryResult.docs.map(doc => {
-            const dayId = doc.data().name;
-            return onSnapshot(query(collection(db, `datar/${dayId}/firms`)),
+            return onSnapshot(query(collection(db, `datar`)),
             (snapshot)=>{
                 let collections = state.datar;
                 let action = null;

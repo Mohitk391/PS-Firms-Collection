@@ -34,7 +34,7 @@ const Kharcha = () => {
 
   useEffect(()=>{
     setResults((dayId==="all" ? kharcha : kharcha.filter(firm=>firm.date === days[dayId])).filter((item) =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase().trim()) || item.place.toLowerCase().includes(searchTerm.toLowerCase().trim())
+    item.kharcha.toLowerCase().includes(searchTerm.toLowerCase().trim()) || item.place.toLowerCase().includes(searchTerm.toLowerCase().trim())
   ));
   },[dayId, kharcha, searchTerm]);
   
@@ -137,7 +137,7 @@ const Kharcha = () => {
                       <td className="text-center border-3">{entry.place}</td>
                       <td className="text-center border-3">{entry.amount >0 ? entry.amount : "-"}</td>
                      <td className="text-center border-3 d-flex gap-3 justify-content-center">
-                      <i className="bi bi-trash3-fill" title="Delete Entry" onClick={()=>deleteEntry(entry)}></i>
+                      <i className="bi bi-trash3-fill" title="Delete Entry" onClick={()=>deleteEntry(entry.id)}></i>
                       </td>
                     </tr>
                   );
@@ -152,7 +152,7 @@ const Kharcha = () => {
                 className="btn btn-outline-success"
                 data-bs-toggle="modal"
                 data-bs-target="#addNew"
-                onClick={()=>setNewDetails({...newDetails, name: searchTerm})}
+                onClick={()=>setNewDetails({...newDetails, kharcha: searchTerm})}
               >
                 Add New Firm
               </button>
