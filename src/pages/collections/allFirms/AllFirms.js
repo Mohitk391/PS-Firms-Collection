@@ -8,7 +8,7 @@ import Navbar from "../../../components/Navbar/Navbar";
 import { useData } from "../../../contexts/DataContext";
 import { Link } from "react-router-dom";
 import { Loader } from "../../../utilities/Loader/Loader"
-import { Timestamp, deleteDoc, doc, setDoc, updateDoc } from "firebase/firestore";
+import { Timestamp, addDoc, collection, deleteDoc, doc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase-config";
 
 const ITEMS_PER_PAGE = 10;
@@ -19,8 +19,8 @@ const AllFirms = () => {
   const [results, setResults] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({});
-  const [newDetails, setNewDetails] = useState({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: ""});
-  const {dataState : {allFirms, phaad, sikshanidhi}} = useData();  
+  const [newDetails, setNewDetails] = useState({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, datarPayer: "", datarMobile : "", datarReciever : ""});
+  const {dataState : {allFirms, phaad, sikshanidhi, datar}} = useData();  
 
 
   useEffect(()=> {
@@ -87,7 +87,7 @@ const AllFirms = () => {
   });
 }
 
-    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: ""});
+    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, datarPayer: "", datarMobile : "", datarReciever : ""});
     setSearchTerm('');
     document.getElementById("newFirmClose").click();
   }
@@ -105,7 +105,13 @@ const AllFirms = () => {
       sikshanidhiCurrent : 0,
       sikshanidhiPayer : "",
       sikshanidhiMobile : "",
-      sikshanidhiReciever : ""
+      sikshanidhiReciever : "",
+      prasadi : 0,
+      aarti: 0,
+      coupon: 0,
+      datarPayer : "",
+      datarMobile: "",
+      datarReciever : "",
     })
 
     if(newDetails.phaadCurrent>0){
@@ -121,7 +127,7 @@ const AllFirms = () => {
       });
     }
 
-    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: ""});
+    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, datarPayer: "", datarMobile : "", datarReciever : ""});
     setSearchTerm('');
     document.getElementById("newFirmClose").click();
   }
@@ -139,7 +145,13 @@ const AllFirms = () => {
       sikshanidhiCurrent : newDetails.sikshanidhiCurrent,
       sikshanidhiPayer : newDetails.sikshanidhiPayer,
       sikshanidhiMobile : newDetails.sikshanidhiMobile,
-      sikshanidhiReciever : newDetails.sikshanidhiReciever
+      sikshanidhiReciever : newDetails.sikshanidhiReciever,
+      prasadi : 0,
+      aarti: 0,
+      coupon: 0,
+      datarPayer : "",
+      datarMobile: "",
+      datarReciever : "",
     });
 
     if(newDetails.sikshanidhiCurrent>0){
@@ -155,7 +167,72 @@ const AllFirms = () => {
       });
     }
 
-    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: ""});
+    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, datarPayer: "", datarMobile : "", datarReciever : ""});
+    setSearchTerm('');
+    document.getElementById("newFirmClose").click();
+  }
+
+  const saveNewFirmDatar = async () => {
+    await setDoc(doc(db, "allFirms", newDetails.name), {
+      name: newDetails.name,
+      place: newDetails.place,
+      phaadPrevious : 0,
+      phaadCurrent : 0,
+      phaadPayer : "",
+      phaadMobile : "",
+      phaadReciever : "",
+      sikshanidhiPrevious : 0,
+      sikshanidhiCurrent : 0,
+      sikshanidhiPayer : "",
+      sikshanidhiMobile : "",
+      sikshanidhiReciever : "",
+      prasadi : newDetails.prasadi,
+      aarti: newDetails.aarti,
+      coupon: newDetails.coupon,
+      datarPayer : newDetails.datarPayer,
+      datarMobile: newDetails.datarMobile,
+      datarReciever : newDetails.datarReciever
+    });
+
+    if(newDetails.prasadi>0){
+        await addDoc(collection(db, "datar"), {
+        name: newDetails.name,
+        place: newDetails.place,
+        data : "prasadi",
+        amount : newDetails.prasadi,
+        payer : newDetails.datarPayer,
+        mobile : newDetails.datarMobile,
+        reciever : newDetails.datarReciever,
+        date : Timestamp.fromDate(new Date())
+      });
+    }
+
+    if(newDetails.aarti>0){
+      await addDoc(collection(db, "datar"), {
+        name: newDetails.name,
+        place: newDetails.place,
+        data : "aarti",
+        amount: newDetails.aarti,
+        payer : newDetails.datarPayer,
+        mobile : newDetails.datarMobile,
+        reciever : newDetails.datarReciever,
+        date : Timestamp.fromDate(new Date())
+      });
+    }
+    if(newDetails.coupon>0){
+      await addDoc(collection(db, "datar"), {
+        name: newDetails.name,
+        place: newDetails.place,
+        data: "coupon",
+        amount: newDetails.coupon,
+        payer : newDetails.datarPayer,
+        mobile : newDetails.datarMobile,
+        reciever : newDetails.datarReciever,
+        date : Timestamp.fromDate(new Date())
+      });
+    }
+
+    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, datarPayer: "", datarMobile : "", datarReciever : ""});
     setSearchTerm('');
     document.getElementById("newFirmClose").click();
   }
@@ -204,6 +281,24 @@ const AllFirms = () => {
        updatingAllBody = {...updatingAllBody, phaadReciever: currentDetails.phaadReciever}
        updatingPhaadBody = {...updatingPhaadBody, reciever: currentDetails.phaadReciever}
     }
+    if(currentDetails.prasadi > 0 || currentDetails.aarti > 0 || currentDetails.coupon > 0){
+      updatingAllBody = {...updatingAllBody, datarPayer: currentDetails.datarPayer, datarMobile: currentDetails.datarMobile, datarReciever: currentDetails.datarReciever}
+    }
+    if(currentDetails.prasadi > 0){
+      updatingAllBody = {...updatingAllBody, prasadi: currentDetails.prasadi}
+      if(!(datar.find(firm => firm.data === "prasadi" && firm.name === currentDetails.name)))
+      await addDoc(collection(db, "datar"), {name: currentDetails.name, place: currentDetails.place, data: currentDetails.prasadi, payer: currentDetails.datarPayer, mobile: currentDetails.datarMobile, reciever: currentDetails.datarReciever});
+    }
+    if(currentDetails.aarti > 0){
+      updatingAllBody = {...updatingAllBody, aarti: currentDetails.aarti}
+      if(!(datar.find(firm => firm.data === "aarti" && firm.name === currentDetails.name)))
+      await addDoc(collection(db, "datar"), {name: currentDetails.name, place: currentDetails.place, data: currentDetails.aarti, payer: currentDetails.datarPayer, mobile: currentDetails.datarMobile, reciever: currentDetails.datarReciever});
+    }
+    if(currentDetails.coupon > 0){
+      updatingAllBody = {...updatingAllBody, coupon: currentDetails.coupon}
+      if(!(datar.find(firm => firm.data === "coupon" && firm.name === currentDetails.name)))
+      await addDoc(collection(db, "datar"), {name: currentDetails.name, place: currentDetails.place, data: currentDetails.coupon, payer: currentDetails.datarPayer, mobile: currentDetails.datarMobile, reciever: currentDetails.datarReciever});
+    }
 
     await updateDoc(doc(db,"allFirms", currentDetails.name), updatingAllBody);
 
@@ -211,14 +306,32 @@ const AllFirms = () => {
         if(phaad.find(firm => firm.name === currentDetails.name))
           await updateDoc(doc(db,"phaad", currentDetails.name), updatingPhaadBody);
         else
-          await setDoc(doc(db,"phaad", currentDetails.name), updatingPhaadBody);
+          await setDoc(doc(db,"phaad", currentDetails.name), {
+            name: currentDetails.name,
+            place: currentDetails.place,
+            previous : currentDetails.phaadPrevious,
+            current : currentDetails.phaadCurrent,
+            payer : currentDetails.phaadPayer,
+            mobile : currentDetails.phaadMobile,
+            reciever : currentDetails.phaadReciever,
+            date : Timestamp.fromDate(new Date())
+          });
     }
       
     if(updatingSikshanidhiBody){
       if(sikshanidhi.find(firm => firm.name === currentDetails.name))
         await updateDoc(doc(db, "sikshanidhi", currentDetails.name), updatingSikshanidhiBody);
       else  
-        await setDoc(doc(db, "sikshanidhi", currentDetails.name), updatingSikshanidhiBody);
+        await setDoc(doc(db, "sikshanidhi", currentDetails.name), {
+          name: currentDetails.name,
+          place: currentDetails.place,
+          previous : currentDetails.sikshanidhiPrevious,
+          current : currentDetails.sikshanidhiCurrent,
+          payer : currentDetails.sikshanidhiPayer,
+          mobile : currentDetails.sikshanidhiMobile,
+          reciever : currentDetails.sikshanidhiReciever,
+          date : Timestamp.fromDate(new Date())
+        });
     }
   }
 
@@ -253,8 +366,6 @@ const AllFirms = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [results]);
-
- 
 
   const totalPages = Math.ceil(results.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -292,6 +403,9 @@ const AllFirms = () => {
                   <th className="col-2 text-center border-3 align-middle" rowSpan={2}>Place</th>
                   <th className="col-3 text-center border-3" colSpan={2}>Phaado</th>
                   <th className="col-3 text-center border-3" colSpan={2}>Sikshanidhi</th>
+                  <th className="col-2 text-center border-3 align-middle" rowSpan={2}>Parsadi</th>
+                  <th className="col-2 text-center border-3 align-middle" rowSpan={2}>Aarti</th>
+                  <th className="col-2 text-center border-3 align-middle" rowSpan={2}>Coupon</th>
                   <th className="col-2 text-center border-3 align-middle" rowSpan={2}>Actions</th>
                 </tr>
                 <tr>
@@ -315,6 +429,9 @@ const AllFirms = () => {
                         {firm.sikshanidhiPrevious >0 ? firm.sikshanidhiPrevious : "-"}
                       </td>
                       <td className="text-center border-3">{firm.sikshanidhiCurrent >0 ? firm.sikshanidhiCurrent : "-"}</td>
+                      <td className="text-center border-3">{firm.prasad >0 ? firm.prasad : "-"}</td>
+                      <td className="text-center border-3">{firm.aarti >0 ? firm.aarti : "-"}</td>
+                      <td className="text-center border-3">{firm.coupon >0 ? firm.coupon : "-"}</td>
                      <td className="text-center border-3 d-flex gap-3 justify-content-center">
                       <i className="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm.name)}></i>
                       </td>
@@ -488,7 +605,7 @@ const AllFirms = () => {
                   <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
                   <div className="col-sm-10">
                     <div className="form-check form-check-inline">
-                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="BhanpuriIndex" value="Bhanpuri" onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="BhanpuriIndex" onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
                       <label className="form-check-label" htmlFor="BhanpuriIndex">Bhanpuri</label>
                     </div>
                     <div className="form-check form-check-inline">
@@ -509,8 +626,12 @@ const AllFirms = () => {
                         <label htmlFor="sikshanidhiSelector" className="form-check-label">Sikshanidhi</label>
                     </div>
                     <div className="form-check form-check-inline">
-                        <input type="radio" name="Selector" className="form-check-input" id="bothSelector" value="Both" data-bs-target="#addNew" data-bs-toggle="modal"/>
-                        <label htmlFor="bothSelector" className="form-check-label">Both</label>
+                        <input type="radio"  name="Selector" className="form-check-input" id="datarSelector" value="Datar" data-bs-target="#addNewDatar" data-bs-toggle="modal"/>
+                        <label htmlFor="datarSelector" className="form-check-label">Aarti | Prasadi | Coupon</label>
+                    </div>
+                    <div className="form-check form-check-inline">
+                        <input type="radio" name="Selector" className="form-check-input" id="allSelector" value="All" data-bs-target="#addNew" data-bs-toggle="modal"/>
+                        <label htmlFor="allSelector" className="form-check-label">All</label>
                     </div>
                   </div>
                 </div>
@@ -539,11 +660,11 @@ const AllFirms = () => {
                   <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
                   <div className="col-sm-10">
                     <div className="form-check form-check-inline">
-                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Bhanpuri" value="option1" onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Bhanpuri" checked={newDetails.place === "Bhanpuri"} onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
                       <label className="form-check-label" htmlFor="Bhanpuri">Bhanpuri</label>
                     </div>
                     <div className="form-check form-check-inline">
-                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Fafadih" value="option2" onChange={e=>setNewDetails({...newDetails, place: "Fafadih"})}/>
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Fafadih" checked={newDetails.place === "Fafadih"} onChange={e=>setNewDetails({...newDetails, place: "Fafadih"})}/>
                       <label className="form-check-label" htmlFor="Fafadih">Fafadih</label>
                     </div>
                   </div>
@@ -766,6 +887,77 @@ const AllFirms = () => {
           </div>
         </div>
       </div>
+      <div className="modal fade" id="addNewDatar" tabIndex="-1" aria-labelledby="addNewDatarLabel" aria-hidden="true">
+        <div className="modal-dialog modal-dialog-centered modal-xl">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="addNewDatarLabel">Firm Details</h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" id="newFirmClose" aria-label="Close"></button>
+            </div>
+            <div className="modal-body">
+                <div className="mb-3 row">
+                    <label htmlFor="name" className="col-sm-2 col-form-label">Firm Name</label>
+                    <div className="col-sm-10">
+                    <input type="text" className="form-control" id="name" value={newDetails?.name} onChange={e=>setNewDetails({...newDetails, name: e.target.value})}/>
+                    </div>
+                </div>
+                <div className="mb-3 row">
+                  <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
+                  <div className="col-sm-10">
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Bhanpuri" checked={newDetails.place==="Bhanpuri"} onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
+                      <label className="form-check-label" htmlFor="Bhanpuri">Bhanpuri</label>
+                    </div>
+                    <div className="form-check form-check-inline">
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Fafadih" checked={newDetails.place==="Fafadih"} onChange={e=>setNewDetails({...newDetails, place: "Fafadih"})}/>
+                      <label className="form-check-label" htmlFor="Fafadih">Fafadih</label>
+                    </div>
+                  </div>
+                </div>
+                <div className="mb-3 row">
+                    <label htmlFor="parsadi" className="col-sm-2 col-form-label">Parsadi</label>
+                    <div className="col-sm-10">
+                    <input type="number" min="0" placeholder="-" className="form-control" id="parsadi" value={newDetails?.parsadi} onChange={e=>setNewDetails({...newDetails, parsadi: Number(e.target.value)})}/>
+                    </div>
+                </div>
+                <div className="mb-3 row">
+                    <label htmlFor="aarti" className="col-sm-2 col-form-label">Aarti</label>
+                    <div className="col-sm-10">
+                    <input type="number" min="0" placeholder="-" className="form-control" id="aarti" value={newDetails?.aarti} onChange={e=>setNewDetails({...newDetails, aarti: Number(e.target.value)})}/>
+                    </div>
+                </div>
+                <div className="mb-3 row">
+                    <label htmlFor="coupon" className="col-sm-2 col-form-label">Coupon</label>
+                    <div className="col-sm-10">
+                    <input type="number" min="0" placeholder="-" className="form-control" id="coupon" value={newDetails?.coupon} onChange={e=>setNewDetails({...newDetails, coupon: Number(e.target.value)})}/>
+                    </div>
+                </div>
+                <div className="mb-3 row">
+                    <label htmlFor="datarPayerName" className="col-sm-2 col-form-label">Haste (Payer)</label>
+                    <div className="col-sm-10">
+                    <input type="text" placeholder="-" className="form-control" id="datarPayerName" value={newDetails?.datarPayer} onChange={e=>setNewDetails({...newDetails, datarPayer: e.target.value})}/>
+                    </div>
+                </div>
+                <div className="mb-3 row">
+                    <label htmlFor="datarPayerNumber" className="col-sm-2 col-form-label">Mobile Number</label>
+                    <div className="col-sm-10">
+                    <input type="text" placeholder="-" className="form-control" id="datarPayerNumber" value={newDetails?.datarMobile} onChange={e=>setNewDetails({...newDetails, datarMobile:  e.target.value})}/>
+                    </div>
+                </div>
+                <div className="mb-3 row">
+                    <label htmlFor="datarReceiver" className="col-sm-2 col-form-label">Haste (Receiver)</label>
+                    <div className="col-sm-10">
+                    <input type="text" placeholder="-" className="form-control" id="datarReceiver" value={newDetails?.datarReciever} onChange={e=>setNewDetails({...newDetails, datarReciever: e.target.value})}/>
+                    </div>
+                </div>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" className="btn btn-primary" onClick={()=>saveNewFirmDatar()}>Add Firm</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <table className="table table-bordered" id="fullDataTable" style={{display: 'none'}}>
               <thead>
                 <tr>
@@ -773,7 +965,6 @@ const AllFirms = () => {
                   <th className="col-2 text-center border-3 align-middle" rowSpan={2}>Place</th>
                   <th className="col-3 text-center border-3" colSpan={2}>Phaad</th>
                   <th className="col-3 text-center border-3" colSpan={2}>Sikshanidhi</th>
-                  <th className="col-2 text-center border-3 align-middle" rowSpan={2}>Actions</th>
                 </tr>
                 <tr>
                   <th className="text-center border-3">Prev (2022)</th>
@@ -796,9 +987,6 @@ const AllFirms = () => {
                         {firm.sikshanidhiPrevious >0 ? firm.sikshanidhiPrevious : "-"}
                       </td>
                       <td className="text-center border-3">{firm.sikshanidhiCurrent >0 ? firm.sikshanidhiCurrent : "-"}</td>
-                     <td className="text-center border-3 d-flex gap-3 justify-content-center">
-                      <i className="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm)}></i>
-                      </td>
                     </tr>
                   );
                 })}

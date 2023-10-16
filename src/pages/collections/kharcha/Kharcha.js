@@ -240,7 +240,7 @@ const Kharcha = () => {
               <div className="mb-3 row">
                 <label htmlFor="kharcha" className="col-sm-2 col-form-label">Kharcha</label>
                 <div className="col-sm-10">
-                  <input type="text" className="form-control" id="kharcha" placeholder="Firm Name"  value={newDetails?.kharcha} onChange={e=>setNewDetails({...newDetails, kharcha: e.target.value})}/>
+                  <input type="text" className="form-control" id="kharcha"  value={newDetails?.kharcha} onChange={e=>setNewDetails({...newDetails, kharcha: e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">

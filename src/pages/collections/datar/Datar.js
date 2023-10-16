@@ -7,7 +7,7 @@ import autoTable from 'jspdf-autotable';
 import { Link, useParams } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import { useData } from "../../../contexts/DataContext";
-import { Timestamp, deleteDoc, doc, setDoc, updateDoc } from "firebase/firestore";
+import { Timestamp, addDoc, collection, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase-config";
 
 const ITEMS_PER_PAGE = 10;
@@ -30,7 +30,7 @@ const Datar = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({});
   const [newDetails, setNewDetails] = useState({});
-  const {dataState : {datar}} = useData();  
+  const {dataState : {datar, allFirms}} = useData();  
 
   useEffect(()=>{
     setResults((dayId==="all" ? datar : datar.filter(firm=>firm.date === days[dayId])).filter((item) =>
@@ -44,8 +44,17 @@ const Datar = () => {
     setSearchTerm('');
   };
 
-  const saveNewFirm = async (firmDetails) => {
-    const docRef = await setDoc(doc(db,"datar", firmDetails.name),{...firmDetails, date: Timestamp.fromDate(new Date())})
+  const saveNewFirm = async () => {
+    const docRef = await addDoc(collection(db,"datar"),{...newDetails, date: Timestamp.fromDate(new Date())})
+
+    if(allFirms.find(firm => firm.name === newDetails.name) && (newDetails.data === "prasadi" || newDetails.data === "aarti" || newDetails.data === "coupon")){
+        await updateDoc(doc(db, "allFirms", newDetails.name), {
+          [newDetails.data] : newDetails.amount,
+          datarPayer : newDetails.payer,
+          datarMobile : newDetails.mobile,
+          datarReciever : newDetails.reciever
+        });
+    }
     console.log("Document written with document id: ", docRef);
     document.getElementById('newFirmClose').click();
   }
@@ -68,13 +77,13 @@ const Datar = () => {
        updatingDatarBody = {...updatingDatarBody, reciever: currentDetails.reciever}
     }
 
-    await updateDoc(doc(db, "datar", currentDetails.name), updatingDatarBody);
+    await updateDoc(doc(db, "datar", currentDetails.id), updatingDatarBody);
 
     document.getElementById('newFirmClose').click();
   }
 
-  const deleteFirm = async (name) => {
-    await deleteDoc(doc(db, "datar", name));
+  const deleteFirm = async (id) => {
+    await deleteDoc(doc(db, "datar", id));
     document.getElementById('newFirmClose').click(); 
   }
   
@@ -147,7 +156,7 @@ const Datar = () => {
                       </td>
                       <td className="text-center border-3">{firm.amount >0 ? firm.amount : "-"}</td>
                      <td className="text-center border-3 d-flex gap-3 justify-content-center">
-                      <i className="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm.name)}></i>
+                      <i className="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm.id)}></i>
                       </td>
                     </tr>
                   );
@@ -291,15 +300,15 @@ const Datar = () => {
                   </div>
                 </div>
               <div className="mb-3 row">
-                <label htmlFor="inputPassword" className="col-sm-2 col-form-label">Data</label>
+                <label htmlFor="data" className="col-sm-2 col-form-label">Data</label>
                 <div className="col-sm-10">
-                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" onChange={e=>setNewDetails({...newDetails, data: e.target.value})}/>
+                  <input type="text" placeholder="-" className="form-control" id="data" onChange={e=>setNewDetails({...newDetails, data: e.target.value})}/>
                 </div>
               </div>
               <div className="mb-3 row">
-                <label htmlFor="inputPassword" className="col-sm-2 col-form-label">Amount</label>
+                <label htmlFor="amount" className="col-sm-2 col-form-label">Amount</label>
                 <div className="col-sm-10">
-                  <input type="number" min="0" placeholder="-" className="form-control" id="inputPassword" onChange={e=>setNewDetails({...newDetails, amount: Number(e.target.value)})}/>
+                  <input type="number" min="0" placeholder="-" className="form-control" id="amount" onChange={e=>setNewDetails({...newDetails, amount: Number(e.target.value)})}/>
                 </div>
               </div>
               <div className="mb-3 row">
