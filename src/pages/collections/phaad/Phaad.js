@@ -71,7 +71,14 @@ const Phaad = () => {
         sikshanidhiCurrent : 0,
         sikshanidhiPayer : "",
         sikshanidhiMobile : "",
-        sikshanidhiReciever : ""
+        sikshanidhiReciever : "",
+        aarti : 0,
+        prasadi : 0,
+        coupon : 0,
+        aartiName : "",
+        datarPayer: "",
+        datarMobile: "",
+        datarReciever : ""
       })
     }
     setNewDetails({name : "", place: "", previous: 0, current: 0, payer: "", mobile: "", reciever: ""});
@@ -82,30 +89,31 @@ const Phaad = () => {
     let updatingPhaadBody = {};
     let updatingSikshanidhiBody = {};
     let updatingAllBody = {};
-    if(currentDetails.previous > 0){ 
+    const currentFirm = phaad.find(firm => firm.name === currentDetails?.name);
+    if(currentDetails.previous !== currentFirm.name){ 
       updatingPhaadBody = {...updatingPhaadBody, previous: currentDetails.previous}
       updatingAllBody = {...updatingAllBody, phaadPrevious: currentDetails}
     }
-    if(currentDetails.current > 0){
+    if(currentDetails.current !== currentFirm.current){
        updatingPhaadBody = {...updatingPhaadBody, current: currentDetails.current}
        updatingAllBody = {...updatingAllBody, phaadCurrent: currentDetails.current}
     }
     
-    if(currentDetails.place){
+    if(currentDetails.place !== currentFirm.place){
       updatingPhaadBody = {...updatingPhaadBody, place: currentDetails.place}
       updatingAllBody = {...updatingAllBody, place: currentDetails.place}
       if(sikshanidhi.find(firm => firm.id === currentDetails.name))
       updatingSikshanidhiBody = {...updatingSikshanidhiBody, place: currentDetails.place};
    }
-    if(currentDetails.payer){
+    if(currentDetails.payer !== currentFirm.payer){
        updatingPhaadBody = {...updatingPhaadBody, payer: currentDetails.payer}
        updatingAllBody = {...updatingAllBody, phaadPayer: currentDetails.payer}
     }
-    if(currentDetails.mobile ){
+    if(currentDetails.mobile !== currentFirm.mobile){
        updatingPhaadBody = {...updatingPhaadBody, mobile: currentDetails.mobile}
        updatingAllBody = {...updatingAllBody, phaadMobile: currentDetails.mobile}
     }
-    if(currentDetails.reciever){
+    if(currentDetails.reciever !== currentFirm.reciever){
        updatingPhaadBody = {...updatingPhaadBody, reciever: currentDetails.reciever}
        updatingAllBody = {...updatingAllBody, phaadReciever: currentDetails.reciever}
     }

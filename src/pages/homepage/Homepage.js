@@ -26,7 +26,7 @@ const Homepage = () => {
                   <div className="card bg-c-green text-white">
                       <div className="card-block">
                           <h4 className="m-b-20">Datar</h4>
-                          <p className="m-b-0">Datar Collected<span className="f-right">{datar.reduce((acc,curr)=>acc+curr.current,0)}</span></p>
+                          <p className="m-b-0">Datar Collected<span className="f-right">{datar.reduce((acc,curr)=>acc+curr.amount,0)}</span></p>
                       </div>
                   </div>
               </div>

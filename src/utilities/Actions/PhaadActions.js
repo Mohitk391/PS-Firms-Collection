@@ -12,7 +12,7 @@ export function readPhaad(q, state, dispatch){
                 let updatedValue = null;
                 snapshot.docChanges().forEach((change)=>{
                     if (change.type === "added") {
-                        console.log("New firm: ", change.doc.data());
+                        //console.log("New firm: ", change.doc.data());
                         collections = [...collections, {...change.doc.data(), id: change.doc.id, date: (new Timestamp(change.doc.data().date.seconds, change.doc.data().date.nanoseconds)).toDate().toLocaleDateString('en-GB')}];
                         action="added";
                     }

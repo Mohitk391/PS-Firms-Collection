@@ -19,8 +19,9 @@ const AllFirms = () => {
   const [results, setResults] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({});
-  const [newDetails, setNewDetails] = useState({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, datarPayer: "", datarMobile : "", datarReciever : ""});
-  const {dataState : {allFirms, phaad, sikshanidhi, datar}} = useData();  
+  const [newDetails, setNewDetails] = useState({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false, datarPayer: "", datarMobile : "", datarReciever : ""});
+  const {dataState : {allFirms, phaad, sikshanidhi, datar}} = useData(); 
+  const [currentFirm, setCurrentFirm] = useState();
 
 
   useEffect(()=> {
@@ -38,6 +39,8 @@ const AllFirms = () => {
   
   const handleModalClose = () => {
     setCurrentDetails({}); 
+    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false, datarPayer: "", datarMobile : "", datarReciever : ""});
+    setSearchTerm('');
   };
 
 // While saving any new firm with either of only phaad, only sikshanidhi or both, add today's date as the respective collection's date . For example for only phaad add today's date as phaadDate.
@@ -46,73 +49,83 @@ const AllFirms = () => {
   const saveNewFirm = async () => {
     console.log(newDetails);
     console.log(searchTerm);
-    await setDoc(doc(db, "allFirms", newDetails.name), {
-      name: newDetails.name,
-      place: newDetails.place,
-      phaadPrevious : newDetails.phaadPrevious,
-      phaadCurrent : newDetails.phaadCurrent,
-      phaadPayer : newDetails.phaadPayer,
-      phaadMobile : newDetails.phaadMobile,
-      phaadReciever : newDetails.phaadReciever,
-      sikshanidhiPrevious : newDetails.sikshanidhiPrevious,
-      sikshanidhiCurrent : newDetails.sikshanidhiCurrent,
-      sikshanidhiPayer : newDetails.sikshanidhiPayer,
-      sikshanidhiMobile : newDetails.sikshanidhiMobile,
-      sikshanidhiReciever : newDetails.sikshanidhiReciever
-    })
+    await setDoc(doc(db, "allFirms", newDetails.name), newDetails);
 
     if(newDetails.phaadCurrent>0){
       await setDoc(doc(db, "phaad", newDetails.name), {
-      name: newDetails.name,
-      place: newDetails.place,
-      previous : newDetails.phaadPrevious,
-      current : newDetails.phaadCurrent,
-      payer : newDetails.phaadPayer,
-      mobile : newDetails.phaadMobile,
-      reciever : newDetails.phaadReciever,
-      date : Timestamp.fromDate(new Date())
-    });
-  }
+        name: newDetails.name,
+        place: newDetails.place,
+        previous : newDetails.phaadPrevious,
+        current : newDetails.phaadCurrent,
+        payer : newDetails.phaadPayer,
+        mobile : newDetails.phaadMobile,
+        reciever : newDetails.phaadReciever,
+        date : Timestamp.fromDate(new Date())
+      });
+    }
 
-  if(newDetails.sikshanidhiCurrent>0){
-    await setDoc(doc(db, "sikshanidhi", newDetails.name), {
-    name: newDetails.name,
-    place: newDetails.place,
-    previous : newDetails.sikshanidhiPrevious,
-    current : newDetails.sikshanidhiCurrent,
-    payer : newDetails.sikshanidhiPayer,
-    mobile : newDetails.sikshanidhiMobile,
-    reciever : newDetails.sikshanidhiReciever,
-    date : Timestamp.fromDate(new Date())
-  });
-}
+    if(newDetails.sikshanidhiCurrent>0){
+      await setDoc(doc(db, "sikshanidhi", newDetails.name), {
+        name: newDetails.name,
+        place: newDetails.place,
+        previous : newDetails.sikshanidhiPrevious,
+        current : newDetails.sikshanidhiCurrent,
+        payer : newDetails.sikshanidhiPayer,
+        mobile : newDetails.sikshanidhiMobile,
+        reciever : newDetails.sikshanidhiReciever,
+        date : Timestamp.fromDate(new Date())
+      });
+    }
 
-    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, datarPayer: "", datarMobile : "", datarReciever : ""});
+    if(newDetails.prasadi>0){
+      await addDoc(collection(db, "datar"), {
+        name: newDetails.name,
+        place: newDetails.place,
+        data : "prasadi",
+        amount : newDetails.prasadi,
+        isPrasadiPaid: newDetails.isPrasadiPaid,
+        payer : newDetails.datarPayer,
+        mobile : newDetails.datarMobile,
+        reciever : newDetails.datarReciever,
+        date : Timestamp.fromDate(new Date())
+      });
+    }
+
+    if(newDetails.aarti>0){
+      await addDoc(collection(db, "datar"), {
+        name: newDetails.name,
+        place: newDetails.place,
+        data : "aarti",
+        aartiName : newDetails.aartiName,
+        amount: newDetails.aarti,
+        isAartiPaid: newDetails.isAartiPaid,
+        payer : newDetails.datarPayer,
+        mobile : newDetails.datarMobile,
+        reciever : newDetails.datarReciever,
+        date : Timestamp.fromDate(new Date())
+      });
+    }
+    if(newDetails.coupon>0){
+      await addDoc(collection(db, "datar"), {
+        name: newDetails.name,
+        place: newDetails.place,
+        data: "coupon",
+        amount: newDetails.coupon,
+        isCouponPaid: newDetails.isCouponPaid,
+        payer : newDetails.datarPayer,
+        mobile : newDetails.datarMobile,
+        reciever : newDetails.datarReciever,
+        date : Timestamp.fromDate(new Date())
+      });
+    }
+
+    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false,  sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, datarPayer: "", datarMobile : "", datarReciever : ""});
     setSearchTerm('');
     document.getElementById("newFirmClose").click();
   }
 
   const saveNewFirmPhaad = async () => {
-    await setDoc(doc(db, "allFirms", newDetails.name), {
-      name: newDetails.name,
-      place: newDetails.place,
-      phaadPrevious : newDetails.phaadPrevious,
-      phaadCurrent : newDetails.phaadCurrent,
-      phaadPayer : newDetails.phaadPayer,
-      phaadMobile : newDetails.phaadMobile,
-      phaadReciever : newDetails.phaadReciever,
-      sikshanidhiPrevious : 0,
-      sikshanidhiCurrent : 0,
-      sikshanidhiPayer : "",
-      sikshanidhiMobile : "",
-      sikshanidhiReciever : "",
-      prasadi : 0,
-      aarti: 0,
-      coupon: 0,
-      datarPayer : "",
-      datarMobile: "",
-      datarReciever : "",
-    })
+    await setDoc(doc(db, "allFirms", newDetails.name), newDetails)
 
     if(newDetails.phaadCurrent>0){
         await setDoc(doc(db, "phaad", newDetails.name), {
@@ -127,32 +140,13 @@ const AllFirms = () => {
       });
     }
 
-    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, datarPayer: "", datarMobile : "", datarReciever : ""});
+    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false,  datarPayer: "", datarMobile : "", datarReciever : ""});
     setSearchTerm('');
-    document.getElementById("newFirmClose").click();
+    document.getElementById("newPhaadClose").click();
   }
 
   const saveNewFirmSikshanidhi = async () => {
-    await setDoc(doc(db, "allFirms", newDetails.name), {
-      name: newDetails.name,
-      place: newDetails.place,
-      phaadPrevious : 0,
-      phaadCurrent : 0,
-      phaadPayer : "",
-      phaadMobile : "",
-      phaadReciever : "",
-      sikshanidhiPrevious : newDetails.sikshanidhiPrevious,
-      sikshanidhiCurrent : newDetails.sikshanidhiCurrent,
-      sikshanidhiPayer : newDetails.sikshanidhiPayer,
-      sikshanidhiMobile : newDetails.sikshanidhiMobile,
-      sikshanidhiReciever : newDetails.sikshanidhiReciever,
-      prasadi : 0,
-      aarti: 0,
-      coupon: 0,
-      datarPayer : "",
-      datarMobile: "",
-      datarReciever : "",
-    });
+    await setDoc(doc(db, "allFirms", newDetails.name), newDetails);
 
     if(newDetails.sikshanidhiCurrent>0){
         await setDoc(doc(db, "sikshanidhi", newDetails.name), {
@@ -167,32 +161,13 @@ const AllFirms = () => {
       });
     }
 
-    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, datarPayer: "", datarMobile : "", datarReciever : ""});
+    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false,  datarPayer: "", datarMobile : "", datarReciever : ""});
     setSearchTerm('');
-    document.getElementById("newFirmClose").click();
+    document.getElementById("newSikshanidhiClose").click();
   }
 
   const saveNewFirmDatar = async () => {
-    await setDoc(doc(db, "allFirms", newDetails.name), {
-      name: newDetails.name,
-      place: newDetails.place,
-      phaadPrevious : 0,
-      phaadCurrent : 0,
-      phaadPayer : "",
-      phaadMobile : "",
-      phaadReciever : "",
-      sikshanidhiPrevious : 0,
-      sikshanidhiCurrent : 0,
-      sikshanidhiPayer : "",
-      sikshanidhiMobile : "",
-      sikshanidhiReciever : "",
-      prasadi : newDetails.prasadi,
-      aarti: newDetails.aarti,
-      coupon: newDetails.coupon,
-      datarPayer : newDetails.datarPayer,
-      datarMobile: newDetails.datarMobile,
-      datarReciever : newDetails.datarReciever
-    });
+    await setDoc(doc(db, "allFirms", newDetails.name), newDetails);
 
     if(newDetails.prasadi>0){
         await addDoc(collection(db, "datar"), {
@@ -200,6 +175,7 @@ const AllFirms = () => {
         place: newDetails.place,
         data : "prasadi",
         amount : newDetails.prasadi,
+        isPrasadiPaid: newDetails.isPrasadiPaid,
         payer : newDetails.datarPayer,
         mobile : newDetails.datarMobile,
         reciever : newDetails.datarReciever,
@@ -212,7 +188,9 @@ const AllFirms = () => {
         name: newDetails.name,
         place: newDetails.place,
         data : "aarti",
+        aartiName : newDetails.aartiName,
         amount: newDetails.aarti,
+        isAartiPaid: newDetails.isAartiPaid,
         payer : newDetails.datarPayer,
         mobile : newDetails.datarMobile,
         reciever : newDetails.datarReciever,
@@ -225,6 +203,7 @@ const AllFirms = () => {
         place: newDetails.place,
         data: "coupon",
         amount: newDetails.coupon,
+        isCouponPaid: newDetails.isCouponPaid,
         payer : newDetails.datarPayer,
         mobile : newDetails.datarMobile,
         reciever : newDetails.datarReciever,
@@ -232,107 +211,118 @@ const AllFirms = () => {
       });
     }
 
-    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, datarPayer: "", datarMobile : "", datarReciever : ""});
+    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false,  datarPayer: "", datarMobile : "", datarReciever : ""});
     setSearchTerm('');
-    document.getElementById("newFirmClose").click();
+    document.getElementById("newDatarClose").click();
+    
   }
 
   const saveUpdatedFirm = async () => {
-    let updatingAllBody = {};
-    let updatingPhaadBody = {};
-    let updatingSikshanidhiBody = {};
-    if(currentDetails.sikshanidhiPrevious > 0){ 
-      updatingAllBody = {...updatingAllBody, sikshanidhiPrevious: currentDetails.sikshanidhiPrevious}
-      updatingSikshanidhiBody = {...updatingSikshanidhiBody, previous: currentDetails.sikshanidhiPrevious}
-    }
-    if(currentDetails.sikshanidhiCurrent > 0){
-      updatingSikshanidhiBody = {...updatingSikshanidhiBody, current: currentDetails.sikshanidhiCurrent}
-       updatingAllBody = {...updatingAllBody, sikshanidhiCurrent: currentDetails.sikshanidhiCurrent}
-    }
-    if(currentDetails.sikshanidhiPayer){
-      updatingSikshanidhiBody = {...updatingSikshanidhiBody, payer: currentDetails.sikshanidhiPayer}
-      updatingAllBody = {...updatingAllBody, sikshanidhiPayer: currentDetails.sikshanidhiPayer}
-    }
-    if(currentDetails.sikshanidhiMobile){
-      updatingSikshanidhiBody = {...updatingSikshanidhiBody, mobile: currentDetails.sikshanidhiMobile}
-       updatingAllBody = {...updatingAllBody, sikshanidhiMobile: currentDetails.sikshanidhiMobile}
-    }
-    if(currentDetails.sikshanidhiReciever){
-      updatingSikshanidhiBody = {...updatingSikshanidhiBody, reciever: currentDetails.sikshanidhiReciever}
-       updatingAllBody = {...updatingAllBody, sikshanidhiReciever: currentDetails.sikshanidhiReciever}
-    }
-    if(currentDetails.phaadPrevious > 0){ 
-      updatingAllBody = {...updatingAllBody, phaadPrevious: currentDetails.phaadPrevious}
-      updatingPhaadBody = {...updatingPhaadBody, previous: currentDetails.phaadPrevious}
-    }
-    if(currentDetails.phaadCurrent > 0){
-       updatingAllBody = {...updatingAllBody, phaadCurrent: currentDetails.phaadCurrent}
-       updatingPhaadBody = {...updatingPhaadBody, current: currentDetails.phaadCurrent}
-    }
-    if(currentDetails.phaadPayer){
-       updatingAllBody = {...updatingAllBody, phaadPayer: currentDetails.phaadPayer}
-       updatingPhaadBody = {...updatingPhaadBody, payer: currentDetails.phaadPayer}
-    }
-    if(currentDetails.phaadMobile ){
-       updatingAllBody = {...updatingAllBody, phaadMobile: currentDetails.phaadMobile}
-       updatingPhaadBody = {...updatingPhaadBody, mobile: currentDetails.phaadMobile}
-    }
-    if(currentDetails.phaadReciever){
-       updatingAllBody = {...updatingAllBody, phaadReciever: currentDetails.phaadReciever}
-       updatingPhaadBody = {...updatingPhaadBody, reciever: currentDetails.phaadReciever}
-    }
-    if(currentDetails.prasadi > 0 || currentDetails.aarti > 0 || currentDetails.coupon > 0){
-      updatingAllBody = {...updatingAllBody, datarPayer: currentDetails.datarPayer, datarMobile: currentDetails.datarMobile, datarReciever: currentDetails.datarReciever}
-    }
-    if(currentDetails.prasadi > 0){
-      updatingAllBody = {...updatingAllBody, prasadi: currentDetails.prasadi}
-      if(!(datar.find(firm => firm.data === "prasadi" && firm.name === currentDetails.name)))
-      await addDoc(collection(db, "datar"), {name: currentDetails.name, place: currentDetails.place, data: currentDetails.prasadi, payer: currentDetails.datarPayer, mobile: currentDetails.datarMobile, reciever: currentDetails.datarReciever});
-    }
-    if(currentDetails.aarti > 0){
-      updatingAllBody = {...updatingAllBody, aarti: currentDetails.aarti}
-      if(!(datar.find(firm => firm.data === "aarti" && firm.name === currentDetails.name)))
-      await addDoc(collection(db, "datar"), {name: currentDetails.name, place: currentDetails.place, data: currentDetails.aarti, payer: currentDetails.datarPayer, mobile: currentDetails.datarMobile, reciever: currentDetails.datarReciever});
-    }
-    if(currentDetails.coupon > 0){
-      updatingAllBody = {...updatingAllBody, coupon: currentDetails.coupon}
-      if(!(datar.find(firm => firm.data === "coupon" && firm.name === currentDetails.name)))
-      await addDoc(collection(db, "datar"), {name: currentDetails.name, place: currentDetails.place, data: currentDetails.coupon, payer: currentDetails.datarPayer, mobile: currentDetails.datarMobile, reciever: currentDetails.datarReciever});
-    }
+      let updatingAllBody = {};
+      let updatingPhaadBody = {};
+      let updatingSikshanidhiBody = {};
+      const currentFirm = allFirms.find(firm => firm.name === currentDetails?.name);
+      console.log(currentDetails);
+      if(currentDetails?.sikshanidhiPrevious !== currentFirm.sikshanidhiPrevious){ 
+        console.log("inside previous");
+        updatingAllBody = {...updatingAllBody, sikshanidhiPrevious: currentDetails?.sikshanidhiPrevious}
+        updatingSikshanidhiBody = {...updatingSikshanidhiBody, previous: currentDetails?.sikshanidhiPrevious}
+      }
+      if(currentDetails?.sikshanidhiCurrent !== currentFirm.sikshanidhiCurrent){
+        console.log("inside current");
+        updatingSikshanidhiBody = {...updatingSikshanidhiBody, current: currentDetails?.sikshanidhiCurrent}
+        updatingAllBody = {...updatingAllBody, sikshanidhiCurrent: currentDetails?.sikshanidhiCurrent}
+      }
+      if(currentDetails?.sikshanidhiPayer !== currentFirm.sikshanidhiPayer){
+        console.log("inside payer");
+        updatingSikshanidhiBody = {...updatingSikshanidhiBody, payer: currentDetails?.sikshanidhiPayer}
+        updatingAllBody = {...updatingAllBody, sikshanidhiPayer: currentDetails?.sikshanidhiPayer}
+      }
+      if(currentDetails?.sikshanidhiMobile !== currentFirm.sikshanidhiMobile){
+        console.log("inside mobile");
+        updatingSikshanidhiBody = {...updatingSikshanidhiBody, mobile: currentDetails?.sikshanidhiMobile}
+        updatingAllBody = {...updatingAllBody, sikshanidhiMobile: currentDetails?.sikshanidhiMobile}
+      }
+      if(currentDetails?.sikshanidhiReciever !== currentFirm.sikshanidhiReciever){
+        console.log("inside reciever");
+        updatingSikshanidhiBody = {...updatingSikshanidhiBody, reciever: currentDetails?.sikshanidhiReciever}
+        updatingAllBody = {...updatingAllBody, sikshanidhiReciever: currentDetails?.sikshanidhiReciever}
+      }
+      if(currentDetails?.phaadPrevious !== currentFirm.phaadPrevious){ 
+        updatingAllBody = {...updatingAllBody, phaadPrevious: currentDetails?.phaadPrevious}
+        updatingPhaadBody = {...updatingPhaadBody, previous: currentDetails?.phaadPrevious}
+      }
+      if(currentDetails?.phaadCurrent !== currentFirm.phaadCurrent){
+        updatingAllBody = {...updatingAllBody, phaadCurrent: currentDetails?.phaadCurrent}
+        updatingPhaadBody = {...updatingPhaadBody, current: currentDetails?.phaadCurrent}
+      }
+      if(currentDetails?.phaadPayer !== currentFirm.phaadPayer){
+        updatingAllBody = {...updatingAllBody, phaadPayer: currentDetails?.phaadPayer}
+        updatingPhaadBody = {...updatingPhaadBody, payer: currentDetails?.phaadPayer}
+      }
+      if(currentDetails?.phaadMobile !== currentFirm.phaadMobile){
+        updatingAllBody = {...updatingAllBody, phaadMobile: currentDetails?.phaadMobile}
+        updatingPhaadBody = {...updatingPhaadBody, mobile: currentDetails?.phaadMobile}
+      }
+      if(currentDetails?.phaadReciever !== currentFirm.phaadReciever){
+        updatingAllBody = {...updatingAllBody, phaadReciever: currentDetails?.phaadReciever}
+        updatingPhaadBody = {...updatingPhaadBody, reciever: currentDetails?.phaadReciever}
+      }
+      if(currentDetails?.prasadi > 0 || currentDetails?.aarti > 0 || currentDetails?.coupon > 0){
+        updatingAllBody = {...updatingAllBody, datarPayer: currentDetails?.datarPayer, datarMobile: currentDetails?.datarMobile, datarReciever: currentDetails?.datarReciever}
+      }
+      if(currentDetails?.prasadi > 0){
+        updatingAllBody = currentDetails?.isPrasadiPaid ? {...updatingAllBody, prasadi: currentDetails?.prasadi, isPrasadiPaid : currentDetails?.isPrasadiPaid} : {...updatingAllBody, prasadi: currentDetails?.prasadi};
+        if(!(datar.find(firm => firm.data === "prasadi" && firm.name === currentDetails?.name)))
+        await addDoc(collection(db, "datar"), {name: currentDetails?.name, place: currentDetails?.place, data: "prasadi", amount: currentDetails?.prasadi, payer: currentDetails?.datarPayer, mobile: currentDetails?.datarMobile, reciever: currentDetails?.datarReciever, isPrasadiPaid : currentDetails?.isPrasadiPaid, date : Timestamp.fromDate(new Date())});
+      }
+      if(currentDetails?.aarti > 0){
+        updatingAllBody = currentDetails?.isAartiPaid ? {...updatingAllBody, aarti: currentDetails?.aarti, isAartiPaid: currentDetails?.isAartiPaid, aartiName: currentDetails?.aartiName} : {...updatingAllBody, aarti: currentDetails?.aarti, aartiName: currentDetails?.aartiName};
+        if(!(datar.find(firm => firm.data === "aarti" && firm.name === currentDetails?.name)))
+        await addDoc(collection(db, "datar"), {name: currentDetails?.name, place: currentDetails?.place, data: "aarti", amount: currentDetails?.aarti, isAartiPaid: currentDetails?.isAartiPaid, aartiName: currentDetails?.aartiName, payer: currentDetails?.datarPayer, mobile: currentDetails?.datarMobile, reciever: currentDetails?.datarReciever, date : Timestamp.fromDate(new Date())});
+      }
+      if(currentDetails?.coupon > 0){
+        updatingAllBody = currentDetails?.isCouponPaid ? {...updatingAllBody, coupon: currentDetails?.coupon, isCouponPaid: currentDetails?.isCouponPaid} : {...updatingAllBody, coupon: currentDetails?.coupon};
+        if(!(datar.find(firm => firm.data === "coupon" && firm.name === currentDetails?.name)))
+        await addDoc(collection(db, "datar"), {name: currentDetails?.name, place: currentDetails?.place, data: "coupon", amount: currentDetails?.coupon, payer: currentDetails?.datarPayer, mobile: currentDetails?.datarMobile, reciever: currentDetails?.datarReciever, isCouponPaid: currentDetails?.isCouponPaid, date : Timestamp.fromDate(new Date())});
+      }
 
-    await updateDoc(doc(db,"allFirms", currentDetails.name), updatingAllBody);
 
-    if(updatingPhaadBody){
-        if(phaad.find(firm => firm.name === currentDetails.name))
-          await updateDoc(doc(db,"phaad", currentDetails.name), updatingPhaadBody);
-        else
-          await setDoc(doc(db,"phaad", currentDetails.name), {
-            name: currentDetails.name,
-            place: currentDetails.place,
-            previous : currentDetails.phaadPrevious,
-            current : currentDetails.phaadCurrent,
-            payer : currentDetails.phaadPayer,
-            mobile : currentDetails.phaadMobile,
-            reciever : currentDetails.phaadReciever,
+      await updateDoc(doc(db,"allFirms", currentDetails?.name), updatingAllBody);
+
+      if(Object.keys(updatingPhaadBody).length>0){
+          if(phaad.find(firm => firm.name === currentDetails?.name))
+            await updateDoc(doc(db,"phaad", currentDetails?.name), updatingPhaadBody);
+          else
+            await setDoc(doc(db,"phaad", currentDetails?.name), {
+              name: currentDetails?.name,
+              place: currentDetails?.place,
+              previous : currentDetails?.phaadPrevious,
+              current : currentDetails?.phaadCurrent,
+              payer : currentDetails?.phaadPayer,
+              mobile : currentDetails?.phaadMobile,
+              reciever : currentDetails?.phaadReciever,
+              date : Timestamp.fromDate(new Date())
+            });
+      }
+        
+      if(Object.keys(updatingSikshanidhiBody).length>0){
+        if(sikshanidhi.find(firm => firm.name === currentDetails?.name))
+          await updateDoc(doc(db, "sikshanidhi", currentDetails?.name), updatingSikshanidhiBody);
+        else  
+          await setDoc(doc(db, "sikshanidhi", currentDetails?.name), {
+            name: currentDetails?.name,
+            place: currentDetails?.place,
+            previous : currentDetails?.sikshanidhiPrevious,
+            current : currentDetails?.sikshanidhiCurrent,
+            payer : currentDetails?.sikshanidhiPayer,
+            mobile : currentDetails?.sikshanidhiMobile,
+            reciever : currentDetails?.sikshanidhiReciever,
             date : Timestamp.fromDate(new Date())
           });
-    }
-      
-    if(updatingSikshanidhiBody){
-      if(sikshanidhi.find(firm => firm.name === currentDetails.name))
-        await updateDoc(doc(db, "sikshanidhi", currentDetails.name), updatingSikshanidhiBody);
-      else  
-        await setDoc(doc(db, "sikshanidhi", currentDetails.name), {
-          name: currentDetails.name,
-          place: currentDetails.place,
-          previous : currentDetails.sikshanidhiPrevious,
-          current : currentDetails.sikshanidhiCurrent,
-          payer : currentDetails.sikshanidhiPayer,
-          mobile : currentDetails.sikshanidhiMobile,
-          reciever : currentDetails.sikshanidhiReciever,
-          date : Timestamp.fromDate(new Date())
-        });
-    }
+      }
+
+      document.getElementById("updateFirmClose").click();
   }
 
   const deleteFirm = async (name) => {
@@ -346,20 +336,27 @@ const AllFirms = () => {
   useEffect(() => {
     const modalElement = document.getElementById('updateDetails');
     const newFirmModalElement = document.getElementById('addNew');
-    const newFirmIndexModalElement = document.getElementById('addNewIndex');
+    const newFirmDatarModalElement = document.getElementById('addNewDatar');
     const newFirmPhaadModalElement = document.getElementById('addNewPhaad');
     const newFirmSikshanidhiModalElement = document.getElementById('addNewSikshanidhi');
+    const indexClose1 = document.getElementById("indexClose1");
+    const indexClose2 = document.getElementById("indexClose2");
     modalElement.addEventListener('hidden.bs.modal', handleModalClose);
     newFirmModalElement.addEventListener('hidden.bs.modal', handleModalClose);
-    newFirmIndexModalElement.addEventListener('hidden.bs.modal', handleModalClose);
+    newFirmDatarModalElement.addEventListener('hidden.bs.modal', handleModalClose);
     newFirmPhaadModalElement.addEventListener('hidden.bs.modal', handleModalClose);
     newFirmSikshanidhiModalElement.addEventListener('hidden.bs.modal', handleModalClose);
+    indexClose1.addEventListener('click', handleModalClose);
+    indexClose2.addEventListener('click', handleModalClose);
+
     return () => {
       modalElement.removeEventListener('hidden.bs.modal', handleModalClose);
       newFirmModalElement.removeEventListener('hidden.bs.modal', handleModalClose);
-      newFirmIndexModalElement.removeEventListener('hidden.bs.modal', handleModalClose);
+      newFirmDatarModalElement.removeEventListener('hidden.bs.modal', handleModalClose);
       newFirmPhaadModalElement.removeEventListener('hidden.bs.modal', handleModalClose);
       newFirmSikshanidhiModalElement.removeEventListener('hidden.bs.modal', handleModalClose);
+      indexClose1.removeEventListener('click', handleModalClose);
+      indexClose2.removeEventListener('click', handleModalClose);
     };
   }, []);
 
@@ -419,7 +416,7 @@ const AllFirms = () => {
                 {currentItems.map((firm) => {
                   return (
                     <tr  key={firm.id}>
-                      <td role="button" className="fw-bold border-3" data-bs-toggle="modal" data-bs-target="#updateDetails" onClick={()=> setCurrentDetails(firm)}>{firm.name}</td>
+                      <td role="button" className="fw-bold border-3" data-bs-toggle="modal" data-bs-target="#updateDetails" onClick={()=>{ setCurrentDetails(firm); setCurrentFirm(firm)}}>{firm.name}</td>
                       <td className="text-center border-3">{firm.place}</td>
                       <td className="border-3 text-center border-3">
                         {firm.phaadPrevious >0 ? firm.phaadPrevious : "-"}
@@ -429,9 +426,9 @@ const AllFirms = () => {
                         {firm.sikshanidhiPrevious >0 ? firm.sikshanidhiPrevious : "-"}
                       </td>
                       <td className="text-center border-3">{firm.sikshanidhiCurrent >0 ? firm.sikshanidhiCurrent : "-"}</td>
-                      <td className="text-center border-3">{firm.prasad >0 ? firm.prasad : "-"}</td>
-                      <td className="text-center border-3">{firm.aarti >0 ? firm.aarti : "-"}</td>
-                      <td className="text-center border-3">{firm.coupon >0 ? firm.coupon : "-"}</td>
+                      <td className="text-center border-3">{firm.prasadi >0 ? (firm.isPrasadiPaid ? firm.prasadi : "Booked") : "-"}</td>
+                      <td className="text-center border-3">{firm.aarti >0 ? (firm.isAartiPaid ? firm.aarti : "Booked") : "-"}</td>
+                      <td className="text-center border-3">{firm.coupon >0 ? (firm.isCouponPaid ? firm.coupon : "Booked") : "-"}</td>
                      <td className="text-center border-3 d-flex gap-3 justify-content-center">
                       <i className="bi bi-trash3-fill" title="Delete Firm" onClick={()=>deleteFirm(firm.name)}></i>
                       </td>
@@ -485,11 +482,11 @@ const AllFirms = () => {
         </div>
       </footer>
       <div className="modal fade" id="updateDetails" tabIndex="-1" aria-labelledby="updateDetailsLabel" aria-hidden="true">
-        <div className="modal-dialog modal-dialog-centered modal-xl">
+        <div className="modal-dialog modal-dialog-centered modal-fullscreen">
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="updateDetailsLabel">Firm Details</h5>
-              <button type="button" className="btn-close" id="newFirmClose"  data-bs-dismiss="modal" aria-label="Close"></button>
+              <button type="button" className="btn-close" id="updateFirmClose"  data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body">
                 <div className="mb-3 row">
@@ -545,7 +542,7 @@ const AllFirms = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="table col-sm border border-2 ms-2 pt-2 caption-top">
+                    <div className="table col-sm border border-2 ms-2 me-2 pt-2 caption-top">
                         <caption><u><b>Sikshanidhi</b></u></caption>
                         <div className="mb-3 row">
                             <label htmlFor="sikshanidhiPrevious" className="col-sm-4 col-form-label">Previous (2022)</label>
@@ -578,11 +575,74 @@ const AllFirms = () => {
                             </div>
                         </div>
                     </div>
+                    <div className="table col-sm border border-2 ms-2 pt-2 caption-top">
+                        <caption><u><b>Datar</b></u></caption>
+                        <div className="mb-3 row">
+                            <label htmlFor="aartiName" className="col-sm-4 col-form-label">Aarti</label>
+                            <div className="col-sm-8">
+                            <input type="text" placeholder="-" className="form-control" id="aartiName" value={currentDetails?.aartiName} onChange={e=>setCurrentDetails({...currentDetails, aartiName: e.target.value})}/>
+                            </div>
+                        </div>
+                        {
+                          currentDetails?.aartiName ? 
+                            (
+                              <div className="mb-3 row d-flex align-items-center">
+                                <label htmlFor="datarAarti" className="col-sm-2 col-form-label">Aarti Amount</label>
+                                <span className="col-sm-2 col-form-label">
+                                  <input type="checkbox" className="btn-check" id="aarti" autocomplete="off" checked={currentDetails.isAartiPaid} onChange={e=>setCurrentDetails({...currentDetails, isAartiPaid: e.target.checked})}/>
+                                  <label className="btn btn-outline-dark" for="aarti">Paid</label>
+                                </span>
+                                <div className="col-sm-8">
+                                <input type="number" min="0" placeholder="Amount" className="form-control" id="datarAarti" value={currentDetails?.aarti} onChange={e=>setCurrentDetails({...currentDetails, aarti: Number(e.target.value)})}/>
+                                </div>
+                              </div>
+                            )
+                            : null
+                        }
+                        <div className="mb-3 row d-flex align-items-center">
+                            <label htmlFor="datarPrasadi" className="col-sm-2 col-form-label">Parsadi</label>
+                            <span className="col-sm-2 col-form-label">
+                              <input type="checkbox" className="btn-check" id="prasadi" autocomplete="off" checked={currentDetails.isPrasadiPaid} onChange={e=>setCurrentDetails({...currentDetails, isPrasadiPaid: e.target.checked})}/>
+                              <label className="btn btn-outline-dark" for="prasadi">Paid</label>
+                            </span>
+                            <div className="col-sm-8">
+                            <input type="number" min="0" placeholder="Amount" className="form-control" id="datarPrasadi" value={currentDetails?.prasadi} onChange={e=>setCurrentDetails({...currentDetails, prasadi: Number(e.target.value)})}/>
+                            </div>
+                        </div>
+                        <div className="mb-3 row d-flex align-items-center">
+                            <label htmlFor="datarCoupon" className="col-sm-2 col-form-label">Coupon</label>
+                            <span className="col-sm-2 col-form-label">
+                              <input type="checkbox" className="btn-check" id="coupon" autocomplete="off" checked={currentDetails.isCouponPaid} onChange={e=>setCurrentDetails({...currentDetails, isCouponPaid: e.target.checked})}/>
+                              <label className="btn btn-outline-dark" for="coupon">Paid</label>
+                            </span>
+                            <div className="col-sm-8">
+                            <input type="number" min="0" placeholder="Amount" className="form-control" id="datarCoupon" value={currentDetails?.coupon} onChange={e=>setCurrentDetails({...currentDetails, coupon: Number(e.target.value)})}/>
+                            </div>
+                        </div>
+                        <div className="mb-3 row">
+                            <label htmlFor="datarPayerName" className="col-sm-4 col-form-label">Haste (Payer)</label>
+                            <div className="col-sm-8">
+                            <input type="text" placeholder="-" className="form-control" id="datarPayerName" value={currentDetails?.datarPayer} onChange={e=>setCurrentDetails({...currentDetails, datarPayer: e.target.value})}/>
+                            </div>
+                        </div>
+                        <div className="mb-3 row">
+                            <label htmlFor="datarPayerNumber" className="col-sm-4 col-form-label">Mobile Number</label>
+                            <div className="col-sm-8">
+                            <input type="text" placeholder="-" className="form-control" id="datarPayerNumber" value={currentDetails?.datarMobile} onChange={e=>setCurrentDetails({...currentDetails, datarMobile:  e.target.value})}/>
+                            </div>
+                        </div>
+                        <div className="mb-3 row">
+                            <label htmlFor="datarReceiver" className="col-sm-4 col-form-label">Haste (Receiver)</label>
+                            <div className="col-sm-8">
+                            <input type="text" placeholder="-" className="form-control" id="datarReceiver" value={currentDetails?.datarReciever} onChange={e=>setCurrentDetails({...currentDetails, datarReciever: e.target.value})}/>
+                            </div>
+                        </div>
+                    </div>
                  </div>
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary" onClick={()=>saveUpdatedFirm(currentDetails)}>Save changes</button>
+              <button type="button" className="btn btn-primary" onClick={saveUpdatedFirm}>Save changes</button>
             </div>
           </div>
         </div>
@@ -592,7 +652,7 @@ const AllFirms = () => {
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="addNewIndexLabel">Firm Details</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" id="newFirmClose" aria-label="Close"></button>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" id="indexClose1" aria-label="Close"></button>
             </div>
             <div className="modal-body">
                 <div className="mb-3 row">
@@ -637,7 +697,7 @@ const AllFirms = () => {
                 </div>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" id="indexClose2">Close</button>
             </div>
           </div>
         </div>
@@ -647,7 +707,7 @@ const AllFirms = () => {
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="addNewLabel">Firm Details</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" id="newFirmClose" aria-label="Close"></button>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" id="updateFirmClose" aria-label="Close"></button>
             </div>
             <div className="modal-body">
                 <div className="mb-3 row">
@@ -703,7 +763,7 @@ const AllFirms = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="table col-sm border border-2 ms-2 pt-2 caption-top">
+                    <div className="table col-sm border border-2 ms-2 me-2 pt-2 caption-top">
                         <caption><u><b>Sikshanidhi</b></u></caption>
                         <div className="mb-3 row">
                             <label htmlFor="sikshanidhiPrevious" className="col-sm-4 col-form-label">Previous (2022)</label>
@@ -736,6 +796,69 @@ const AllFirms = () => {
                             </div>
                         </div>
                     </div>
+                    <div className="table col-sm border border-2 ms-2 pt-2 caption-top">
+                        <caption><u><b>Datar</b></u></caption>
+                        <div className="mb-3 row">
+                            <label htmlFor="aartiName" className="col-sm-4 col-form-label">Aarti</label>
+                            <div className="col-sm-8">
+                            <input type="text" placeholder="-" className="form-control" id="aartiName" value={newDetails?.aartiName} onChange={e=>setNewDetails({...newDetails, aartiName: e.target.value})}/>
+                            </div>
+                        </div>
+                        {
+                          newDetails?.aartiName ? 
+                            (
+                              <div className="mb-3 row d-flex align-items-center">
+                                <label htmlFor="datarAarti" className="col-sm-2 col-form-label">Aarti Amount</label>
+                                <span className="col-sm-2 col-form-label">
+                                  <input type="checkbox" className="btn-check" id="aarti" autocomplete="off" checked={newDetails.isAartiPaid} onChange={e=>setNewDetails({...newDetails, isAartiPaid: e.target.checked})}/>
+                                  <label className="btn btn-outline-dark" for="aarti">Paid</label>
+                                </span>
+                                <div className="col-sm-8">
+                                <input type="number" min="0" placeholder="Amount" className="form-control" id="datarAarti" value={newDetails?.datarAarti} onChange={e=>setNewDetails({...newDetails, datarAarti: Number(e.target.value)})}/>
+                                </div>
+                              </div>
+                            )
+                            : null
+                        }
+                        <div className="mb-3 row d-flex align-items-center">
+                            <label htmlFor="datarPrasadi" className="col-sm-2 col-form-label">Parsadi</label>
+                            <span className="col-sm-2 col-form-label">
+                              <input type="checkbox" className="btn-check" id="prasadi" autocomplete="off" checked={newDetails.isPrasadiPaid} onChange={e=>setNewDetails({...newDetails, isPrasadiPaid: e.target.checked})}/>
+                              <label className="btn btn-outline-dark" for="prasadi">Paid</label>
+                            </span>
+                            <div className="col-sm-8">
+                            <input type="number" min="0" placeholder="Amount" className="form-control" id="datarPrasadi" value={newDetails?.datarPrasadi} onChange={e=>setNewDetails({...newDetails, datarPrasadi: Number(e.target.value)})}/>
+                            </div>
+                        </div>
+                        <div className="mb-3 row d-flex align-items-center">
+                            <label htmlFor="datarCoupon" className="col-sm-2 col-form-label">Coupon</label>
+                            <span className="col-sm-2 col-form-label">
+                              <input type="checkbox" className="btn-check" id="coupon" autocomplete="off" checked={newDetails.isCouponPaid} onChange={e=>setNewDetails({...newDetails, isCouponPaid: e.target.checked})}/>
+                              <label className="btn btn-outline-dark" for="coupon">Paid</label>
+                            </span>
+                            <div className="col-sm-8">
+                            <input type="number" min="0" placeholder="Amount" className="form-control" id="datarCoupon" value={newDetails?.datarCoupon} onChange={e=>setNewDetails({...newDetails, datarCoupon: Number(e.target.value)})}/>
+                            </div>
+                        </div>
+                        <div className="mb-3 row">
+                            <label htmlFor="phaadPayerName" className="col-sm-4 col-form-label">Haste (Payer)</label>
+                            <div className="col-sm-8">
+                            <input type="text" placeholder="-" className="form-control" id="phaadPayerName" value={newDetails?.phaadPayer} onChange={e=>setNewDetails({...newDetails, phaadPayer: e.target.value})}/>
+                            </div>
+                        </div>
+                        <div className="mb-3 row">
+                            <label htmlFor="phaadPayerNumber" className="col-sm-4 col-form-label">Mobile Number</label>
+                            <div className="col-sm-8">
+                            <input type="text" placeholder="-" className="form-control" id="phaadPayerNumber" value={newDetails?.phaadMobile} onChange={e=>setNewDetails({...newDetails, phaadMobile:  e.target.value})}/>
+                            </div>
+                        </div>
+                        <div className="mb-3 row">
+                            <label htmlFor="phaadReceiver" className="col-sm-4 col-form-label">Haste (Receiver)</label>
+                            <div className="col-sm-8">
+                            <input type="text" placeholder="-" className="form-control" id="phaadReceiver" value={newDetails?.phaadReciever} onChange={e=>setNewDetails({...newDetails, phaadReciever: e.target.value})}/>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div className="modal-footer">
@@ -750,7 +873,7 @@ const AllFirms = () => {
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="addNewPhaadLabel">Firm Details</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" id="newFirmClose" aria-label="Close"></button>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" id="newPhaadClose" aria-label="Close"></button>
             </div>
             <div className="modal-body">
                 <div className="mb-3 row">
@@ -815,7 +938,7 @@ const AllFirms = () => {
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="addNewSikshanidhiLabel">Firm Details</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" id="newFirmClose" aria-label="Close"></button>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" id="newSikshanidhiClose" aria-label="Close"></button>
             </div>
             <div className="modal-body">
                 <div className="mb-3 row">
@@ -892,7 +1015,7 @@ const AllFirms = () => {
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="addNewDatarLabel">Firm Details</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" id="newFirmClose" aria-label="Close"></button>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" id="newDatarClose" aria-label="Close"></button>
             </div>
             <div className="modal-body">
                 <div className="mb-3 row">
@@ -915,19 +1038,42 @@ const AllFirms = () => {
                   </div>
                 </div>
                 <div className="mb-3 row">
-                    <label htmlFor="parsadi" className="col-sm-2 col-form-label">Parsadi</label>
+                    <label htmlFor="aartiName" className="col-sm-2 col-form-label">Aarti Name</label>
                     <div className="col-sm-10">
-                    <input type="number" min="0" placeholder="-" className="form-control" id="parsadi" value={newDetails?.parsadi} onChange={e=>setNewDetails({...newDetails, parsadi: Number(e.target.value)})}/>
+                      <input type="text" placeholder="-" className="form-control" id="aartiName" value={newDetails?.aartiName} onChange={e=>setNewDetails({...newDetails, aartiName: (e.target.value)})}/>
                     </div>
                 </div>
-                <div className="mb-3 row">
-                    <label htmlFor="aarti" className="col-sm-2 col-form-label">Aarti</label>
+                {
+                  newDetails.aartiName ? 
+                    (<div className="mb-3 row">
+                      <label htmlFor="aarti" className="col-sm-1 col-form-label">Aarti Amount</label>
+                      <span className="col-sm-1 col-form-label">
+                        <input type="checkbox" className="btn-check" id="aarti" autocomplete="off" checked={newDetails.isAartiPaid} onChange={e=>setNewDetails({...newDetails, isAartiPaid: e.target.checked})}/>
+                        <label className="btn btn-outline-dark" for="aarti">Paid</label>
+                      </span>
+                      <div className="col-sm-10">
+                        <input type="number" min="0" placeholder="-" className="form-control" id="aarti" value={newDetails?.aarti} onChange={e=>setNewDetails({...newDetails, aarti: Number(e.target.value)})}/>
+                      </div>
+                    </div>)
+                    :
+                    null
+                }
+                 <div className="mb-3 row ">
+                    <label htmlFor="parsadi" className="col-sm-1 col-form-label">Parsadi</label>
+                    <span className="col-sm-1 col-form-label">
+                      <input type="checkbox" className="btn-check" id="aarti" autocomplete="off" checked={newDetails.isPrasadiPaid} onChange={e=>setNewDetails({...newDetails, isPrasadiPaid: e.target.checked})}/>
+                      <label className="btn btn-outline-dark" for="aarti">Paid</label>
+                    </span>
                     <div className="col-sm-10">
-                    <input type="number" min="0" placeholder="-" className="form-control" id="aarti" value={newDetails?.aarti} onChange={e=>setNewDetails({...newDetails, aarti: Number(e.target.value)})}/>
+                    <input type="number" min="0" placeholder="-" className="form-control" id="f" value={newDetails?.prasadi} onChange={e=>setNewDetails({...newDetails, prasadi: Number(e.target.value)})}/>
                     </div>
                 </div>
-                <div className="mb-3 row">
-                    <label htmlFor="coupon" className="col-sm-2 col-form-label">Coupon</label>
+                <div className="mb-3 row ">
+                    <label htmlFor="coupon" className="col-sm-1 col-form-label">Coupon</label>
+                    <span className="col-sm-1 col-form-label">
+                      <input type="checkbox" className="btn-check" id="aarti" autocomplete="off" checked={newDetails.isCouponPaid} onChange={e=>setNewDetails({...newDetails, isCouponPaid: e.target.checked})}/>
+                      <label className="btn btn-outline-dark" for="aarti">Paid</label>
+                    </span>
                     <div className="col-sm-10">
                     <input type="number" min="0" placeholder="-" className="form-control" id="coupon" value={newDetails?.coupon} onChange={e=>setNewDetails({...newDetails, coupon: Number(e.target.value)})}/>
                     </div>

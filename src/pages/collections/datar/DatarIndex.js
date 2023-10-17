@@ -39,7 +39,7 @@ const DatarIndex = () => {
     },[datar]);
 
     for(let i=1; i<=day; i++) {
-        let total = (datar.filter(firm=>firm.date === days[`day-${i}`])).reduce((acc,curr)=>acc+curr.current,0);
+        let total = (datar.filter(firm=>firm.date === days[`day-${i}`])).reduce((acc,curr)=>acc+curr.amount,0);
         elements.push(
             <div className="day-one d-grid mb-2 mx-5" key={i}>
                 <Link to={`/datar/day-${i}`} className="btn btn-outline-dark d-flex">
@@ -59,7 +59,7 @@ const DatarIndex = () => {
             </div>
             <div className="day-index">
                 <div className="all d-grid my-2 mx-5">
-                    <Link to="/datar/all" className="btn btn-outline-dark d-flex"><span className="me-auto">All</span> <span className="me-3">Total - {datar.reduce((acc,curr)=>acc+curr.current,0)}</span></Link>
+                    <Link to="/datar/all" className="btn btn-outline-dark d-flex"><span className="me-auto">All</span> <span className="me-3">Total - {datar.reduce((acc,curr)=>acc+curr.amount,0)}</span></Link>
                 </div>
                 {
                     elements.map(element => element)

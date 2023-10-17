@@ -237,9 +237,38 @@ const Datar = () => {
               <div className="mb-3 row">
                 <label htmlFor="previous" className="col-sm-2 col-form-label">Data</label>
                 <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="previous" value={currentDetails?.data} onChange={e=>setCurrentDetails({...currentDetails, data: e.target.value})} required/>
+                  <select class="form-select" aria-label="Default select example" onChange={e=>setCurrentDetails({...currentDetails, data: e.target.value})}>
+                    <option></option>
+                    <option value="prasadi" selected={currentDetails?.data === "prasadi"}>Prasadi</option>
+                    <option value="aarti"selected={currentDetails?.data === "aarti"}>Aarti</option>
+                    <option value="coupon" selected={currentDetails?.data === "coupon"}>Coupon</option>
+                    <option value="other" selected={(currentDetails?.data !== "prasadi" && currentDetails?.data !== "aarti" && currentDetails?.data !== "coupon")}>Other</option>
+                  </select>
                 </div>
               </div>
+              {
+                currentDetails?.data === "aarti" ?
+                (
+                <div className="mb-3 row">
+                  <label htmlFor="data" className="col-sm-2 col-form-label">Aarti Name</label>
+                  <div className="col-sm-10">
+                    <input type="text" placeholder="-" className="form-control" id="data" value ={currentDetails?.aartiName} onChange={e=>setCurrentDetails({...currentDetails, aartiName: e.target.value})}/>
+                  </div>
+                </div>
+                ) : 
+                (
+                  (currentDetails?.data !== "prasadi" && currentDetails?.data !== "coupon") ? 
+                  (
+                    <div className="mb-3 row">
+                      <label htmlFor="data" className="col-sm-2 col-form-label">Datar Name</label>
+                      <div className="col-sm-10">
+                        <input type="text" placeholder="-" className="form-control" value={currentDetails?.data} id="data" onChange={e=>setCurrentDetails({...currentDetails, data: e.target.value})}/>
+                      </div>
+                    </div>
+                    )
+                    : null
+                )
+              }
               <div className="mb-3 row">
                 <label htmlFor="current" className="col-sm-2 col-form-label">Amount</label>
                 <div className="col-sm-10">
@@ -300,11 +329,40 @@ const Datar = () => {
                   </div>
                 </div>
               <div className="mb-3 row">
-                <label htmlFor="data" className="col-sm-2 col-form-label">Data</label>
+                <label htmlFor="data" className="col-sm-2 col-form-label">Datar Type</label>
                 <div className="col-sm-10">
-                  <input type="text" placeholder="-" className="form-control" id="data" onChange={e=>setNewDetails({...newDetails, data: e.target.value})}/>
+                  <select class="form-select" aria-label="Default select example" onChange={e=>setNewDetails({...newDetails, data: e.target.value})}>
+                    <option selected></option>
+                    <option value="prasadi">Prasadi</option>
+                    <option value="aarti">Aarti</option>
+                    <option value="coupon">Coupon</option>
+                    <option value="other">Other</option>
+                  </select>
                 </div>
               </div>
+              {
+                newDetails.data === "aarti" ?
+                (
+                <div className="mb-3 row">
+                  <label htmlFor="data" className="col-sm-2 col-form-label">Aarti Name</label>
+                  <div className="col-sm-10">
+                    <input type="text" placeholder="-" className="form-control" id="data" onChange={e=>setNewDetails({...newDetails, aartiName: e.target.value})}/>
+                  </div>
+                </div>
+                ) : 
+                (
+                  newDetails.data !== "prasadi" && newDetails.data !== "coupon" ? 
+                  (
+                    <div className="mb-3 row">
+                      <label htmlFor="data" className="col-sm-2 col-form-label">Datar Name</label>
+                      <div className="col-sm-10">
+                        <input type="text" placeholder="-" className="form-control" id="data" onChange={e=>setNewDetails({...newDetails, data: e.target.value})}/>
+                      </div>
+                    </div>
+                    )
+                    : null
+                )
+              }
               <div className="mb-3 row">
                 <label htmlFor="amount" className="col-sm-2 col-form-label">Amount</label>
                 <div className="col-sm-10">
