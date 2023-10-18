@@ -1,11 +1,7 @@
-import { collection, onSnapshot, orderBy, query} from "firebase/firestore";
-import { db } from "../../firebase-config";
+import { onSnapshot} from "firebase/firestore";
 
 export function readAllFirms(q, state, dispatch){
-    return onSnapshot(q, (queryResult)=>{
-        queryResult.docs.map(doc => {
-            return onSnapshot(query(collection(db, `allFirms`), orderBy("name")),
-            (snapshot)=>{
+    return onSnapshot(q, (snapshot)=>{
                 let collections = state.allFirms;
                 let action = null;
                 let updatedValue = null;
@@ -38,8 +34,6 @@ export function readAllFirms(q, state, dispatch){
                         break;
                     default:
                         return ;
-                } 
-            });
-        });
+                }
     });
 }

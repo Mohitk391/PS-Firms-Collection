@@ -20,8 +20,7 @@ const AllFirms = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({});
   const [newDetails, setNewDetails] = useState({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false, datarPayer: "", datarMobile : "", datarReciever : ""});
-  const {dataState : {allFirms, phaad, sikshanidhi, datar}} = useData(); 
-  const [currentFirm, setCurrentFirm] = useState();
+  const {dataState : {allFirms, phaad, sikshanidhi, datar}} = useData();
 
 
   useEffect(()=> {
@@ -222,7 +221,7 @@ const AllFirms = () => {
       let updatingPhaadBody = {};
       let updatingSikshanidhiBody = {};
       const currentFirm = allFirms.find(firm => firm.name === currentDetails?.name);
-      console.log(currentDetails);
+      console.log(currentFirm);
       if(currentDetails?.sikshanidhiPrevious !== currentFirm.sikshanidhiPrevious){ 
         console.log("inside previous");
         updatingAllBody = {...updatingAllBody, sikshanidhiPrevious: currentDetails?.sikshanidhiPrevious}
@@ -268,23 +267,44 @@ const AllFirms = () => {
         updatingAllBody = {...updatingAllBody, phaadReciever: currentDetails?.phaadReciever}
         updatingPhaadBody = {...updatingPhaadBody, reciever: currentDetails?.phaadReciever}
       }
-      if(currentDetails?.prasadi > 0 || currentDetails?.aarti > 0 || currentDetails?.coupon > 0){
+      if(currentDetails?.prasadi !== currentFirm.prasadi || currentDetails?.aarti !== currentFirm.aarti || currentDetails?.coupon !== currentFirm.coupon){
         updatingAllBody = {...updatingAllBody, datarPayer: currentDetails?.datarPayer, datarMobile: currentDetails?.datarMobile, datarReciever: currentDetails?.datarReciever}
       }
-      if(currentDetails?.prasadi > 0){
+      if(currentDetails?.prasadi !== currentFirm.prasadi){
         updatingAllBody = currentDetails?.isPrasadiPaid ? {...updatingAllBody, prasadi: currentDetails?.prasadi, isPrasadiPaid : currentDetails?.isPrasadiPaid} : {...updatingAllBody, prasadi: currentDetails?.prasadi};
         if(!(datar.find(firm => firm.data === "prasadi" && firm.name === currentDetails?.name)))
         await addDoc(collection(db, "datar"), {name: currentDetails?.name, place: currentDetails?.place, data: "prasadi", amount: currentDetails?.prasadi, payer: currentDetails?.datarPayer, mobile: currentDetails?.datarMobile, reciever: currentDetails?.datarReciever, isPrasadiPaid : currentDetails?.isPrasadiPaid, date : Timestamp.fromDate(new Date())});
       }
-      if(currentDetails?.aarti > 0){
+      if(currentDetails?.isPrasadiPaid !== currentFirm.isPrasadiPaid && currentDetails?.prasadi === currentFirm.prasadi && currentDetails?.prasadi > 0){
+        updatingAllBody = {...updatingAllBody, isPrasadiPaid : currentDetails?.isPrasadiPaid};
+        const datarFirm = datar.find(firm=>firm.name === currentDetails?.name && firm.data === "prasadi");
+        await updateDoc(doc(db, "datar", datarFirm.id), {
+          isPrasadiPaid: currentDetails?.isPrasadiPaid
+        });
+      }
+      if(currentDetails?.aarti !== currentFirm.aarti){
         updatingAllBody = currentDetails?.isAartiPaid ? {...updatingAllBody, aarti: currentDetails?.aarti, isAartiPaid: currentDetails?.isAartiPaid, aartiName: currentDetails?.aartiName} : {...updatingAllBody, aarti: currentDetails?.aarti, aartiName: currentDetails?.aartiName};
         if(!(datar.find(firm => firm.data === "aarti" && firm.name === currentDetails?.name)))
         await addDoc(collection(db, "datar"), {name: currentDetails?.name, place: currentDetails?.place, data: "aarti", amount: currentDetails?.aarti, isAartiPaid: currentDetails?.isAartiPaid, aartiName: currentDetails?.aartiName, payer: currentDetails?.datarPayer, mobile: currentDetails?.datarMobile, reciever: currentDetails?.datarReciever, date : Timestamp.fromDate(new Date())});
       }
-      if(currentDetails?.coupon > 0){
+      if(currentDetails?.isAartiPaid !== currentFirm.isAartiPaid && currentDetails?.aarti === currentFirm.aarti && currentDetails?.aarti > 0){
+        updatingAllBody = {...updatingAllBody, isAartiPaid : currentDetails?.isAartiPaid};
+        const datarFirm = datar.find(firm=>firm.name === currentDetails?.name && firm.data === "aarti");
+        await updateDoc(doc(db, "datar", datarFirm.id), {
+          isAartiPaid: currentDetails?.isAartiPaid
+        });
+      }
+      if(currentDetails?.coupon !== currentFirm.coupon){
         updatingAllBody = currentDetails?.isCouponPaid ? {...updatingAllBody, coupon: currentDetails?.coupon, isCouponPaid: currentDetails?.isCouponPaid} : {...updatingAllBody, coupon: currentDetails?.coupon};
         if(!(datar.find(firm => firm.data === "coupon" && firm.name === currentDetails?.name)))
         await addDoc(collection(db, "datar"), {name: currentDetails?.name, place: currentDetails?.place, data: "coupon", amount: currentDetails?.coupon, payer: currentDetails?.datarPayer, mobile: currentDetails?.datarMobile, reciever: currentDetails?.datarReciever, isCouponPaid: currentDetails?.isCouponPaid, date : Timestamp.fromDate(new Date())});
+      }
+      if(currentDetails?.isCouponPaid !== currentFirm.isCouponPaid && currentDetails?.coupon === currentFirm.coupon && currentDetails?.coupon > 0){
+        updatingAllBody = {...updatingAllBody, isCouponPaid : currentDetails?.isCouponPaid};
+        const datarFirm = datar.find(firm=>firm.name === currentDetails?.name && firm.data === "coupon");
+        await updateDoc(doc(db, "datar", datarFirm.id), {
+          isCouponPaid: currentDetails?.isCouponPaid
+        });
       }
 
 
@@ -378,7 +398,8 @@ const AllFirms = () => {
     doc.text(`All Firms Details`, 15, 12);
     autoTable(doc, { html: '#fullDataTable' });
     doc.save('All Firms Details.pdf')
-}
+  }
+
 
   return (
     <div className="App d-flex flex-column min-vh-100">
@@ -416,7 +437,7 @@ const AllFirms = () => {
                 {currentItems.map((firm) => {
                   return (
                     <tr  key={firm.id}>
-                      <td role="button" className="fw-bold border-3" data-bs-toggle="modal" data-bs-target="#updateDetails" onClick={()=>{ setCurrentDetails(firm); setCurrentFirm(firm)}}>{firm.name}</td>
+                      <td role="button" className="fw-bold border-3" data-bs-toggle="modal" data-bs-target="#updateDetails" onClick={()=>setCurrentDetails(firm)}>{firm.name}</td>
                       <td className="text-center border-3">{firm.place}</td>
                       <td className="border-3 text-center border-3">
                         {firm.phaadPrevious >0 ? firm.phaadPrevious : "-"}
@@ -580,7 +601,11 @@ const AllFirms = () => {
                         <div className="mb-3 row">
                             <label htmlFor="aartiName" className="col-sm-4 col-form-label">Aarti</label>
                             <div className="col-sm-8">
-                            <input type="text" placeholder="-" className="form-control" id="aartiName" value={currentDetails?.aartiName} onChange={e=>setCurrentDetails({...currentDetails, aartiName: e.target.value})}/>
+                            <select class="form-select" id="aartiName" aria-label="Default select example" onChange={e=>setCurrentDetails({...currentDetails, aartiName: e.target.value})}>
+                                <option ></option>
+                                <option value="pratham" selected={currentDetails?.aartiName === "pratham"}>Pratham (1st)</option>
+                                <option value="dritya" selected={currentDetails?.aartiName === "dritya"}>Biji (2nd)</option>
+                              </select>
                             </div>
                         </div>
                         {
@@ -662,19 +687,6 @@ const AllFirms = () => {
                     </div>
                 </div>
                 <div className="mb-3 row">
-                  <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
-                  <div className="col-sm-10">
-                    <div className="form-check form-check-inline">
-                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="BhanpuriIndex" onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
-                      <label className="form-check-label" htmlFor="BhanpuriIndex">Bhanpuri</label>
-                    </div>
-                    <div className="form-check form-check-inline">
-                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="FafadihIndex" value="Fafadih" onChange={e=>setNewDetails({...newDetails, place: "Fafadih"})}/>
-                      <label className="form-check-label" htmlFor="FafadihIndex">Fafadih</label>
-                    </div>
-                  </div>
-                </div>
-                <div className="mb-3 row">
                   <label htmlFor="place" className="col-sm-2 col-form-label">Type of Collection</label>
                   <div className="col-sm-10">
                     <div className="form-check form-check-inline">
@@ -720,11 +732,11 @@ const AllFirms = () => {
                   <label htmlFor="place" className="col-sm-2 col-form-label">Place</label>
                   <div className="col-sm-10">
                     <div className="form-check form-check-inline">
-                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Bhanpuri" checked={newDetails.place === "Bhanpuri"} onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Bhanpuri" checked={newDetails?.place === "Bhanpuri"} onChange={e=>setNewDetails({...newDetails, place: "Bhanpuri"})}/>
                       <label className="form-check-label" htmlFor="Bhanpuri">Bhanpuri</label>
                     </div>
                     <div className="form-check form-check-inline">
-                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Fafadih" checked={newDetails.place === "Fafadih"} onChange={e=>setNewDetails({...newDetails, place: "Fafadih"})}/>
+                      <input className="form-check-input" type="radio" name="inlineRadioOptions" id="Fafadih" checked={newDetails?.place === "Fafadih"} onChange={e=>setNewDetails({...newDetails, place: "Fafadih"})}/>
                       <label className="form-check-label" htmlFor="Fafadih">Fafadih</label>
                     </div>
                   </div>
@@ -801,7 +813,11 @@ const AllFirms = () => {
                         <div className="mb-3 row">
                             <label htmlFor="aartiName" className="col-sm-4 col-form-label">Aarti</label>
                             <div className="col-sm-8">
-                            <input type="text" placeholder="-" className="form-control" id="aartiName" value={newDetails?.aartiName} onChange={e=>setNewDetails({...newDetails, aartiName: e.target.value})}/>
+                              <select class="form-select" id="aartiName" aria-label="Default select example" onChange={e=>setNewDetails({...newDetails, aartiName: e.target.value})}>
+                                <option selected></option>
+                                <option value="pratham">Pratham (1st)</option>
+                                <option value="dritya">Biji (2nd)</option>
+                              </select>
                             </div>
                         </div>
                         {
@@ -1137,7 +1153,7 @@ const AllFirms = () => {
                   );
                 })}
               </tbody>
-            </table>
+      </table>
     </div>
   );
 }

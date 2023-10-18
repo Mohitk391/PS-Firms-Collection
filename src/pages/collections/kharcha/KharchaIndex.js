@@ -35,7 +35,7 @@ const KharchaIndex = () => {
     let elements = [];
 
     useEffect(()=>{
-        setDay(daysIndex[kharcha[kharcha?.length-1]?.date]);
+        setDay(kharcha.reduce((acc,curr)=>daysIndex[curr.date]>acc?daysIndex[curr.date] : acc,0))
     },[kharcha]);
 
     for(let i=1; i<=day; i++) {

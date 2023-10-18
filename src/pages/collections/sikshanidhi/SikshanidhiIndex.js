@@ -36,7 +36,7 @@ const SikshanidhiIndex = () => {
     let elements = [];
 
     useEffect(()=>{
-        setDay(daysIndex[sikshanidhi[sikshanidhi?.length-1]?.date]);
+        setDay(sikshanidhi.reduce((acc,curr)=>daysIndex[curr.date]>acc?daysIndex[curr.date] : acc,0))
     },[sikshanidhi]);
 
     for(let i=1; i<=day; i++) {

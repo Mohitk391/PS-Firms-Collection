@@ -237,7 +237,7 @@ const Datar = () => {
               <div className="mb-3 row">
                 <label htmlFor="previous" className="col-sm-2 col-form-label">Data</label>
                 <div className="col-sm-10">
-                  <select class="form-select" aria-label="Default select example" onChange={e=>setCurrentDetails({...currentDetails, data: e.target.value})}>
+                  <select className="form-select" aria-label="Default select example" onChange={e=>setCurrentDetails({...currentDetails, data: e.target.value})}>
                     <option></option>
                     <option value="prasadi" selected={currentDetails?.data === "prasadi"}>Prasadi</option>
                     <option value="aarti"selected={currentDetails?.data === "aarti"}>Aarti</option>
@@ -331,7 +331,7 @@ const Datar = () => {
               <div className="mb-3 row">
                 <label htmlFor="data" className="col-sm-2 col-form-label">Datar Type</label>
                 <div className="col-sm-10">
-                  <select class="form-select" aria-label="Default select example" onChange={e=>setNewDetails({...newDetails, data: e.target.value})}>
+                  <select className="form-select" aria-label="Default select example" onChange={e=>setNewDetails({...newDetails, data: e.target.value})}>
                     <option selected></option>
                     <option value="prasadi">Prasadi</option>
                     <option value="aarti">Aarti</option>
@@ -412,12 +412,21 @@ const Datar = () => {
                       <td className="text-center border-3">{firm.date}</td>
                       <td className="fw-bold border-3">{firm.name}</td>
                       <td className="text-center border-3">{firm.place}</td>
-                      <td className="border-3 text-center border-3">{firm.data}</td>
+                      <td className="border-3 text-center">{firm.data}</td>
                       <td className="text-center border-3">{firm.amount >0 ? firm.amount : "-"}</td>
                     </tr>
                   );
                 })}
               </tbody>
+              <tfoot>
+              <tr>
+                    <td className="text-center border-3"></td>
+                    <td className="border-3"></td>
+                    <td className="text-center border-3"></td>
+                    <td className="fw-bold border-3 text-center">Total</td>
+                    <td className="text-center border-3">{currentItems.reduce((acc,curr)=>acc+curr.amount,0)}</td>
+                  </tr>
+              </tfoot>
       </table>
     </div>
   );

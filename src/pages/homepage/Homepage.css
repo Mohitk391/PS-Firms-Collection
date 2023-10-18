@@ -26,6 +26,9 @@
     background: linear-gradient(45deg,#ababab,#c1c1c1);
 }
 
+.bg-c-white {
+    background: linear-gradient(45deg,#e2e2e2,#e6e5e5);
+}
 
 .card {
     border-radius: 5px;

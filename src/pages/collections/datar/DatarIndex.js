@@ -34,8 +34,10 @@ const DatarIndex = () => {
     const [day, setDay] = useState(0);
     let elements = [];
 
+    console.log(datar);
+
     useEffect(()=>{
-        setDay(daysIndex[datar[datar.length-1]?.date]);
+        setDay(datar.reduce((acc,curr)=>daysIndex[curr.date]>acc?daysIndex[curr.date] : acc,0))
     },[datar]);
 
     for(let i=1; i<=day; i++) {

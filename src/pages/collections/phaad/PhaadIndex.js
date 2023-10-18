@@ -35,7 +35,7 @@ const PhaadIndex = () => {
     let elements = [];
 
     useEffect(()=>{
-        setDay(daysIndex[phaad[phaad?.length-1]?.date]);
+        setDay(phaad.reduce((acc,curr)=>daysIndex[curr.date]>acc?daysIndex[curr.date] : acc,0))
     },[phaad]);
 
     for(let i=1; i<=day; i++) {

@@ -64,6 +64,14 @@ const Homepage = () => {
                       </div>
                   </div>
               </div>
+              <div className="col-md-4 col-xl-3" role="button">
+                  <div className="card bg-c-white">
+                      <div className="card-block">
+                          <h4 className="m-b-20 text-center">Today's Yajman</h4>
+                          <p className="m-b-0 invisible">Total Expense</p>
+                      </div>
+                  </div>
+              </div>
             </div>
           </div>
         </main>

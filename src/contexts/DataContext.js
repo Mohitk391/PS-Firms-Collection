@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useReducer } from "react";
 import { DataReducer } from "../reducers/DataReducer";
-import { collection, query } from "firebase/firestore";
+import { collection, orderBy, query } from "firebase/firestore";
 import { db } from "../firebase-config";
 import { readPhaad } from "../utilities/Actions/PhaadActions";
 import { readSikshanidhi } from "../utilities/Actions/SikshanidhiActions";
@@ -27,7 +27,7 @@ const DataProvider = ({children}) => {
         const phaadQuery = query(collection(db, "phaad"));
         const sikshanidhiQuery = query(collection(db, "sikshanidhi"));
         const datarQuery = query(collection(db, "datar"));
-        const allFirmsQuery = query(collection(db, "allFirms"));
+        const allFirmsQuery = query(collection(db, "allFirms"), orderBy("name"));
         const samitiQuery = query(collection(db, "samiti"));
         const kharchaQuery = query(collection(db, "kharcha"));
 

@@ -4,7 +4,7 @@ import Pagination from "../../../utilities/Pagination/Pagination";
 import { useEffect } from "react";
 import jsPDF from "jspdf";
 import autoTable from 'jspdf-autotable';
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import { useData } from "../../../contexts/DataContext";
 import { Timestamp, deleteDoc, doc, setDoc, updateDoc } from "firebase/firestore";
@@ -31,6 +31,7 @@ const Sikshanidhi = () => {
   const [currentDetails, setCurrentDetails] = useState({});
   const [newDetails, setNewDetails] = useState({});
   const {dataState : {sikshanidhi, allFirms}} = useData();  
+  const navigate = useNavigate();
 
   useEffect(()=>{
     setResults((dayId==="all" ? sikshanidhi : sikshanidhi.filter(firm=>firm.date === days[dayId])).filter((item) =>
@@ -203,9 +204,7 @@ const Sikshanidhi = () => {
               <button
                 type="button"
                 className="btn btn-outline-success"
-                data-bs-toggle="modal"
-                data-bs-target="#addNew"
-                onClick={()=>setNewDetails({...newDetails, name: searchTerm})}
+                onClick={()=>navigate("/allFirms")}
               >
                 Add New Firm
               </button>
@@ -392,6 +391,13 @@ const Sikshanidhi = () => {
             );
           })}
         </tbody>
+        <tfoot>
+          <tr>
+            <td className="text-center border-3"></td>
+            <td className="fw-bold border-3 text-center">Total</td>
+            <td className="text-center border-3">{currentItems.reduce((acc,curr)=>acc+curr.current,0)}</td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   );

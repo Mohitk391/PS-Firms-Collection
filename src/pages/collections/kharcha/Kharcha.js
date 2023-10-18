@@ -291,6 +291,15 @@ const Kharcha = () => {
                   );
                 })}
               </tbody>
+              <tfoot>
+              <tr>
+                    <td className="text-center border-3"></td>
+                    <td className="border-3"></td>
+                    <td className="text-center border-3"></td>
+                    <td className="fw-bold border-3 text-center">Total</td>
+                    <td className="text-center border-3">{currentItems.reduce((acc,curr)=>acc+curr.amount,0)}</td>
+                  </tr>
+              </tfoot>
       </table>
     </div>
   );

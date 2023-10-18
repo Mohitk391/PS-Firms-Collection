@@ -4,7 +4,7 @@ import Pagination from "../../../utilities/Pagination/Pagination";
 import { useEffect } from "react";
 import jsPDF from "jspdf";
 import autoTable from 'jspdf-autotable';
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
 import { useData } from "../../../contexts/DataContext";
 import { Timestamp, deleteDoc, doc, setDoc, updateDoc } from "firebase/firestore";
@@ -30,7 +30,8 @@ const Phaad = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({name : "", place: "", previous: 0, current: 0, payer: "", mobile: "", reciever: ""});
   const [newDetails, setNewDetails] = useState({name : "", place: "", previous: 0, current: 0, payer: "", mobile: "", reciever: ""});
-  const {dataState : {phaad, allFirms, sikshanidhi}} = useData();  
+  const {dataState : {phaad, allFirms, sikshanidhi}} = useData(); 
+  const navigate = useNavigate(); 
 
   useEffect(()=>{
     setResults((dayId==="all" ? phaad : phaad.filter(firm=>firm.date === days[dayId])).filter(item =>item.name.toLowerCase().includes(searchTerm.toLowerCase().trim()) || item.place.toLowerCase().includes(searchTerm.toLowerCase().trim())) );
@@ -123,7 +124,7 @@ const Phaad = () => {
     if(Object.keys(updatingSikshanidhiBody).length)
       await updateDoc(doc(db, "sikshanidhi", currentDetails.name), updatingSikshanidhiBody);
 
-    document.getElementById('newFirmClose').click();
+    document.getElementById('updateFirmClose').click();
   }
 
   const deleteFirm = async (name) => {
@@ -220,11 +221,9 @@ const Phaad = () => {
               <button
                 type="button"
                 className="btn btn-outline-success"
-                data-bs-toggle="modal"
-                data-bs-target="#addNew"
-                onClick={()=>setNewDetails({...newDetails, name: searchTerm})}
+                onClick={()=>navigate("/allFirms")}
               >
-                Add New Firm
+                Search All Firms
               </button>
             </div>
           )}
@@ -263,7 +262,7 @@ const Phaad = () => {
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="updateDetailsLabel">Firm Details</h5>
-              <button type="button" className="btn-close" id="newFirmClose"  data-bs-dismiss="modal" aria-label="Close"></button>
+              <button type="button" className="btn-close" id="updateFirmClose"  data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body">
               <div className="mb-3 row">
@@ -409,6 +408,13 @@ const Phaad = () => {
             );
           })}
         </tbody>
+        <tfoot>
+          <tr>
+            <td className="text-center border-3"></td>
+            <td className="fw-bold border-3 text-center">Total</td>
+            <td className="text-center border-3">{currentItems.reduce((acc,curr)=>acc+curr.current,0)}</td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   );
