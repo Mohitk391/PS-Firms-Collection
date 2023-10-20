@@ -403,19 +403,21 @@ const AllFirms = () => {
       await updateDoc(doc(db,"allFirms", currentDetails?.name), updatingAllBody);
 
       if(Object.keys(updatingPhaadBody).length>0){
-          if(phaad.find(firm => firm.name === currentDetails?.name))
-            await updateDoc(doc(db,"phaad", currentDetails?.name), updatingPhaadBody);
-          else
-            await setDoc(doc(db,"phaad", currentDetails?.name), {
-              name: currentDetails?.name,
-              place: currentDetails?.place,
-              previous : currentDetails?.phaadPrevious,
-              current : currentDetails?.phaadCurrent,
-              payer : currentDetails?.phaadPayer,
-              mobile : currentDetails?.phaadMobile,
-              reciever : currentDetails?.phaadReciever,
-              date : Timestamp.fromDate(new Date())
-            });
+          if(!(Object.keys(updatingPhaadBody).length===1 && updatingPhaadBody.hasProperty("phaadRevious"))){
+            if(phaad.find(firm => firm.name === currentDetails?.name))
+              await updateDoc(doc(db,"phaad", currentDetails?.name), updatingPhaadBody);
+            else
+              await setDoc(doc(db,"phaad", currentDetails?.name), {
+                name: currentDetails?.name,
+                place: currentDetails?.place,
+                previous : currentDetails?.phaadPrevious,
+                current : currentDetails?.phaadCurrent,
+                payer : currentDetails?.phaadPayer,
+                mobile : currentDetails?.phaadMobile,
+                reciever : currentDetails?.phaadReciever,
+                date : Timestamp.fromDate(new Date())
+              });
+            }
       }
         
       if(Object.keys(updatingSikshanidhiBody).length>0){
