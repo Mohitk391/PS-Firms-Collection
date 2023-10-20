@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom"
 import Navbar from "../../../components/Navbar/Navbar";
 import UmiyaMataji from "../../../assets/umiya-mataji.png";
-import { useData } from "../../../contexts/DataContext";
+import { usePhaad } from "../../../contexts/PhaadContext";
 import { useEffect, useState } from "react";
 
 const daysIndex = {
@@ -30,7 +30,7 @@ const days = {
   
 
 const PhaadIndex = () => {
-    const {dataState: {phaad}} = useData();
+    const {phaadState: {phaad}} = usePhaad();
     const [day, setDay] = useState(0);
     let elements = [];
 

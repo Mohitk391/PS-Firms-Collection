@@ -6,11 +6,23 @@ import jsPDF from "jspdf";
 import autoTable from 'jspdf-autotable';
 import { Link, useParams } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
-import { useData } from "../../../contexts/DataContext";
+import { useDatar } from "../../../contexts/DatarContext";
 import { Timestamp, addDoc, collection, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase-config";
+import { useAllFirms } from "../../../contexts/AllFirmsContext";
 
 const ITEMS_PER_PAGE = 10;
+const daysIndex = {
+  "15/10/2023" : 1,
+  "16/10/2023" : 2,
+  "17/10/2023" : 3,
+  "18/10/2023" : 4,
+  "19/10/2023" : 5,
+  "20/10/2023" : 6,
+  "21/10/2023" : 7,
+  "22/10/2023" : 8,
+  "23/10/2023" : 9
+}
 const days = {
   "day-1" : new Date("10/15/2023").toLocaleDateString("en-GB"),
   "day-2" : new Date("10/16/2023").toLocaleDateString("en-GB"),
@@ -30,13 +42,22 @@ const Datar = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({});
   const [newDetails, setNewDetails] = useState({});
-  const {dataState : {datar, allFirms}} = useData();  
+  const {datarState : {datar}} = useDatar();  
+  const {allFirmsState : {allFirms}} = useAllFirms();
+  const today = new Date().toLocaleDateString("en-GB");
+  let elements = [];
 
   useEffect(()=>{
     setResults((dayId==="all" ? datar : datar.filter(firm=>firm.date === days[dayId])).filter((item) =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase().trim()) || item.place.toLowerCase().includes(searchTerm.toLowerCase().trim())
   ));
   },[dayId, datar, searchTerm]);
+
+  for(let i=daysIndex[today];i<=9;i++){
+    elements.push(
+      <option value={days[`day-${i}`]}>{days[`day-${i}`]}</option>
+    )
+  }
   
   const handleModalClose = () => {
     setCurrentDetails({});  
@@ -45,15 +66,34 @@ const Datar = () => {
   };
 
   const saveNewFirm = async () => {
-    const docRef = await addDoc(collection(db,"datar"),{...newDetails, date: Timestamp.fromDate(new Date())})
+    const docRef = await addDoc(collection(db,"datar"),{...newDetails, date: Timestamp.fromDate(new Date())});
 
-    if(allFirms.find(firm => firm.name === newDetails.name) && (newDetails.data === "prasadi" || newDetails.data === "aarti" || newDetails.data === "coupon")){
+    if(newDetails.aarti >0){
+      await addDoc(collection(db, "yajman"), {
+        name: newDetails.name,
+        place: newDetails.place,
+        aartiDate: newDetails.aartiDate,
+        aartiName : newDetails.aartiName
+      })
+    }
+
+    if(allFirms.find(firm => firm.name === newDetails.name) && (newDetails.data === "prasadi"  || newDetails.data === "coupon")){
         await updateDoc(doc(db, "allFirms", newDetails.name), {
           [newDetails.data] : newDetails.amount,
           datarPayer : newDetails.payer,
           datarMobile : newDetails.mobile,
           datarReciever : newDetails.reciever
         });
+    }
+    else if(allFirms.find(firm => firm.name === newDetails.name) && (newDetails.data === "aarti")){
+      await updateDoc(doc(db, "allFirms", newDetails.name), {
+        aartiDate: newDetails.aartiDate,
+        aartiName : newDetails.aartiName,
+        aarti : newDetails.amount,
+        datarPayer : newDetails.payer,
+        datarMobile : newDetails.mobile,
+        datarReciever : newDetails.reciever
+      });
     }
     console.log("Document written with document id: ", docRef);
     document.getElementById('newFirmClose').click();
@@ -249,12 +289,27 @@ const Datar = () => {
               {
                 currentDetails?.data === "aarti" ?
                 (
-                <div className="mb-3 row">
-                  <label htmlFor="data" className="col-sm-2 col-form-label">Aarti Name</label>
-                  <div className="col-sm-10">
-                    <input type="text" placeholder="-" className="form-control" id="data" value ={currentDetails?.aartiName} onChange={e=>setCurrentDetails({...currentDetails, aartiName: e.target.value})}/>
+                <span>
+                  <div className="mb-3 row">
+                      <label htmlFor="aartiDate" className="col-sm-4 col-form-label">Aarti Date</label>
+                      <div className="col-sm-8">
+                      <select class="form-select" id="aartiDate" aria-label="Default select example" value={currentDetails?.aartiDate} onChange={e=>setCurrentDetails({...currentDetails, aartiDate: e.target.value})}>
+                          <option></option>
+                          {elements.map(element => element)}
+                        </select>
+                      </div>
                   </div>
-                </div>
+                  <div className="mb-3 row">
+                      <label htmlFor="aartiName" className="col-sm-4 col-form-label">Aarti</label>
+                      <div className="col-sm-8">
+                      <select class="form-select" id="aartiName" aria-label="Default select example" onChange={e=>setCurrentDetails({...currentDetails, aartiName: e.target.value})}>
+                          <option ></option>
+                          <option value="pratham" selected={currentDetails?.aartiName === "pratham"}>Pratham (1st)</option>
+                          <option value="dritya" selected={currentDetails?.aartiName === "dritya"}>Biji (2nd)</option>
+                        </select>
+                      </div>
+                  </div>
+                </span>
                 ) : 
                 (
                   (currentDetails?.data !== "prasadi" && currentDetails?.data !== "coupon") ? 
@@ -343,12 +398,27 @@ const Datar = () => {
               {
                 newDetails.data === "aarti" ?
                 (
-                <div className="mb-3 row">
-                  <label htmlFor="data" className="col-sm-2 col-form-label">Aarti Name</label>
-                  <div className="col-sm-10">
-                    <input type="text" placeholder="-" className="form-control" id="data" onChange={e=>setNewDetails({...newDetails, aartiName: e.target.value})}/>
+                  <span>
+                  <div className="mb-3 row">
+                      <label htmlFor="aartiDate" className="col-sm-4 col-form-label">Aarti Date</label>
+                      <div className="col-sm-8">
+                      <select class="form-select" id="aartiDate" aria-label="Default select example" value={newDetails?.aartiDate} onChange={e=>setNewDetails({...newDetails, aartiDate: e.target.value})}>
+                          <option></option>
+                          {elements.map(element => element)}
+                        </select>
+                      </div>
                   </div>
-                </div>
+                  <div className="mb-3 row">
+                      <label htmlFor="aartiName" className="col-sm-4 col-form-label">Aarti</label>
+                      <div className="col-sm-8">
+                      <select class="form-select" id="aartiName" aria-label="Default select example" onChange={e=>setNewDetails({...newDetails, aartiName: e.target.value})}>
+                          <option ></option>
+                          <option value="pratham" selected={newDetails?.aartiName === "pratham"}>Pratham (1st)</option>
+                          <option value="dritya" selected={newDetails?.aartiName === "dritya"}>Biji (2nd)</option>
+                        </select>
+                      </div>
+                  </div>
+                </span>
                 ) : 
                 (
                   newDetails.data !== "prasadi" && newDetails.data !== "coupon" ? 

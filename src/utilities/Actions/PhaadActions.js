@@ -3,9 +3,7 @@ import { Timestamp, collection, onSnapshot, orderBy, query } from "firebase/fire
 
 
 export function readPhaad(q, state, dispatch){
-    return onSnapshot(q, (queryResult)=>{
-        queryResult.docs.map(doc => {
-            return onSnapshot(query(collection(db, `phaad`), orderBy("date")),
+    return onSnapshot(query(collection(db, `phaad`), orderBy("date")),
             (snapshot)=>{
                 let collections = state.phaad;
                 let action = null;
@@ -41,6 +39,5 @@ export function readPhaad(q, state, dispatch){
                         return ;
                 } 
             });
-        });
-    });
+       
 }

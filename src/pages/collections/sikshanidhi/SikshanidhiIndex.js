@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom"
 import Navbar from "../../../components/Navbar/Navbar";
 import UmiyaMataji from "../../../assets/umiya-mataji.png";
-import { useData } from "../../../contexts/DataContext";
+import { useSikshanidhi } from "../../../contexts/SikshanidhiContext";
 import { useEffect, useState } from "react";
 
 
@@ -31,7 +31,7 @@ const days = {
 
 const SikshanidhiIndex = () => {
     
-    const {dataState: {sikshanidhi}} = useData();
+    const {sikshanidhiState: {sikshanidhi}} = useSikshanidhi();
     const [day, setDay] = useState(0);
     let elements = [];
 

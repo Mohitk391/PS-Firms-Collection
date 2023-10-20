@@ -6,7 +6,7 @@ import jsPDF from "jspdf";
 import autoTable from 'jspdf-autotable';
 import { Link, useParams } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
-import { useData } from "../../../contexts/DataContext";
+import { useKharcha } from "../../../contexts/KharchaContext";
 import { Timestamp, addDoc, collection, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase-config";
 
@@ -30,7 +30,7 @@ const Kharcha = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({});
   const [newDetails, setNewDetails] = useState({});
-  const {dataState : {kharcha}} = useData();  
+  const {kharchaState : {kharcha}} = useKharcha();  
 
   useEffect(()=>{
     setResults((dayId==="all" ? kharcha : kharcha.filter(firm=>firm.date === days[dayId])).filter((item) =>

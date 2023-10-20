@@ -15,6 +15,7 @@ import SamitiIndex from "./pages/collections/samiti/SamitiIndex";
 import Samiti from "./pages/collections/samiti/Samiti";
 import KharchaIndex from "./pages/collections/kharcha/KharchaIndex";
 import Kharcha from "./pages/collections/kharcha/Kharcha";
+import Yajman from "./pages/collections/yajman/Yajman";
 
 function App() {
   useEffect(()=>{
@@ -68,6 +69,12 @@ function App() {
           </RequiresAuth>
         } />
         <Route path="kharcha/:dayId" element={<Kharcha />} />
+
+        <Route path="yajman" element={
+          <RequiresAuth>
+            <Yajman />
+          </RequiresAuth>
+        } />
 
         <Route path="/login" element={<Login />} />
       </Routes>

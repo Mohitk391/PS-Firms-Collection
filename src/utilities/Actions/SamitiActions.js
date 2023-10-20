@@ -3,9 +3,7 @@ import { Timestamp, collection, onSnapshot, query } from "firebase/firestore";
 
 
 export function readSamiti(q, state, dispatch){
-    return onSnapshot(q, (queryResult)=>{
-        queryResult.docs.map(doc => {
-            return onSnapshot(query(collection(db, `samiti`)),
+    return onSnapshot(query(collection(db, `samiti`)),
             (snapshot)=>{
                 let collections = state.kharcha;
                 let action = null;
@@ -41,6 +39,5 @@ export function readSamiti(q, state, dispatch){
                         return ;
                 } 
             });
-        });
-    });
+       
 }

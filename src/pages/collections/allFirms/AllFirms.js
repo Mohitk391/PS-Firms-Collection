@@ -5,7 +5,11 @@ import { useEffect } from "react";
 import jsPDF from "jspdf";
 import autoTable from 'jspdf-autotable';
 import Navbar from "../../../components/Navbar/Navbar";
-import { useData } from "../../../contexts/DataContext";
+import { useDatar } from "../../../contexts/DatarContext";
+import { useAllFirms } from "../../../contexts/AllFirmsContext";
+import { usePhaad } from "../../../contexts/PhaadContext";
+import { useYajman } from "../../../contexts/YajmanContext";
+import { useSikshanidhi } from "../../../contexts/SikshanidhiContext";
 import { Link } from "react-router-dom";
 import { Loader } from "../../../utilities/Loader/Loader"
 import { Timestamp, addDoc, collection, deleteDoc, doc, setDoc, updateDoc } from "firebase/firestore";
@@ -13,15 +17,45 @@ import { db } from "../../../firebase-config";
 
 const ITEMS_PER_PAGE = 10;
 
+const daysIndex = {
+  "15/10/2023" : 1,
+  "16/10/2023" : 2,
+  "17/10/2023" : 3,
+  "18/10/2023" : 4,
+  "19/10/2023" : 5,
+  "20/10/2023" : 6,
+  "21/10/2023" : 7,
+  "22/10/2023" : 8,
+  "23/10/2023" : 9
+}
+
+const days = {
+  1 : new Date("10/15/2023").toLocaleDateString("en-GB"),
+  2 : new Date("10/16/2023").toLocaleDateString("en-GB"),
+  3 : new Date("10/17/2023").toLocaleDateString("en-GB"),
+  4 : new Date("10/18/2023").toLocaleDateString("en-GB"),
+  5 : new Date("10/19/2023").toLocaleDateString("en-GB"),
+  6 : new Date("10/20/2023").toLocaleDateString("en-GB"),
+  7 : new Date("10/21/2023").toLocaleDateString("en-GB"),
+  8 : new Date("10/22/2023").toLocaleDateString("en-GB"),
+  9 : new Date("10/23/2023").toLocaleDateString("en-GB"),
+}
+
+
 const AllFirms = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({});
-  const [newDetails, setNewDetails] = useState({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false, datarPayer: "", datarMobile : "", datarReciever : ""});
-  const {dataState : {allFirms, phaad, sikshanidhi, datar}} = useData();
-
+  const [newDetails, setNewDetails] = useState({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, aartiDate: "", aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false, datarPayer: "", datarMobile : "", datarReciever : ""});
+  const {datarState : {datar}} = useDatar();
+  const {allFirmsState : {allFirms}} = useAllFirms();
+  const {phaadState : {phaad}} = usePhaad();
+  const {sikshanidhiState : {sikshanidhi}} = useSikshanidhi();
+  const {yajmanState : {yajman}} = useYajman();
+  const today = new Date().toLocaleDateString("en-GB");
+  let elements = [];
 
   useEffect(()=> {
     if(allFirms) 
@@ -32,13 +66,19 @@ const AllFirms = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     ,[]);
 
+    for(let i=daysIndex[today];i<=9;i++){
+      elements.push(
+        <option value={days[i]}>{days[i]}</option>
+      )
+    }
+
     useEffect(()=>{
       setResults(allFirms.filter((item)=>item.name.toLowerCase().includes(searchTerm.toLocaleLowerCase().trim()) || item.place.toLowerCase().includes(searchTerm.toLowerCase().trim()) ))
     },[searchTerm, allFirms]);
   
   const handleModalClose = () => {
     setCurrentDetails({}); 
-    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false, datarPayer: "", datarMobile : "", datarReciever : ""});
+    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, aartiDate: "", aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false, datarPayer: "", datarMobile : "", datarReciever : ""});
     setSearchTerm('');
   };
 
@@ -95,6 +135,7 @@ const AllFirms = () => {
         name: newDetails.name,
         place: newDetails.place,
         data : "aarti",
+        aartiDate : newDetails.aartiDate,
         aartiName : newDetails.aartiName,
         amount: newDetails.aarti,
         isAartiPaid: newDetails.isAartiPaid,
@@ -103,7 +144,15 @@ const AllFirms = () => {
         reciever : newDetails.datarReciever,
         date : Timestamp.fromDate(new Date())
       });
+
+      await addDoc(collection(db, "yajman"), {
+        name: newDetails.name,
+        aartiName : newDetails.aartiName,
+        aartiDate  : newDetails.aartiDate,
+        place: newDetails.place
+      })
     }
+
     if(newDetails.coupon>0){
       await addDoc(collection(db, "datar"), {
         name: newDetails.name,
@@ -118,7 +167,7 @@ const AllFirms = () => {
       });
     }
 
-    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false,  sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, datarPayer: "", datarMobile : "", datarReciever : ""});
+    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", aartiDate: "", aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false,  sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, datarPayer: "", datarMobile : "", datarReciever : ""});
     setSearchTerm('');
     document.getElementById("newFirmClose").click();
   }
@@ -160,7 +209,7 @@ const AllFirms = () => {
       });
     }
 
-    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false,  datarPayer: "", datarMobile : "", datarReciever : ""});
+    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, aartiDate: "", aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false,  datarPayer: "", datarMobile : "", datarReciever : ""});
     setSearchTerm('');
     document.getElementById("newSikshanidhiClose").click();
   }
@@ -187,6 +236,7 @@ const AllFirms = () => {
         name: newDetails.name,
         place: newDetails.place,
         data : "aarti",
+        aartiDate : newDetails.aartiDate,
         aartiName : newDetails.aartiName,
         amount: newDetails.aarti,
         isAartiPaid: newDetails.isAartiPaid,
@@ -195,7 +245,15 @@ const AllFirms = () => {
         reciever : newDetails.datarReciever,
         date : Timestamp.fromDate(new Date())
       });
+
+      await addDoc(collection(db, "yajman"), {
+        name: newDetails.name,
+        aartiName : newDetails.aartiName,
+        aartiDate  : newDetails.aartiDate,
+        place: newDetails.place
+      })
     }
+
     if(newDetails.coupon>0){
       await addDoc(collection(db, "datar"), {
         name: newDetails.name,
@@ -210,7 +268,7 @@ const AllFirms = () => {
       });
     }
 
-    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false,  datarPayer: "", datarMobile : "", datarReciever : ""});
+    setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, aartiDate: "", aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false,  datarPayer: "", datarMobile : "", datarReciever : ""});
     setSearchTerm('');
     document.getElementById("newDatarClose").click();
     
@@ -223,22 +281,18 @@ const AllFirms = () => {
       const currentFirm = allFirms.find(firm => firm.name === currentDetails?.name);
       console.log(currentFirm);
       if(currentDetails?.sikshanidhiPrevious !== currentFirm.sikshanidhiPrevious){ 
-        console.log("inside previous");
         updatingAllBody = {...updatingAllBody, sikshanidhiPrevious: currentDetails?.sikshanidhiPrevious}
         updatingSikshanidhiBody = {...updatingSikshanidhiBody, previous: currentDetails?.sikshanidhiPrevious}
       }
       if(currentDetails?.sikshanidhiCurrent !== currentFirm.sikshanidhiCurrent){
-        console.log("inside current");
         updatingSikshanidhiBody = {...updatingSikshanidhiBody, current: currentDetails?.sikshanidhiCurrent}
         updatingAllBody = {...updatingAllBody, sikshanidhiCurrent: currentDetails?.sikshanidhiCurrent}
       }
       if(currentDetails?.sikshanidhiPayer !== currentFirm.sikshanidhiPayer){
-        console.log("inside payer");
         updatingSikshanidhiBody = {...updatingSikshanidhiBody, payer: currentDetails?.sikshanidhiPayer}
         updatingAllBody = {...updatingAllBody, sikshanidhiPayer: currentDetails?.sikshanidhiPayer}
       }
       if(currentDetails?.sikshanidhiMobile !== currentFirm.sikshanidhiMobile){
-        console.log("inside mobile");
         updatingSikshanidhiBody = {...updatingSikshanidhiBody, mobile: currentDetails?.sikshanidhiMobile}
         updatingAllBody = {...updatingAllBody, sikshanidhiMobile: currentDetails?.sikshanidhiMobile}
       }
@@ -284,8 +338,46 @@ const AllFirms = () => {
       }
       if(currentDetails?.aarti !== currentFirm.aarti){
         updatingAllBody = currentDetails?.isAartiPaid ? {...updatingAllBody, aarti: currentDetails?.aarti, isAartiPaid: currentDetails?.isAartiPaid, aartiName: currentDetails?.aartiName} : {...updatingAllBody, aarti: currentDetails?.aarti, aartiName: currentDetails?.aartiName};
-        if(!(datar.find(firm => firm.data === "aarti" && firm.name === currentDetails?.name)))
-        await addDoc(collection(db, "datar"), {name: currentDetails?.name, place: currentDetails?.place, data: "aarti", amount: currentDetails?.aarti, isAartiPaid: currentDetails?.isAartiPaid, aartiName: currentDetails?.aartiName, payer: currentDetails?.datarPayer, mobile: currentDetails?.datarMobile, reciever: currentDetails?.datarReciever, date : Timestamp.fromDate(new Date())});
+        if(!(datar.find(firm => firm.data === "aarti" && firm.name === currentDetails?.name))){
+          await addDoc(collection(db, "datar"), {name: currentDetails?.name, place: currentDetails?.place, data: "aarti", aartiDate: currentDetails?.aartiDate, amount: currentDetails?.aarti, isAartiPaid: currentDetails?.isAartiPaid, aartiName: currentDetails?.aartiName, payer: currentDetails?.datarPayer, mobile: currentDetails?.datarMobile, reciever: currentDetails?.datarReciever, date : Timestamp.fromDate(new Date())});
+          await addDoc(collection(db, "yajman"), {
+            name : currentDetails?.name,
+            place : currentDetails?.place,
+            aartiDate : currentDetails?.aartiDate,
+            aartiName : currentDetails?.aartiName
+          })
+        }
+        else{
+            let updatedDatar = {};
+            let updatedYajman = {};
+            if(currentDetails?.name !== currentFirm.name){
+               updatedDatar = {...updatedDatar, name : currentDetails?.name};
+               updatedYajman = {...updatedYajman, name : currentDetails?.name};
+            }
+            if(currentDetails?.place !== currentFirm.place){
+               updatedDatar = {...updatedDatar, place : currentDetails?.place}
+               updatedYajman = {...updatedYajman, place : currentDetails?.place}
+            }
+            if(currentDetails?.aartiDate !== currentFirm.aartiDate){
+               updatedDatar = {...updatedDatar, aartiDate : currentDetails?.aartiDate}
+               updatedYajman = {...updatedYajman, aartiDate : currentDetails?.aartiDate}
+            }
+            if(currentDetails?.aartiName !== currentFirm.aartiName){
+               updatedDatar = {...updatedDatar, aartiName : currentDetails?.aartiName}
+               updatedYajman = {...updatedYajman, aartiName : currentDetails?.aartiName}
+            }
+            if(currentDetails?.amount !== currentFirm.amount) updatedDatar = {...updatedDatar, amount : currentDetails?.amount}
+            if(currentDetails?.datarPayer !== currentFirm.datarPayer) updatedDatar = {...updatedDatar, payer : currentDetails?.datarPayer}
+            if(currentDetails?.isAartiPaid !== currentFirm.isAartiPaid) updatedDatar = {...updatedDatar, isAartiPaid : currentDetails?.isAartiPaid}
+            if(currentDetails?.datarMobile !== currentFirm.datarMobile) updatedDatar = {...updatedDatar, mobile : currentDetails?.datarMobile}
+            if(currentDetails?.datarReciever !== currentFirm.datarReciever) updatedDatar = {...updatedDatar, reciever : currentDetails?.datarReciever}
+    
+          await updateDoc(doc(db, "datar", datar.find(firm => firm.data === "aarti" && firm.name === currentDetails?.name).id), updatedDatar);
+          if(Object.keys(updatedYajman).length>0){
+            await updateDoc(doc(db, "yajman", yajman.find(yajman => yajman.aartiDate === currentFirm.aartiDate && yajman.name === currentFirm.name)), updatedYajman)
+          }
+        }
+
       }
       if(currentDetails?.isAartiPaid !== currentFirm.isAartiPaid && currentDetails?.aarti === currentFirm.aarti && currentDetails?.aarti > 0){
         updatingAllBody = {...updatingAllBody, isAartiPaid : currentDetails?.isAartiPaid};
@@ -598,29 +690,41 @@ const AllFirms = () => {
                     </div>
                     <div className="table col-sm border border-2 ms-2 pt-2 caption-top">
                         <caption><u><b>Datar</b></u></caption>
-                        <div className="mb-3 row">
-                            <label htmlFor="aartiName" className="col-sm-4 col-form-label">Aarti</label>
-                            <div className="col-sm-8">
-                            <select class="form-select" id="aartiName" aria-label="Default select example" onChange={e=>setCurrentDetails({...currentDetails, aartiName: e.target.value})}>
-                                <option ></option>
-                                <option value="pratham" selected={currentDetails?.aartiName === "pratham"}>Pratham (1st)</option>
-                                <option value="dritya" selected={currentDetails?.aartiName === "dritya"}>Biji (2nd)</option>
-                              </select>
-                            </div>
-                        </div>
-                        {
-                          currentDetails?.aartiName ? 
-                            (
-                              <div className="mb-3 row d-flex align-items-center">
-                                <label htmlFor="datarAarti" className="col-sm-2 col-form-label">Aarti Amount</label>
-                                <span className="col-sm-2 col-form-label">
-                                  <input type="checkbox" className="btn-check" id="aarti" autocomplete="off" checked={currentDetails.isAartiPaid} onChange={e=>setCurrentDetails({...currentDetails, isAartiPaid: e.target.checked})}/>
-                                  <label className="btn btn-outline-dark" for="aarti">Paid</label>
-                                </span>
+                            <div className="mb-3 row">
+                                <label htmlFor="aartiDate" className="col-sm-4 col-form-label">Aarti Date</label>
                                 <div className="col-sm-8">
-                                <input type="number" min="0" placeholder="Amount" className="form-control" id="datarAarti" value={currentDetails?.aarti} onChange={e=>setCurrentDetails({...currentDetails, aarti: Number(e.target.value)})}/>
+                                <select class="form-select" id="aartiDate" aria-label="Default select example" value={currentDetails?.aartiDate} onChange={e=>setCurrentDetails({...currentDetails, aartiDate: e.target.value})}>
+                                    <option></option>
+                                    {elements.map(element => element)}
+                                  </select>
                                 </div>
-                              </div>
+                            </div>
+                        {
+                          currentDetails?.aartiDate ? 
+                            (
+                              <span>
+                                <div className="mb-3 row">
+                                    <label htmlFor="aartiName" className="col-sm-4 col-form-label">Aarti</label>
+                                    <div className="col-sm-8">
+                                    <select class="form-select" id="aartiName" aria-label="Default select example" onChange={e=>setCurrentDetails({...currentDetails, aartiName: e.target.value})}>
+                                        <option ></option>
+                                        <option value="pratham" selected={currentDetails?.aartiName === "pratham"}>Pratham (1st)</option>
+                                        <option value="dritya" selected={currentDetails?.aartiName === "dritya"}>Biji (2nd)</option>
+                                      </select>
+                                    </div>
+                                </div>
+                                <div className="mb-3 row d-flex align-items-center">
+                                  <label htmlFor="datarAarti" className="col-sm-2 col-form-label">Aarti Amount</label>
+                                  <span className="col-sm-2 col-form-label">
+                                    <input type="checkbox" className="btn-check" id="aarti" autocomplete="off" checked={currentDetails.isAartiPaid} onChange={e=>setCurrentDetails({...currentDetails, isAartiPaid: e.target.checked})}/>
+                                    <label className="btn btn-outline-dark" for="aarti">Paid</label>
+                                  </span>
+                                  <div className="col-sm-8">
+                                  <input type="number" min="0" placeholder="Amount" className="form-control" id="datarAarti" value={currentDetails?.aarti} onChange={e=>setCurrentDetails({...currentDetails, aarti: Number(e.target.value)})}/>
+                                  </div>
+                                </div>
+                              </span>
+                              
                             )
                             : null
                         }
@@ -811,28 +915,41 @@ const AllFirms = () => {
                     <div className="table col-sm border border-2 ms-2 pt-2 caption-top">
                         <caption><u><b>Datar</b></u></caption>
                         <div className="mb-3 row">
-                            <label htmlFor="aartiName" className="col-sm-4 col-form-label">Aarti</label>
+                            <label htmlFor="aartiDate" className="col-sm-4 col-form-label">Aarti Date</label>
                             <div className="col-sm-8">
-                              <select class="form-select" id="aartiName" aria-label="Default select example" onChange={e=>setNewDetails({...newDetails, aartiName: e.target.value})}>
-                                <option selected></option>
-                                <option value="pratham">Pratham (1st)</option>
-                                <option value="dritya">Biji (2nd)</option>
+                            <select class="form-select" id="aartiDate" aria-label="Default select example" onChange={e=>setCurrentDetails({...newDetails, aartiDate: e.target.value})}>
+                                <option></option>
+                                {elements.map(element => element)}
                               </select>
                             </div>
                         </div>
+                        
                         {
-                          newDetails?.aartiName ? 
+                          newDetails?.aartiDate ? 
                             (
-                              <div className="mb-3 row d-flex align-items-center">
-                                <label htmlFor="datarAarti" className="col-sm-2 col-form-label">Aarti Amount</label>
-                                <span className="col-sm-2 col-form-label">
-                                  <input type="checkbox" className="btn-check" id="aarti" autocomplete="off" checked={newDetails.isAartiPaid} onChange={e=>setNewDetails({...newDetails, isAartiPaid: e.target.checked})}/>
-                                  <label className="btn btn-outline-dark" for="aarti">Paid</label>
-                                </span>
-                                <div className="col-sm-8">
-                                <input type="number" min="0" placeholder="Amount" className="form-control" id="datarAarti" value={newDetails?.datarAarti} onChange={e=>setNewDetails({...newDetails, datarAarti: Number(e.target.value)})}/>
+                              <span>
+                                <div className="mb-3 row">
+                                    <label htmlFor="aartiName" className="col-sm-4 col-form-label">Aarti</label>
+                                    <div className="col-sm-8">
+                                      <select class="form-select" id="aartiName" aria-label="Default select example" onChange={e=>setNewDetails({...newDetails, aartiName: e.target.value})}>
+                                        <option selected></option>
+                                        <option value="pratham">Pratham (1st)</option>
+                                        <option value="dritya">Biji (2nd)</option>
+                                      </select>
+                                    </div>
                                 </div>
-                              </div>
+                                <div className="mb-3 row d-flex align-items-center">
+                                  <label htmlFor="datarAarti" className="col-sm-2 col-form-label">Aarti Amount</label>
+                                  <span className="col-sm-2 col-form-label">
+                                    <input type="checkbox" className="btn-check" id="aarti" autocomplete="off" checked={newDetails.isAartiPaid} onChange={e=>setNewDetails({...newDetails, isAartiPaid: e.target.checked})}/>
+                                    <label className="btn btn-outline-dark" for="aarti">Paid</label>
+                                  </span>
+                                  <div className="col-sm-8">
+                                  <input type="number" min="0" placeholder="Amount" className="form-control" id="datarAarti" value={newDetails?.datarAarti} onChange={e=>setNewDetails({...newDetails, datarAarti: Number(e.target.value)})}/>
+                                  </div>
+                                </div>
+                              </span>
+                              
                             )
                             : null
                         }
@@ -1054,25 +1171,43 @@ const AllFirms = () => {
                   </div>
                 </div>
                 <div className="mb-3 row">
-                    <label htmlFor="aartiName" className="col-sm-2 col-form-label">Aarti Name</label>
-                    <div className="col-sm-10">
-                      <input type="text" placeholder="-" className="form-control" id="aartiName" value={newDetails?.aartiName} onChange={e=>setNewDetails({...newDetails, aartiName: (e.target.value)})}/>
+                    <label htmlFor="aartiDate" className="col-sm-4 col-form-label">Aarti Date</label>
+                    <div className="col-sm-8">
+                    <select class="form-select" id="aartiDate" aria-label="Default select example" onChange={e=>setCurrentDetails({...newDetails, aartiDate: e.target.value})}>
+                        <option></option>
+                        {elements.map(element => element)}
+                      </select>
                     </div>
                 </div>
+                
                 {
-                  newDetails.aartiName ? 
-                    (<div className="mb-3 row">
-                      <label htmlFor="aarti" className="col-sm-1 col-form-label">Aarti Amount</label>
-                      <span className="col-sm-1 col-form-label">
-                        <input type="checkbox" className="btn-check" id="aarti" autocomplete="off" checked={newDetails.isAartiPaid} onChange={e=>setNewDetails({...newDetails, isAartiPaid: e.target.checked})}/>
-                        <label className="btn btn-outline-dark" for="aarti">Paid</label>
+                  newDetails?.aartiDate ? 
+                    (
+                      <span>
+                        <div className="mb-3 row">
+                            <label htmlFor="aartiName" className="col-sm-4 col-form-label">Aarti</label>
+                            <div className="col-sm-8">
+                              <select class="form-select" id="aartiName" aria-label="Default select example" onChange={e=>setNewDetails({...newDetails, aartiName: e.target.value})}>
+                                <option selected></option>
+                                <option value="pratham">Pratham (1st)</option>
+                                <option value="dritya">Biji (2nd)</option>
+                              </select>
+                            </div>
+                        </div>
+                        <div className="mb-3 row d-flex align-items-center">
+                          <label htmlFor="datarAarti" className="col-sm-2 col-form-label">Aarti Amount</label>
+                          <span className="col-sm-2 col-form-label">
+                            <input type="checkbox" className="btn-check" id="aarti" autocomplete="off" checked={newDetails.isAartiPaid} onChange={e=>setNewDetails({...newDetails, isAartiPaid: e.target.checked})}/>
+                            <label className="btn btn-outline-dark" for="aarti">Paid</label>
+                          </span>
+                          <div className="col-sm-8">
+                          <input type="number" min="0" placeholder="Amount" className="form-control" id="datarAarti" value={newDetails?.datarAarti} onChange={e=>setNewDetails({...newDetails, datarAarti: Number(e.target.value)})}/>
+                          </div>
+                        </div>
                       </span>
-                      <div className="col-sm-10">
-                        <input type="number" min="0" placeholder="-" className="form-control" id="aarti" value={newDetails?.aarti} onChange={e=>setNewDetails({...newDetails, aarti: Number(e.target.value)})}/>
-                      </div>
-                    </div>)
-                    :
-                    null
+                      
+                    )
+                    : null
                 }
                  <div className="mb-3 row ">
                     <label htmlFor="parsadi" className="col-sm-1 col-form-label">Parsadi</label>
@@ -1127,6 +1262,9 @@ const AllFirms = () => {
                   <th className="col-2 text-center border-3 align-middle" rowSpan={2}>Place</th>
                   <th className="col-3 text-center border-3" colSpan={2}>Phaad</th>
                   <th className="col-3 text-center border-3" colSpan={2}>Sikshanidhi</th>
+                  <th className="col-3 text-center border-3 align-middle" rowSpan={2}>Prasadi</th>
+                  <th className="col-2 text-center border-3 align-middle" rowSpan={2}>Aarti</th>
+                  <th className="col-3 text-center border-3 align-middle" rowSpan={2}>Coupon</th>
                 </tr>
                 <tr>
                   <th className="text-center border-3">Prev (2022)</th>
@@ -1149,6 +1287,9 @@ const AllFirms = () => {
                         {firm.sikshanidhiPrevious >0 ? firm.sikshanidhiPrevious : "-"}
                       </td>
                       <td className="text-center border-3">{firm.sikshanidhiCurrent >0 ? firm.sikshanidhiCurrent : "-"}</td>
+                      <td className="text-center border-3">{firm.prasadi >0 ? firm.prasadi : "-"}</td>
+                      <td className="text-center border-3">{firm.aarti >0 ? firm.aarti : "-"}</td>
+                      <td className="text-center border-3">{firm.coupon >0 ? firm.coupon : "-"}</td>
                     </tr>
                   );
                 })}

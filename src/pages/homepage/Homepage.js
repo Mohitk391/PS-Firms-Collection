@@ -2,11 +2,21 @@ import { Link, useNavigate } from "react-router-dom";
 import UmiyaMataji from "../../assets/umiya-mataji.png";
 import Navbar from "../../components/Navbar/Navbar";
 import "./Homepage.css";
-import { useData } from "../../contexts/DataContext";
+import { useDatar } from "../../contexts/DatarContext";
+import { useAllFirms } from "../../contexts/AllFirmsContext";
+import { usePhaad } from "../../contexts/PhaadContext";
+import { useSikshanidhi } from "../../contexts/SikshanidhiContext";
+import { useKharcha } from "../../contexts/KharchaContext";
+import { useSamiti } from "../../contexts/SamitiContext";
 
 const Homepage = () => {
     const navigate = useNavigate();
-    const { dataState : {allFirms, phaad, datar, sikshanidhi, kharcha, samiti}} = useData();
+    const { datarState : { datar}} = useDatar();
+    const { allFirmsState : {allFirms}} = useAllFirms();
+    const {phaadState : {phaad}} = usePhaad();
+    const { sikshanidhiState : { sikshanidhi}} = useSikshanidhi();
+    const {kharchaState : { kharcha }} = useKharcha();
+    const { samitiState : {samiti}} = useSamiti();
 
     return (
         <div className="App d-flex flex-column min-vh-100">
@@ -64,7 +74,7 @@ const Homepage = () => {
                       </div>
                   </div>
               </div>
-              <div className="col-md-4 col-xl-3" role="button">
+              <div className="col-md-4 col-xl-3" onClick={()=>navigate("/yajman")} role="button">
                   <div className="card bg-c-white">
                       <div className="card-block">
                           <h4 className="m-b-20 text-center">Today's Yajman</h4>

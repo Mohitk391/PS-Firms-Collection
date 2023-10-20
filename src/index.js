@@ -11,16 +11,34 @@ import "bootstrap/dist/js/bootstrap.bundle.min";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { HashRouter } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
-import { DataProvider } from './contexts/DataContext';
+import { AllFirmsProvider } from './contexts/AllFirmsContext';
+import { DatarProvider } from './contexts/DatarContext';
+import { KharchaProvider } from './contexts/KharchaContext';
+import { SamitiProvider } from './contexts/SamitiContext';
+import { PhaadProvider } from './contexts/PhaadContext';
+import { SikshanidhiProvider } from './contexts/SikshanidhiContext';
+import { YajmanProvider } from './contexts/YajmanContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <HashRouter>
       <UserProvider>
-        <DataProvider>
-          <App />
-        </DataProvider>
+        <AllFirmsProvider>
+          <PhaadProvider>
+            <SikshanidhiProvider>
+              <DatarProvider>
+                <KharchaProvider>
+                  <SamitiProvider>
+                    <YajmanProvider>
+                      <App />
+                    </YajmanProvider>
+                  </SamitiProvider>
+                </KharchaProvider>
+              </DatarProvider>
+            </SikshanidhiProvider>
+          </PhaadProvider>
+        </AllFirmsProvider>
       </UserProvider>
     </HashRouter>
   </React.StrictMode>

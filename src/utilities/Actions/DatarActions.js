@@ -3,9 +3,7 @@ import { Timestamp, collection, onSnapshot, query } from "firebase/firestore";
 
 
 export function readDatar(q, state, dispatch){
-    return onSnapshot(q, (queryResult)=>{
-        queryResult.docs.map(doc => {
-            return onSnapshot(query(collection(db, `datar`)),
+    return onSnapshot(query(collection(db, `datar`)),
             (snapshot)=>{
                 let collections = state.datar;
                 let action = null;
@@ -41,6 +39,4 @@ export function readDatar(q, state, dispatch){
                         return ;
                 } 
             });
-        });
-    });
 }

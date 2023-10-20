@@ -6,9 +6,11 @@ import jsPDF from "jspdf";
 import autoTable from 'jspdf-autotable';
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
-import { useData } from "../../../contexts/DataContext";
+import { usePhaad } from "../../../contexts/PhaadContext";
 import { Timestamp, deleteDoc, doc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase-config";
+import { useSikshanidhi } from "../../../contexts/SikshanidhiContext";
+import { useAllFirms } from "../../../contexts/AllFirmsContext";
 
 const ITEMS_PER_PAGE = 10;
 const days = {
@@ -30,7 +32,9 @@ const Phaad = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({name : "", place: "", previous: 0, current: 0, payer: "", mobile: "", reciever: ""});
   const [newDetails, setNewDetails] = useState({name : "", place: "", previous: 0, current: 0, payer: "", mobile: "", reciever: ""});
-  const {dataState : {phaad, allFirms, sikshanidhi}} = useData(); 
+  const {phaadState : {phaad}} = usePhaad(); 
+  const {sikshanidhiState : {sikshanidhi}} = useSikshanidhi();
+  const {allFirmsState : {allFirms}} = useAllFirms();
   const navigate = useNavigate(); 
 
   useEffect(()=>{
@@ -132,7 +136,6 @@ const Phaad = () => {
     await updateDoc(doc(db, "allFirms", name), {
       phaadCurrent : 0,
       phaadReciever: "",
-      phaadPrevious: 0,
       phaadPayer : "",
       phaadMobile : ""
     })

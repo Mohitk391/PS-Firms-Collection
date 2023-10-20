@@ -6,9 +6,10 @@ import jsPDF from "jspdf";
 import autoTable from 'jspdf-autotable';
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../../components/Navbar/Navbar";
-import { useData } from "../../../contexts/DataContext";
+import { useSikshanidhi } from "../../../contexts/SikshanidhiContext";
 import { Timestamp, deleteDoc, doc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase-config";
+import { useAllFirms } from "../../../contexts/AllFirmsContext";
 
 const ITEMS_PER_PAGE = 10;
 const days = {
@@ -30,7 +31,8 @@ const Sikshanidhi = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentDetails, setCurrentDetails] = useState({});
   const [newDetails, setNewDetails] = useState({});
-  const {dataState : {sikshanidhi, allFirms}} = useData();  
+  const {sikshanidhiState : {sikshanidhi}} = useSikshanidhi();  
+  const {allFirmsState : {allFirms}} = useAllFirms();
   const navigate = useNavigate();
 
   useEffect(()=>{
