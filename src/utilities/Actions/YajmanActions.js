@@ -1,11 +1,10 @@
-import { db } from "../../firebase-config.js";
-import { Timestamp, collection, onSnapshot, query } from "firebase/firestore";
+import { Timestamp, onSnapshot } from "firebase/firestore";
 
 
 export function readYajman(q, state, dispatch){
-    return onSnapshot(query(collection(db, `yajman`)),
+    return onSnapshot(q,
             (snapshot)=>{
-                let collections = state.datar;
+                let collections = state.yajman;
                 let action = null;
                 let updatedValue = null;
                 snapshot.docChanges().forEach((change)=>{

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useReducer } from "react";
 import { YajmanReducer } from "../reducers/YajmanReducer";
-import { collection, query } from "firebase/firestore";
+import { collection, orderBy, query } from "firebase/firestore";
 import { db } from "../firebase-config";
 import { readYajman } from "../utilities/Actions/YajmanActions";
 
@@ -16,7 +16,7 @@ const YajmanProvider = ({children}) => {
     const [yajmanState, yajmanDispatch] = useReducer(YajmanReducer, initialState);
 
     useEffect(()=>{
-        const yajmanQuery = query(collection(db, "yajman"));
+        const yajmanQuery = query(collection(db, "yajman"), orderBy("aartiDate"));
 
         const unsubscribeYajman = readYajman(yajmanQuery, yajmanState, yajmanDispatch);
 

@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useReducer } from "react";
 import { KharchaReducer } from "../reducers/KharchaReducer";
 import { readKharcha } from "../utilities/Actions/KharchaActions";
-import { collection, query } from "firebase/firestore";
+import { collection, orderBy, query } from "firebase/firestore";
 import { db } from "../firebase-config";
 
 
@@ -16,7 +16,7 @@ const KharchaProvider = ({children}) => {
     const [kharchaState, kharchaDispatch] = useReducer(KharchaReducer, initialState);
 
     useEffect(()=>{
-        const kharchaQuery = query(collection(db, "kharcha"));
+        const kharchaQuery = query(collection(db, "kharcha"), orderBy("date", "desc"));
 
         const unsubscribeKharcha = readKharcha(kharchaQuery, kharchaState, kharchaDispatch);
 

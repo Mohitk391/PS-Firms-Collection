@@ -61,7 +61,7 @@ function App() {
             <SamitiIndex />
           </RequiresAuth>
         } />
-        <Route path="samiti/:type" element={<Samiti />} />
+        <Route path="samiti/:place/:type" element={<Samiti />} />
 
         <Route path="/kharcha" element={
           <RequiresAuth>

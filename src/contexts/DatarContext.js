@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useReducer } from "react";
 import { DatarReducer } from "../reducers/DatarReducer";
 import { readDatar } from "../utilities/Actions/DatarActions";
-import { collection, query } from "firebase/firestore";
+import { collection, orderBy, query } from "firebase/firestore";
 import { db } from "../firebase-config";
 
 
@@ -16,7 +16,7 @@ const DatarProvider = ({children}) => {
     const [datarState, datarDispatch] = useReducer(DatarReducer, initialState);
 
     useEffect(()=>{
-        const datarQuery = query(collection(db, "datar"));
+        const datarQuery = query(collection(db, "datar"), orderBy("date", "desc"));
        
         const unsubscribeDatar = readDatar(datarQuery, datarState, datarDispatch);
 

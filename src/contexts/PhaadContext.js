@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useReducer } from "react";
 import { PhaadReducer } from "../reducers/PhaadReducer";
-import { collection, query } from "firebase/firestore";
+import { collection, orderBy, query } from "firebase/firestore";
 import { db } from "../firebase-config";
 import { readPhaad } from "../utilities/Actions/PhaadActions";
 
@@ -16,7 +16,7 @@ const PhaadProvider = ({children}) => {
     const [phaadState, phaadDispatch] = useReducer(PhaadReducer, initialState);
 
     useEffect(()=>{
-        const phaadQuery = query(collection(db, "phaad"));
+        const phaadQuery = query(collection(db, "phaad"), orderBy("date"));
 
         const unsubscribePhaad = readPhaad(phaadQuery, phaadState, phaadDispatch);
 

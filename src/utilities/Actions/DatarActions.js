@@ -1,9 +1,8 @@
-import { db } from "../../firebase-config.js";
-import { Timestamp, collection, onSnapshot, query } from "firebase/firestore";
+import { Timestamp, onSnapshot } from "firebase/firestore";
 
 
 export function readDatar(q, state, dispatch){
-    return onSnapshot(query(collection(db, `datar`)),
+    return onSnapshot(q,
             (snapshot)=>{
                 let collections = state.datar;
                 let action = null;

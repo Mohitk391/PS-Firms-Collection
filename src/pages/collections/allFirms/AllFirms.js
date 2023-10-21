@@ -47,7 +47,7 @@ const AllFirms = () => {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [currentDetails, setCurrentDetails] = useState({});
+  const [currentDetails, setCurrentDetails] = useState({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, aartiDate: "", aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false, datarPayer: "", datarMobile : "", datarReciever : ""});
   const [newDetails, setNewDetails] = useState({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, aartiDate: "", aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false, datarPayer: "", datarMobile : "", datarReciever : ""});
   const {datarState : {datar}} = useDatar();
   const {allFirmsState : {allFirms}} = useAllFirms();
@@ -77,7 +77,7 @@ const AllFirms = () => {
     },[searchTerm, allFirms]);
   
   const handleModalClose = () => {
-    setCurrentDetails({}); 
+    setCurrentDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, aartiDate: "", aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false, datarPayer: "", datarMobile : "", datarReciever : ""}); 
     setNewDetails({name: "", place: "", phaadPrevious: 0, phaadCurrent: 0, phaadPayer: "", phaadMobile: "", phaadReciever: "", sikshanidhiPrevious: 0, sikshanidhiCurrent: 0, sikshanidhiPayer: "", sikshanidhiMobile: "", sikshanidhiReciever: "", aarti: 0, prasadi : 0, coupon : 0, aartiDate: "", aartiName: "", isAartiPaid: false, isPrasadiPaid : false, isCouponPaid : false, datarPayer: "", datarMobile : "", datarReciever : ""});
     setSearchTerm('');
   };
@@ -403,7 +403,7 @@ const AllFirms = () => {
       await updateDoc(doc(db,"allFirms", currentDetails?.name), updatingAllBody);
 
       if(Object.keys(updatingPhaadBody).length>0){
-          if(!(Object.keys(updatingPhaadBody).length===1 && updatingPhaadBody.hasProperty("phaadRevious"))){
+          if(!(Object.keys(updatingPhaadBody).length===1 && updatingPhaadBody.hasProperty("phaadPrevious"))){
             if(phaad.find(firm => firm.name === currentDetails?.name))
               await updateDoc(doc(db,"phaad", currentDetails?.name), updatingPhaadBody);
             else

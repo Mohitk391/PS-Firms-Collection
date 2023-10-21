@@ -1,9 +1,8 @@
-import { db } from "../../firebase-config.js";
-import { Timestamp, collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { Timestamp, onSnapshot } from "firebase/firestore";
 
 
 export function readPhaad(q, state, dispatch){
-    return onSnapshot(query(collection(db, `phaad`), orderBy("date")),
+    return onSnapshot(q,
             (snapshot)=>{
                 let collections = state.phaad;
                 let action = null;
